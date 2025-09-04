@@ -1,0 +1,341 @@
+// ** 현재 사용중인 챗봇 페이지 코드 **
+
+import 'package:all_new_uniplan/widgets/recording_bottom_sheet.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:all_new_uniplan/models/chat_message_model.dart';
+import 'package:all_new_uniplan/services/chatbot_service.dart';
+import 'package:all_new_uniplan/services/auth_service.dart';
+
+class ChatbotPage extends StatefulWidget {
+  const ChatbotPage({super.key});
+
+  @override
+  State<ChatbotPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatbotPage> {
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  // Schedule 객체를 _ChatPageState의 멤버 변수로 선언
+  // '일정 추가 요청' 시 여기에 값을 할당하고, '아니오' 클릭 시 null로 만들 수 있도록 합니다.
+
+  // 채팅의 내용을 UI에 말풍선 형태로 띄우는 함수
+  // 매개변수 : 입력한 or 챗봇이 출력하는 채팅 내용을 담은 클래스
+  Widget buildMessage(ChatMessage chatMessage) {
+    // 말풍선 형태의 위젯들이 저장될 List
+    List<Widget> children = [];
+
+    // 매개변수로 전달받은 클래스에서 채팅 내용에 관한 필드가
+    // 비어있지 않은 경우 위젯에 말풍선(Text 위젯)을 생성한다.
+    if (chatMessage.message.isNotEmpty) {
+      children.add(
+        Text(
+          chatMessage.message,
+
+          // 채팅 내용은 전부 검은색으로 지정.
+          style: TextStyle(color: Colors.black),
+        ),
+      );
+    }
+
+    // 매개변수로 전달받은 클래스에서 버튼 표시 여부에 대한
+    // 필드인 showButtons이 true인 경우에만 버튼 위젯 추가
+    if (chatMessage.showButtons) {
+      // 채팅 내역이 담긴 List인 children에 텍스트가 있을 경우,
+      // 위 말풍선과 새로 생성할 말풍선 사이에 여백을 추가한다.
+      if (children.isNotEmpty) {
+        children.add(const SizedBox(height: 10));
+      }
+      children.add(
+        // Row 위젯에 '예' 버튼과 '아니오' 버튼을 생성한다.
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+
+          children: [
+            // '예' 버튼
+            ElevatedButton(
+              onPressed: () {
+                // 각 Service 클래스를 구독하는 변수 선언
+                final chatbotService = context.read<ChatbotService>();
+                final authService = context.read<AuthService>();
+
+                // '예' 버튼을 클릭하면 실행되는 메서드로
+                // 일정 변경이 반영되었다는 메시지를 생성한다.
+                chatbotService.confirmScheduleAddition(
+                  authService.currentUser!.userId,
+                );
+              },
+              child: const Text('예'),
+            ),
+            const SizedBox(width: 16), // 버튼 사이 간격
+            // '아니오' 버튼
+            ElevatedButton(
+              onPressed: () {
+                final chatbotService = context.read<ChatbotService>();
+
+                // '아니오' 버튼을 클릭하면 실행되는 메서드로
+                // 일정 변경을 취소한다는 메시지를 생성한다.
+                chatbotService.cancelScheduleAddition();
+              },
+              child: const Text('아니오'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 텍스트와 버튼(있다면)을 세로로 정렬
+    Widget content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start, // 텍스트 왼쪽 정렬
+      children: children,
+    );
+
+    // 최종적으로 위젯 내에서의 정렬과 관련한 Align을 반환
+    return Align(
+      // 만약 화자가 사용자인 경우 오른쪽, 챗봇인 경우 왼쪽 정렬
+      alignment:
+          // Row 내부 위젯들의 세로 정렬 방식 설정 (프로필 사진과 말풍선의 상단을 맞춤)
+          chatMessage.speaker == ChatMessageType.user
+              ? Alignment
+                  .centerRight // 사용자 메시지는 오른쪽 끝으로 정렬
+              : Alignment.centerLeft, // 챗봇 메시지는 왼쪽 시작점으로 정렬
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Column(
+          crossAxisAlignment:
+              chatMessage.speaker == ChatMessageType.user
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // 만약 화자가 챗봇인 경우 프로필(임시)에 해당하는 원을 생성
+                if (chatMessage.speaker == ChatMessageType.bot)
+                  const CircleAvatar(
+                    radius: 16,
+                    backgroundImage: AssetImage(
+                      'assets/images/bot_profile_pic.png',
+                    ),
+                  ),
+                if (chatMessage.speaker == ChatMessageType.bot)
+                  // 프로필과 말풍선 사이의 여백을 생성
+                  SizedBox(width: 6),
+
+                if (chatMessage.speaker == ChatMessageType.bot)
+                  Text('UniBot', style: TextStyle(fontWeight: FontWeight.w600)),
+              ],
+            ),
+            SizedBox(height: 8),
+            // 말풍선이 화면 너비를 넘어가지 않도록 ConstrainedBox 위젯으로 감싸 말풍선의 최대 크기를 제한.
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.85,
+              ),
+              child: Container(
+                margin: EdgeInsets.only(left: 12),
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                decoration: BoxDecoration(
+                  color:
+                      // 메시지 화자에 따라 배경색을 다르게 지정
+                      chatMessage.speaker != ChatMessageType.user
+                          ? Colors.white
+                          : Color(0xEE8CFF1A),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0, 0.25),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: content, // 텍스트와 버튼이 포함된 Column을 여기에 넣습니다.
+              ),
+            ),
+
+            // 사용자의 메시지라면 말풍선 오른쪽에 여백을 생성
+            if (chatMessage.speaker != ChatMessageType.user) SizedBox(width: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Provider를 통해 ChatbotService와 AuthService의 상태를 구독
+    // 서비스의 데이터가 변경되면(notifyListeners 호출 시) 이 위젯은 자동으로 다시 빌드
+    final chatbotService = context.watch<ChatbotService>();
+    final authService = context.watch<AuthService>();
+
+    return Scaffold(
+      backgroundColor: Color(0xEEEBF2E8),
+      appBar: chatTopBar(),
+      body: Column(
+        children: [
+          Expanded(
+            // 스크롤이 가능한 리스트를 생성
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: chatbotService.messages.length,
+
+              // 각 항목이 화면에 보일 때마다 호출되어 해당 위치의 위젯을 생성하며
+              // index에 해당하는 메시지 객체를 buildMessage 함수에 전달하여 말풍선 위젯을 생성하는 흐름으로
+              // 즉, chatbotService 객체에서 채팅 내역을 저장하는 messages 필드에 저장되어 있는
+              // 마지막 채팅을 말풍선으로 그리는 부분
+              itemBuilder: (context, index) {
+                return buildMessage(chatbotService.messages[index]);
+              },
+            ),
+          ),
+          // Divider(height: 1),
+          Container(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+            child: Row(
+              children: [
+                // 입력창
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            decoration: const InputDecoration(
+                              hintText: '여기에 메시지를 입력...',
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.mic_none),
+                          onPressed:
+                              () => {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true, // 높이 조절 가능하도록
+                                  backgroundColor:
+                                      Colors.transparent, // 모서리 둥글게 하려면 투명하게
+                                  builder:
+                                      (context) => const RecordingBottomSheet(),
+                                ),
+                              },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 전송 버튼
+                GestureDetector(
+                  onTap:
+                      () => {
+                        chatbotService.sendMessage(
+                          _controller.text,
+                          authService.currentUser!.userId,
+                        ),
+
+                        _controller.text = "",
+                      },
+                  child: Container(
+                    width: 46,
+                    height: 46,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFF22553D), // 초록색 배경
+                    ),
+                    child: const Icon(Icons.send, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Padding(
+          //   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          //   child: Row(
+          //     children: [
+          //       Expanded(
+          //         child: TextField(
+          //           controller: _controller,
+          //           decoration: InputDecoration(
+          //             hintText: "메시지를 입력하세요",
+          //             border: OutlineInputBorder(
+          //               borderRadius: BorderRadius.circular(12),
+          //             ),
+          //             contentPadding: EdgeInsets.symmetric(
+          //               horizontal: 12,
+          //               vertical: 10,
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //       SizedBox(width: 8),
+          //       ElevatedButton(
+          //         // 입력된 내용을 서버측으로 전송하는 sendMessage를 호출
+          //         onPressed:
+          //             () => chatbotService.sendMessage(
+          //               _controller.text,
+          //               authService.currentUser!.userId,
+          //             ),
+          //         child: Text("보내기"),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+        ],
+      ),
+    );
+  }
+}
+
+// ** 챗봇 화면의 상단 바 **
+class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
+  const chatTopBar({super.key});
+
+  void _showHelpDialog() {}
+
+  void _showSearchDialog() {}
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      automaticallyImplyLeading: false, // 기본 뒤로가기 제거
+      elevation: 0, // 그림자 높이
+      scrolledUnderElevation: 0, // 스크롤 해도 색상이 변하지 않게
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '유니봇 1.0',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            tooltip: '도움말',
+            onPressed: _showHelpDialog,
+            padding: EdgeInsets.zero, // 버튼 내부 간격 최소화
+            constraints: const BoxConstraints(), // 아이콘 크기 줄이기
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.search),
+          tooltip: '검색',
+          onPressed: _showSearchDialog,
+        ),
+      ],
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}

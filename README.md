@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # all_new_uniplan
 
 ## 폴더 구조 설명
@@ -20,3 +21,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# UniPlan_Client
+안양대학교 소프트웨어학과 2025학년도 4학년 졸업작품 클라이언트
+>>>>>>> 549c7393311f9bdc99a0d03a297155aeac58c2cf

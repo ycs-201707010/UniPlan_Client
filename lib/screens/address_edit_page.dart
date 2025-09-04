@@ -1,6 +1,7 @@
 // 사용자 계정에 생성된 '자주 가는 장소'를 관리하는 페이지이다.
 // TODO : ListView.builder를 사용해서 사용자가 저장한 장소 리스트를 불러와 위젯 리스트로 출력하기
 
+import 'package:all_new_uniplan/screens/address_add_page.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -72,6 +73,18 @@ class _addressEditPageState extends State<addressEditPage> {
                                 SlidableAction(
                                   onPressed: (context) {
                                     print('주소를 수정할겁니다');
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => AddressAddPage(
+                                              // 현재 항목의 데이터를 전달
+                                              initialTitle: entry.key,
+                                              initialAddress: entry.value,
+                                            ),
+                                      ),
+                                    );
                                   },
                                   backgroundColor: const Color(0xFF21B7CA),
                                   foregroundColor: Colors.white,
@@ -141,7 +154,12 @@ class _addressEditPageState extends State<addressEditPage> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddressAddPage()),
+              );
+            },
 
             child: const Text(
               '장소 추가하기',

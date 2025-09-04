@@ -1,5 +1,6 @@
-<<<<<<< HEAD
-# all_new_uniplan
+# UniPlan_Client
+
+안양대학교 소프트웨어학과 2025학년도 4학년 졸업작품 클라이언트
 
 ## 폴더 구조 설명
 
@@ -21,7 +22,10 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
-=======
-# UniPlan_Client
-안양대학교 소프트웨어학과 2025학년도 4학년 졸업작품 클라이언트
->>>>>>> 549c7393311f9bdc99a0d03a297155aeac58c2cf
+
+## TO-DO List
+
+- 일정 추가 시 저장된 장소/직접 입력 선택하는 기능
+- 등록된 일정 1.5초간 홀드시 일정 상세보기 bottomSheet 출력
+- 에브리타임 시간표 연동 화면 UI 구현
+- 실제 음성이 녹음되고 mp3 파일로 저장되도록 임시 기능 구현

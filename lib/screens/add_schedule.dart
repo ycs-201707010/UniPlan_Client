@@ -3,7 +3,6 @@ import 'package:all_new_uniplan/screens/location_deside_page.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 시간 및 날짜 포맷팅
-import './location_picker_page.dart';
 import 'package:all_new_uniplan/classes/schedule.dart';
 
 class AddSchedulePage extends StatefulWidget {
@@ -193,6 +192,18 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   final TextEditingController memoController = TextEditingController();
 
   @override
+  void dispose() {
+    // 컨트롤러들을 해제합니다.
+    titleController.dispose();
+    dateController.dispose();
+    startTimeController.dispose();
+    endTimeController.dispose();
+    locationController.dispose();
+    memoController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -313,7 +324,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final title = titleController.text.trim();
               final date = selectedDate;
               final start = startTime;
@@ -353,6 +364,9 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                 memo: memo,
               );
               // 예시: 일정 리스트에 추가하거나 Provider 등 상태관리로 전달
+
+              if (!context.mounted) return;
+
               Navigator.pop(context, schedule);
             },
 

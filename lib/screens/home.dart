@@ -1,6 +1,7 @@
 // 메인화면
 import 'package:all_new_uniplan/screens/chatbot.dart';
 import 'package:all_new_uniplan/screens/my_page.dart';
+import 'package:all_new_uniplan/screens/timeTable.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
       const scheduleSheetsPage(), // 0번 탭: 캘린더 화면 (이제 Scaffold 포함)
+      const TimetablePage(), // 1번 탭 : 대학 시간표 화면
       const MyPage(), // 임시 위젯 (추후 Scaffold로 변경)
       const ChatbotPage(), // 임시 위젯 (추후 ChatBotPage()로 변경)
     ];
@@ -43,10 +45,19 @@ class _HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(index: _selectedIndex, children: widgetOptions),
 
       bottomNavigationBar: BottomNavigationBar(
+        // ✅ 1. 타입을 fixed로 강제 지정
+        type: BottomNavigationBarType.fixed,
+
+        // ✅ 2. 비활성화된 아이템의 색상을 명확하게 지정 (선택 사항이지만 권장)
+        unselectedItemColor: Colors.grey,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today_outlined),
             label: '캘린더',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today_outlined),
+            label: '시간표',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

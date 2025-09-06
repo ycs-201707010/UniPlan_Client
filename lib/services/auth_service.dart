@@ -14,6 +14,7 @@ class AuthService with ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null;
 
+  // 로그인
   Future<void> login(String id, String password) async {
     final Map<String, dynamic> body = {"username": id, "password": password};
 

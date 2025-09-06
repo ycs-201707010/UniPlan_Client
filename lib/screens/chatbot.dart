@@ -1,5 +1,6 @@
 // ** 현재 사용중인 챗봇 페이지 코드 **
 
+import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:all_new_uniplan/widgets/recording_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -169,6 +170,7 @@ class _ChatPageState extends State<ChatbotPage> {
     // 서비스의 데이터가 변경되면(notifyListeners 호출 시) 이 위젯은 자동으로 다시 빌드
     final chatbotService = context.watch<ChatbotService>();
     final authService = context.watch<AuthService>();
+    final recordService = context.watch<RecordService>();
 
     return Scaffold(
       backgroundColor: Color(0xEEEBF2E8),
@@ -215,18 +217,38 @@ class _ChatPageState extends State<ChatbotPage> {
                           ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.mic_none),
-                          onPressed:
-                              () => {
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true, // 높이 조절 가능하도록
-                                  backgroundColor:
-                                      Colors.transparent, // 모서리 둥글게 하려면 투명하게
-                                  builder:
-                                      (context) => const RecordingBottomSheet(),
+                          icon: const Icon(Icons.mic_none),
+                          onPressed: () async {
+                            final initResult = await recordService.initialize();
+
+                            // ✅ 1. context.mounted 체크 추가 (안정성)
+                            if (!context.mounted) return;
+
+                            String? resultText;
+
+                            if (initResult == true) {
+                              resultText = await showModalBottomSheet<String>(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder:
+                                    (context) => const RecordingBottomSheet(),
+                              );
+
+                              // ✅ 2. resultText 할당 로직을 if 블록 안으로 이동 (충돌 방지)
+                              if (resultText != null) {
+                                _controller.text = resultText;
+                              }
+                            } else {
+                              print("[System log] 마이크 권한이 거부되었거나 초기화에 실패했습니다.");
+                              // (선택사항) 사용자에게 권한이 필요하다는 스낵바 메시지를 보여줄 수 있습니다.
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('음성 녹음을 사용하려면 마이크 권한이 필요합니다.'),
                                 ),
-                              },
+                              );
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -257,38 +279,6 @@ class _ChatPageState extends State<ChatbotPage> {
               ],
             ),
           ),
-          // Padding(
-          //   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          //   child: Row(
-          //     children: [
-          //       Expanded(
-          //         child: TextField(
-          //           controller: _controller,
-          //           decoration: InputDecoration(
-          //             hintText: "메시지를 입력하세요",
-          //             border: OutlineInputBorder(
-          //               borderRadius: BorderRadius.circular(12),
-          //             ),
-          //             contentPadding: EdgeInsets.symmetric(
-          //               horizontal: 12,
-          //               vertical: 10,
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //       SizedBox(width: 8),
-          //       ElevatedButton(
-          //         // 입력된 내용을 서버측으로 전송하는 sendMessage를 호출
-          //         onPressed:
-          //             () => chatbotService.sendMessage(
-          //               _controller.text,
-          //               authService.currentUser!.userId,
-          //             ),
-          //         child: Text("보내기"),
-          //       ),
-          //     ],
-          //   ),
-          // ),
         ],
       ),
     );

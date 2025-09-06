@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
-import 'package:all_new_uniplan/services/schedule_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -112,6 +111,35 @@ class _LoginPageState extends State<LoginPage> {
           height: 55,
           child: ElevatedButton(
             onPressed: () async {
+              print("[System log] 로그인 기능 실행");
+              if (idController.text == "" || passwordController.text == "") {
+                showDialog(
+                  context: context,
+                  barrierDismissible: true, // 다이얼로그 바깥 영역 터치 시 닫을 지 여부
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('에러'),
+                      content: const SingleChildScrollView(
+                        child: ListBody(
+                          children: <Widget>[
+                            Text('로그인에 실패했습니다.'),
+                            Text('아이디 및 비밀번호를 다시 확인해주십시오.'),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('확인'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ); // showdialog
+              }
+
               final authService = context.read<AuthService>();
               // final scheduleService = context.read<ScheduleService>();
 
@@ -124,6 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                 //final user = authService.currentUser;
 
                 if (authService.isLoggedIn) {
+                  print("[System log] 로그인 성공");
                   // await scheduleService.getSchedule(
                   //   authService.currentUser!.userId,
                   // ); home.dart에서 해야할 듯.
@@ -135,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                 } else {
                   // 사용자가 로그인하지 않은 경우에 대한 처리
                   // ** 다이얼로그를 띄우는 것으로 처리하기 **
-                  //print('로그인 상태가 아니므로 스케줄을 가져올 수 없습니다.');
+                  print("[System log] 로그인 기능 실패함");
 
                   showDialog(
                     context: context,
@@ -161,11 +190,36 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       );
                     },
-                  );
+                  ); // showdialog
                 }
               } catch (e) {
                 print("에러 발생 : $e");
                 // TODO: 여기서도 로그인 실패 다이얼로그를 보여주면 좋을 듯함.
+                showDialog(
+                  context: context,
+                  barrierDismissible: true, // 다이얼로그 바깥 영역 터치 시 닫을 지 여부
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('에러'),
+                      content: const SingleChildScrollView(
+                        child: ListBody(
+                          children: <Widget>[
+                            Text('로그인에 실패했습니다.'),
+                            Text('아이디 및 비밀번호를 다시 확인해주십시오.'),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('확인'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ); // showdialog
               }
             },
 

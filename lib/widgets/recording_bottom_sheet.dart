@@ -1,34 +1,10 @@
 // TODO : 챗봇 화면의 음성녹음 버튼을 클릭했을 시 출력될 BottomSheet
 
 import 'dart:async';
+import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wave_blob/wave_blob.dart';
-
-// // 웨이브 효과를 위한 위젯
-// class WaveEffect extends StatelessWidget {
-//   final double size;
-//   final double opacity;
-//   final Color color;
-
-//   const WaveEffect({
-//     Key? key,
-//     required this.size,
-//     required this.opacity,
-//     required this.color,
-//   }) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: size,
-//       height: size,
-//       decoration: BoxDecoration(
-//         shape: BoxShape.circle,
-//         color: color.withValues(alpha: opacity),
-//       ),
-//     );
-//   }
-// }
 
 class RecordingBottomSheet extends StatefulWidget {
   const RecordingBottomSheet({super.key});
@@ -55,7 +31,29 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
     });
   }
 
-  // 타이머 시작
+  // ** Service 코드에 있는 녹음 시작/중지 함수를 실행시키는 용도. **
+  Future<void> _toggleService() async {
+    final recordService = context.read<RecordService>();
+
+    await recordService.toggleRecording();
+  }
+
+  // ** Service 코드에서 진행중인 녹음을 강제 중단시키는 용도. **
+  // ** IconButton을 눌러 모달을 닫을 때 사용해야 함.
+  Future<void> _forceStopService() async {
+    final recordService = context.read<RecordService>();
+
+    await recordService.forceStopRecording();
+  }
+
+  // ** 녹음된 음성 파일을 API에 전달하는 함수. **
+  Future<String> _sendToAPI() async {
+    final recordService = context.read<RecordService>();
+
+    return await recordService.getSpeechToText();
+  }
+
+  // (클라이언트) 타이머 시작
   void _startTimer() {
     _recordSeconds = 0; // 시작 시 시간 초기화
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -65,7 +63,7 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
     });
   }
 
-  // 타이머 중지 함수
+  // (클라이언트) 타이머 중지 함수
   void _stopTimer() {
     _timer?.cancel();
     _timer = null; // 타이머 객체 변수를 null로 초기화.
@@ -75,9 +73,14 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
   void _toggleRecording() {
     setState(() {
       _isRecording = !_isRecording;
+
+      _toggleService();
+
       if (_isRecording) {
+        print("[System log] _toggleService 실행. 녹음 시작됨");
         _startTimer();
       } else {
+        print("[System log] _toggleService 실행. 녹음 종료됨");
         _stopTimer();
         // ✅ 녹음이 끝났으므로, 결정 화면으로 전환
         _isDeciding = true;
@@ -156,37 +159,18 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
           left: 15,
           child: IconButton(
             icon: Icon(Icons.close, color: Colors.grey, size: 24),
-            onPressed: () => {Navigator.of(context).pop()},
+            onPressed:
+                () => {
+                  // TODO : 녹음을 즉시 중단하도록
+                  _forceStopService(),
+                  Navigator.of(context).pop(),
+                },
           ),
         ),
 
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 웨이브 효과 (Stack 내부에 배치하면 버튼 뒤로 갈 수 있음)
-            // if (_isRecording)
-            //   Stack(
-            //     alignment: Alignment.center,
-            //     children: [
-            //       // 가장 바깥 웨이브 (가장 투명하고 크게)
-            //       WaveEffect(
-            //         size: 200 + (_recordSeconds * 0.5), // 시간에 따라 크기 변화
-            //         opacity: 0.1,
-            //         color: Colors.green,
-            //       ),
-            //       // 중간 웨이브
-            //       WaveEffect(
-            //         size: 170 + (_recordSeconds * 0.2), // 시간에 따라 크기 변화
-            //         opacity: 0.2,
-            //         color: Colors.green,
-            //       ),
-            //       // 가장 안쪽 웨이브 (가장 불투명하고 작게)
-            //       WaveEffect(size: 90, opacity: 0.3, color: Colors.green),
-            //       // 실제 버튼 (맨 위에 렌더링)
-            //       _buildRecordButton(),
-            //     ],
-            //   )
-            // else
             _buildRecordButton(), // 녹음 중이 아닐 때는 웨이브 없이 버튼만
             const SizedBox(height: 30),
 
@@ -245,10 +229,17 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.88,
               child: ElevatedButton(
-                onPressed:
-                    () => {
-                      // TODO : 버튼 클릭 후 로딩 -> bottomSheet 닫힘 -> 채팅창 갱신의 흐름이 되도록 로직 구현하기
-                    },
+                onPressed: () async {
+                  // TODO : 버튼 클릭 후 로딩(추후 추가) -> bottomSheet 닫힘 -> Toast 알림 (Text : 음성 변환 완료!) -> 입력란(Controller)의 내용을 응답받은 텍스트로 변경.
+                  // 여기에선 bottomSheet를 닫으며 응답받은 텍스트를 chatbot.dart에 전달하는 기능을 수행.
+
+                  final recordedText = await _sendToAPI();
+
+                  if (!context.mounted) return;
+
+                  // ignore: use_build_context_synchronously
+                  Navigator.of(context).pop(recordedText);
+                },
                 child: Text(
                   '전송하기',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

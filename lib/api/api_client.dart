@@ -42,4 +42,23 @@ class ApiClient {
       throw Exception('Failed to load data: ${response.statusCode}');
     }
   }
+
+  // 음성 파일 관련 요청
+  Future<dynamic> multiPost(
+    String endpoint,
+    String key, {
+    required String filePath,
+  }) async {
+    final url = Uri.parse('$_url$endpoint');
+    final request = http.MultipartRequest('POST', url);
+    request.files.add(await http.MultipartFile.fromPath(key, filePath));
+
+    final streamedResponse = await request.send();
+
+    //StreamedResponse를 일반 http.Response로 변환
+    final response = await http.Response.fromStream(streamedResponse);
+
+    // 6. post 함수와 동일한 방식으로 응답을 처리하여 반환
+    return _handleResponse(response);
+  }
 }

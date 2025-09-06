@@ -3,7 +3,6 @@
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:all_new_uniplan/screens/add_schedule.dart';
@@ -11,6 +10,7 @@ import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:all_new_uniplan/models/schedule_model.dart';
 import 'package:all_new_uniplan/classes/schedule_data_source.dart';
+import 'package:toastification/toastification.dart';
 
 class scheduleSheetsPage extends StatefulWidget {
   const scheduleSheetsPage({super.key});
@@ -20,7 +20,6 @@ class scheduleSheetsPage extends StatefulWidget {
 }
 
 class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
-  List<Schedule> scheduleList = []; // 예시 일정 리스트
   final CalendarController _calendarController =
       CalendarController(); // SfCalendar에서 날짜를 선택하기 위한 컨트롤러.
 
@@ -135,8 +134,8 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                 child: Icon(Icons.calendar_today),
                 label: 'Add Schedule',
                 onTap: () async {
-                  // 일정 추가 다이얼로그 열기 -> 일정 추가 창으로 이동하는 로직으로 변경 필요!
-                  final newSchedule = await Navigator.push<Schedule>(
+                  // 일정 추가 창으로 이동, 일정 추가 결과에 따른 결과를 반환받음.
+                  final result = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(
                       builder:
@@ -145,11 +144,19 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                     ),
                   );
 
-                  if (newSchedule != null) {
-                    setState(() {
-                      // TODO : 실제 일정을 추가할 수 있도록 서버 단 코드와 연결하기 (현재는 클라이언트에만 일정이 표시되고 있음.)
-                      scheduleList.add(newSchedule);
-                    });
+                  // TODO : 일정이 성공적으로 추가되었다면, 일정 추가창에서 캘린더 창으로 bool 형식의 응답을 하고, 일정 추가에 성공한 응답을 받으면 일정이 추가되었다는 Dialog 알림 주기
+                  if (result == true) {
+                    // 성공했을 때 Toast 알림
+                    if (!context.mounted) return; // context 유효성 검사
+
+                    toastification.show(
+                      context:
+                          context, // optional if you use ToastificationWrapper
+                      type: ToastificationType.success,
+                      style: ToastificationStyle.flatColored,
+                      autoCloseDuration: const Duration(seconds: 3),
+                      title: Text('제하하하하하!! 일정을 등록했다!!'),
+                    );
                   }
                 },
               ),

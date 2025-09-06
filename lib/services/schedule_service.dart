@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/api/api_client.dart';
-import 'package:all_new_uniplan/models/schedule_model.dart';
+import 'package:all_new_uniplan/models/schedule_model.dart'; // 사용자의 일정을 받아오는 클래스
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:all_new_uniplan/screens/location_picker_page.dart';
 
 class ScheduleService with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
@@ -50,7 +49,7 @@ class ScheduleService with ChangeNotifier {
 
   // 유저의 일정 DB에 일정을 추가하고 저장될 때 생성되는 schedule_id를 반환받아
   // Schedule에 부여하여 ScheduleService의 List에 추가하는 메서드
-  Future<void> addSchedule(
+  Future<bool> addSchedule(
     int userId,
     String title,
     DateTime date,
@@ -60,12 +59,20 @@ class ScheduleService with ChangeNotifier {
     String? memo,
     bool? isLongProject,
   }) async {
+    final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+
+    // 👇 2. TimeOfDay를 'HH:mm' 형식의 문자열로 변환
+    final String formattedStartTime =
+        '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}';
+    final String formattedEndTime =
+        '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}';
+
     final Map<String, dynamic> body = {
       'user_id': userId,
       'title': title,
-      'date': date,
-      'start_time': startTime,
-      'end_time': endTime,
+      'date': formattedDate,
+      'start_time': formattedStartTime,
+      'end_time': formattedEndTime,
       if (location != null) 'location': location,
       if (memo != null) 'memo': memo,
       if (isLongProject != null) 'long_project': isLongProject,
@@ -74,6 +81,7 @@ class ScheduleService with ChangeNotifier {
     try {
       final response = await _apiClient.post(
         '/schedule/addSchedule',
+
         body: body,
       );
 
@@ -81,11 +89,11 @@ class ScheduleService with ChangeNotifier {
       var message = json['message'];
 
       if (message == "Add Schedule Successed") {
-        int scheduleId = json["schedule"] as int;
+        int scheduleId = json["schedule_id"] as int;
         int? projectId;
 
         if (isLongProject == true) {
-          // projectId = json["project_id"] as int;
+          projectId = json["project_id"] as int;
         }
 
         Schedule newSchedule = Schedule(
@@ -104,13 +112,19 @@ class ScheduleService with ChangeNotifier {
 
         // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
         notifyListeners();
+
+        //성공 시 true 반환
+        return true;
       } else {
-        throw Exception('Get Schedule Failed: $message');
+        print('일정을 추가하는 과정에서 에러 발생: $message');
+        // throw Exception('Get Schedule Failed: $message');
+        return false;
       }
     } catch (e) {
-      print('일정을 검색하는 과정에서 에러 발생: $e');
+      print('일정을 추가하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
-      rethrow;
+      // rethrow;
+      return false;
     }
   }
 

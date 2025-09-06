@@ -4,6 +4,7 @@ import 'package:all_new_uniplan/screens/address_edit_page.dart';
 import 'package:all_new_uniplan/screens/home.dart';
 import 'package:all_new_uniplan/screens/welcome.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
+import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
 import 'package:provider/provider.dart';
@@ -38,6 +39,7 @@ void main() async {
             return previousChatbotService ?? ChatbotService(scheduleService);
           },
         ),
+        ChangeNotifierProvider(create: (context) => RecordService()),
       ],
 
       child: const uniPlanApp(),
@@ -125,7 +127,7 @@ class uniPlanApp extends StatelessWidget {
           if (authService.isLoggedIn) {
             return HomeScreen(); // BottomNavigationBar를 포함하는 페이지
           } else {
-            return HomeScreen(); //welcomePage();
+            return welcomePage(); //welcomePage();
           }
         },
       ),

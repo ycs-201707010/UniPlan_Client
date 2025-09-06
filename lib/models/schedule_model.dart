@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 @immutable
 class Schedule {
-  final int schedule_id;
+  final int schedule_id; // DB에서 일정을 식별하기 위해 사용?
   final String title;
   final DateTime date;
   final TimeOfDay startTime;

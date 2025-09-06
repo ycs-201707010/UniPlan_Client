@@ -1,9 +1,12 @@
 // ** 일정을 직접 등록하는 화면 **
+import 'package:all_new_uniplan/models/schedule_model.dart';
 import 'package:all_new_uniplan/screens/location_deside_page.dart';
+import 'package:all_new_uniplan/services/auth_service.dart';
+import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // 시간 및 날짜 포맷팅
-import 'package:all_new_uniplan/classes/schedule.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart'; // 시간 및 날짜 포맷팅
 
 class AddSchedulePage extends StatefulWidget {
   final BuildContext rootContext;
@@ -47,8 +50,9 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
       startTimeController.text = _formatTime(schedule.startTime);
       endTimeController.text = _formatTime(schedule.endTime);
       titleController.text = schedule.title;
-      locationController.text = schedule.location;
-      memoController.text = schedule.memo;
+      locationController.text =
+          schedule.location!; // 느낌표를 붙여서 값이 존재하지 않을 수 있는 필드에 대한 처리를 해줌.
+      memoController.text = schedule.memo!;
     }
   }
 
@@ -206,6 +210,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final scheduleService = context.watch<ScheduleService>();
 
     return Scaffold(
       appBar: TopBar(title: barTitle),
@@ -325,12 +330,24 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
           height: 55,
           child: ElevatedButton(
             onPressed: () async {
+              final authService =
+                  context.read<AuthService>(); // 일정을 추가하는데 userId를 가져오기 위함
+
+              final userId = authService.currentUser!.userId;
               final title = titleController.text.trim();
               final date = selectedDate;
               final start = startTime;
               final end = endTime;
-              final location = locationController.text;
-              final memo = memoController.text.trim();
+              String? location;
+              String? memo;
+
+              if (locationController.text != "") {
+                location = locationController.text;
+              }
+
+              if (memoController.text != "") {
+                memo = memoController.text.trim();
+              }
 
               // ✅ 통합 유효성 검사
               if (title.isEmpty ||
@@ -355,19 +372,20 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 
               // 이후 캘린더에 넘길 데이터 구조로 저장
               // 느낌표는 지워도, 그대로 작성해도 무방함
-              final schedule = Schedule(
-                title: title,
-                date: date,
-                startTime: start,
-                endTime: end,
+              final bool isSuccess = await scheduleService.addSchedule(
+                userId,
+                title,
+                date,
+                start,
+                end,
                 location: location,
                 memo: memo,
+                isLongProject: false,
               );
-              // 예시: 일정 리스트에 추가하거나 Provider 등 상태관리로 전달
 
               if (!context.mounted) return;
 
-              Navigator.pop(context, schedule);
+              Navigator.of(context).pop(isSuccess);
             },
 
             child: const Text(

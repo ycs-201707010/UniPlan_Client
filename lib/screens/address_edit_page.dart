@@ -155,6 +155,8 @@ class _addressEditPageState extends State<addressEditPage> {
           height: 55,
           child: ElevatedButton(
             onPressed: () {
+              print("[System log] 장소 추가/수정 기능의 지도 ON");
+
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const AddressAddPage()),

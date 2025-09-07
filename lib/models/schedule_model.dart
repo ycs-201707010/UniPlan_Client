@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 @immutable
 class Schedule {
-  final int schedule_id; // DB에서 일정을 식별하기 위해 사용?
+  final int? scheduleId; // DB에서 일정을 식별하기 위해 사용?
   final String title;
   final DateTime date;
   final TimeOfDay startTime;
@@ -16,7 +16,7 @@ class Schedule {
   final DateTime? timestamp;
 
   const Schedule({
-    required this.schedule_id,
+    this.scheduleId,
     required this.title,
     required this.date,
     required this.startTime,
@@ -30,7 +30,7 @@ class Schedule {
   });
 
   Schedule copyWith({
-    int? schedule_id,
+    int? scheduleId,
     String? title,
     DateTime? date,
     TimeOfDay? startTime,
@@ -43,7 +43,7 @@ class Schedule {
     DateTime? timestamp,
   }) {
     return Schedule(
-      schedule_id: schedule_id ?? this.schedule_id,
+      scheduleId: scheduleId ?? this.scheduleId,
       title: title ?? this.title,
       date: date ?? this.date,
       startTime: startTime ?? this.startTime,
@@ -70,7 +70,7 @@ class Schedule {
 
     // 최종 JSON Map 구성
     final Map<String, dynamic> jsonMap = {
-      'schedule_id': schedule_id,
+      if (scheduleId != null) 'schedule_id': scheduleId,
       'title': title,
       'date': formattedDate,
       'start_time': formattedStartTime,
@@ -95,7 +95,7 @@ class Schedule {
     }
 
     return Schedule(
-      schedule_id: json['schedule_id'] as int,
+      scheduleId: json['schedule_id'] as int?,
       title: json['title'] as String,
       date: DateTime.parse(json['date'] as String),
       startTime: parseTimeOfDay(json['start_time'] as String),

@@ -203,6 +203,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.28"
+  flutter_randomcolor:
+    dependency: "direct main"
+    description:
+      name: flutter_randomcolor
+      sha256: "831095ae7883d006de8067d58b96fb722591c72b42364ffd503bfdbe4f65f592"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.18"
   flutter_slidable:
     dependency: "direct main"
     description:

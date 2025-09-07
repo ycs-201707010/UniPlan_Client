@@ -4,6 +4,7 @@ import 'package:all_new_uniplan/screens/address_edit_page.dart';
 import 'package:all_new_uniplan/screens/home.dart';
 import 'package:all_new_uniplan/screens/welcome.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
+import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
@@ -21,6 +22,7 @@ void main() async {
         // 앱 전체에서 사용할 서비스들을 여기에 등록
         ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => ScheduleService()),
+        ChangeNotifierProvider(create: (context) => RecordService()),
         ChangeNotifierProxyProvider<ScheduleService, ChatbotService>(
           // create는 다른 Provider를 참조할 수 없으므로,
           // update에서 모든 것을 처리하는 것이 일반적입니다.
@@ -39,7 +41,15 @@ void main() async {
             return previousChatbotService ?? ChatbotService(scheduleService);
           },
         ),
-        ChangeNotifierProvider(create: (context) => RecordService()),
+        ChangeNotifierProxyProvider<ScheduleService, EverytimeService>(
+          create:
+              (context) => EverytimeService(context.read<ScheduleService>()),
+          // update는 ScheduleService가 변경될 때 호출되며,
+          // 기존 EverytimeService 인스턴스를 재사용하여 상태를 유지합니다.
+          update:
+              (context, scheduleService, previousEverytimeService) =>
+                  previousEverytimeService ?? EverytimeService(scheduleService),
+        ),
       ],
 
       child: const uniPlanApp(),
@@ -69,6 +79,8 @@ class uniPlanApp extends StatelessWidget {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF6BE347), // ElevatedButton의 배경색
+            disabledBackgroundColor: Colors.grey.shade300,
+            disabledForegroundColor: Colors.grey.shade500,
             foregroundColor: Colors.black, // ElevatedButton의 텍스트/아이콘 색상
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12), // 버튼 모서리 둥글게

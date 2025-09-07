@@ -97,7 +97,7 @@ class ScheduleService with ChangeNotifier {
         }
 
         Schedule newSchedule = Schedule(
-          schedule_id: scheduleId,
+          scheduleId: scheduleId,
           title: title,
           date: date,
           startTime: startTime,
@@ -154,7 +154,7 @@ class ScheduleService with ChangeNotifier {
 
       if (message == "Modify Schedule Successed") {
         int scheduleId = json['schedule_id'] as int;
-        Schedule newSchedule = modifySchedule.copyWith(schedule_id: scheduleId);
+        Schedule newSchedule = modifySchedule.copyWith(scheduleId: scheduleId);
 
         modifyScheduleToList(originalSchedule, newSchedule);
 

@@ -1,6 +1,12 @@
+// ** 대학 시간표 페이지 **
+
+import 'package:all_new_uniplan/models/subject_model.dart';
 import 'package:all_new_uniplan/screens/everytime_link_page.dart';
+import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_randomcolor/flutter_randomcolor.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:provider/provider.dart';
 import 'package:timetable_view/timetable_view.dart';
 
 class TimetablePage extends StatefulWidget {
@@ -11,13 +17,26 @@ class TimetablePage extends StatefulWidget {
 }
 
 class _TimetablePageState extends State<TimetablePage> {
+  final List<LaneEvents> _subjects = []; // LaneEvents를 저장할 리스트
+
+  // ** LaneEvents 내부에 삽입될 TableEvent를 요일별로 저장함 **
+  final List<Map<String, dynamic>> _tableEvents = [
+    {'day': '월', 'list': <TableEvent>[]},
+    {'day': '화', 'list': <TableEvent>[]},
+    {'day': '수', 'list': <TableEvent>[]},
+    {'day': '목', 'list': <TableEvent>[]},
+    {'day': '금', 'list': <TableEvent>[]},
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final everytimeService = context.watch<EverytimeService>();
+
     return Scaffold(
       appBar: AppBar(title: Text('내 시간표')),
       body: TimetableView(
         // 시간표에 들어갈 요일별 강의 데이터 생성
-        laneEventsList: _buildLaneEvents(),
+        laneEventsList: _subjects,
         // 시간표 레이아웃 설정
         timetableStyle: TimetableStyle(
           startHour: 9,
@@ -42,27 +61,78 @@ class _TimetablePageState extends State<TimetablePage> {
         children: [
           SpeedDialChild(
             child: Icon(Icons.calendar_today),
-            label: 'Add Schedule',
+            label: 'Link Everytime',
             onTap: () async {
-              // 일정 추가 다이얼로그 열기 -> 일정 추가 창으로 이동하는 로직으로 변경 필요!
-              // final newSchedule = await Navigator.push<Schedule>(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder:
-              //         (pageContext) => AddSchedulePage(rootContext: context),
-              //   ),
-              // );
-
-              Navigator.push(
+              final result = await Navigator.push<bool>(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const EverytimeLinkPage(),
-                ),
+                MaterialPageRoute(builder: (context) => EverytimeLinkPage()),
               );
 
-              setState(() {
-                // TODO : 실제 과목을 추가할 수 있도록 서버 단 코드와 연결하기
-              });
+              if (result == true) {
+                final currentSubjects =
+                    everytimeService.currentTimetable!.subjects!;
+
+                int dayIndex = 0;
+
+                setState(() {
+                  // TODO : 실제 과목을 추가할 수 있도록 서버 단 코드와 연결하기
+                  _subjects.clear();
+
+                  _tableEvents[0]['list'].clear();
+                  _tableEvents[1]['list'].clear();
+                  _tableEvents[2]['list'].clear();
+                  _tableEvents[3]['list'].clear();
+                  _tableEvents[4]['list'].clear();
+
+                  for (int i = 0; i < currentSubjects.length; i++) {
+                    switch (weekdayISMap[currentSubjects[i].day]) {
+                      case '월':
+                        dayIndex = 0;
+                        break;
+                      case '화':
+                        dayIndex = 1;
+                        break;
+                      case '수':
+                        dayIndex = 2;
+                        break;
+                      case '목':
+                        dayIndex = 3;
+                        break;
+                      case '금':
+                        dayIndex = 4;
+                        break;
+                    }
+
+                    _tableEvents[dayIndex]['list'].add(
+                      TableEvent(
+                        title:
+                            '${currentSubjects[i].title} \n\n ${currentSubjects[i].classroom}',
+                        eventId: dayIndex + (i * 12),
+                        startTime: TableEventTime(
+                          hour: currentSubjects[i].startTime.hour,
+                          minute: currentSubjects[i].startTime.minute,
+                        ),
+                        endTime: TableEventTime(
+                          hour: currentSubjects[i].endTime.hour,
+                          minute: currentSubjects[i].endTime.minute,
+                        ),
+                        laneIndex: dayIndex, // 월요일
+                        backgroundColor: Colors.deepOrangeAccent,
+                        textStyle: TextStyle(fontSize: 12),
+                      ),
+                    );
+                  }
+
+                  for (int i = 0; i < _tableEvents.length; i++) {
+                    _subjects.add(
+                      LaneEvents(
+                        lane: Lane(name: _tableEvents[i]['day'], laneIndex: i),
+                        events: _tableEvents[i]['list'],
+                      ),
+                    );
+                  }
+                });
+              }
             },
           ),
         ],
@@ -72,6 +142,8 @@ class _TimetablePageState extends State<TimetablePage> {
 
   // 각 요일별 강의 데이터를 생성하는 함수
   List<LaneEvents> _buildLaneEvents() {
+    // TODO : 현재 사용자 DB에 저장된 과목을 불러와 LaneEvents 배열로 반환할 수 있도록
+
     return [
       // 월요일
       LaneEvents(

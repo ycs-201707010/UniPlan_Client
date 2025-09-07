@@ -171,7 +171,7 @@ class RecordService with ChangeNotifier {
       var json = jsonDecode(response.body);
       var message = json['message'];
 
-      if (message == "Response Success") {
+      if (message == "Response Successed") {
         String stt = json['output'];
 
         return stt;

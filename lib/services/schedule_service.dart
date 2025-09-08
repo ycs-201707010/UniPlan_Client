@@ -275,4 +275,48 @@ class ScheduleService with ChangeNotifier {
     // UI 갱신을 위해 notifyListeners() 호출
     notifyListeners();
   }
+
+  int? findScheduleId(Schedule targetSchedule) {
+    final index = _schedules.indexWhere((schedule) {
+      // 비교를 위해 시간들을 정수로 변환
+      final targetStartMinutes =
+          targetSchedule.startTime.hour * 60 + targetSchedule.startTime.minute;
+      final scheduleStartMinutes =
+          schedule.startTime.hour * 60 + schedule.startTime.minute;
+      final targetEndMinutes =
+          targetSchedule.endTime.hour * 60 + targetSchedule.endTime.minute;
+      final scheduleEndMinutes =
+          schedule.endTime.hour * 60 + schedule.endTime.minute;
+
+      print("-----------------------");
+      print(targetSchedule.title);
+      print(targetSchedule.startTime);
+      print(targetStartMinutes);
+      print(targetSchedule.endTime);
+      print(targetEndMinutes);
+
+      print("-----------------------");
+      print(schedule.title);
+      print(schedule.startTime);
+      print(scheduleStartMinutes);
+      print(schedule.endTime);
+      print(scheduleEndMinutes);
+
+      // 모든 조건이 일치하는지 확인
+      return schedule.title == schedule.title &&
+          schedule.date.year == schedule.date.year &&
+          schedule.date.month == schedule.date.month &&
+          schedule.date.day == schedule.date.day &&
+          scheduleStartMinutes == targetStartMinutes &&
+          scheduleEndMinutes == targetEndMinutes;
+    });
+
+    // 인덱스를 찾았다면( -1이 아니라면), 해당 위치에 있는 schedule의 ID를 반환
+    if (index != -1) {
+      return _schedules[index].scheduleId!;
+    } else {
+      // 일치하는 일정이 없으면 null을 반환
+      return null;
+    }
+  }
 }

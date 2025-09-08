@@ -119,6 +119,15 @@ class ChatbotService with ChangeNotifier {
             );
           } else if (intent == "일정 변경 요청") {
             _pendingScheduleOriginal = Schedule.fromJson(output["delete"]);
+            int? scheduleId = _scheduleService.findScheduleId(
+              _pendingScheduleOriginal!,
+            );
+            if (scheduleId != null) {
+              _pendingScheduleOriginal = _pendingScheduleOriginal!.copyWith(
+                scheduleId: scheduleId,
+              );
+            }
+
             _pendingScheduleNew = Schedule.fromJson(output["add"]);
             final scheduleInfoText = _currentMessage.scheduleModifyMessage(
               _pendingScheduleOriginal!,

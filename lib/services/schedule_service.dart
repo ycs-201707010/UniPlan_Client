@@ -251,10 +251,7 @@ class ScheduleService with ChangeNotifier {
     Schedule modifySchedule,
   ) {
     final index = _schedules.indexWhere(
-      (s) =>
-          s.title == originalSchedule.title &&
-          s.startTime == originalSchedule.startTime &&
-          s.endTime == originalSchedule.endTime,
+      (s) => s.scheduleId == originalSchedule.scheduleId,
     );
     if (index != -1) {
       _schedules[index] = modifySchedule;

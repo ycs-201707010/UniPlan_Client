@@ -129,20 +129,75 @@ class ScheduleService with ChangeNotifier {
   }
 
   // 일정을 DB 상에서 변경하고
+  // Future<void> modifySchedule(
+  //   int userId,
+  //   Schedule originalSchedule,
+  //   Schedule modifySchedule,
+  // ) async {
+  //   //     final Map<String, dynamic> body = {
+  //   //       'user_id': userId,
+  //   //       'add_schedule': originalSchedule.toJson(),
+  //   //       'delete_schedule': modifySchedule.toJson(),
+  //   //     };
+
+  //   //  body['delete_schedule']['schedule_id'] = modifySchedule.scheduleId;
+  //   //     body['add_schedule']['user_id'] = userId;
+  //   //     body['delete_schedule']['user_id'] = userId;
+
+  //   final Map<String, dynamic> body = {
+  //     'add_schedule': modifySchedule.toJson(),
+  //     'delete_schedule': {
+  //       'user_id': userId,
+  //       'schedule_id': originalSchedule.scheduleId,
+  //     },
+  //   };
+
+  //   body['add_schedule']['user_id'] = userId;
+
+  //   try {
+  //     final response = await _apiClient.post(
+  //       '/schedule/modifySchedule',
+  //       body: body,
+  //     );
+
+  //     var json = jsonDecode(response.body);
+  //     var message = json['message'];
+
+  //     if (message == "Modify Schedule Successed") {
+  //       int scheduleId = json['schedule_id'] as int;
+  //       Schedule newSchedule = modifySchedule.copyWith(scheduleId: scheduleId);
+
+  //       modifyScheduleToList(originalSchedule, newSchedule);
+
+  //       // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
+  //       notifyListeners();
+  //     } else {
+  //       throw Exception('Get Schedule Failed: $message');
+  //     }
+  //   } catch (e) {
+  //     print('일정을 검색하는 과정에서 에러 발생: $e');
+  //     // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+  //     rethrow;
+  //   }
+  // }
+
+  // 일정을 DB 상에서 변경하고
   Future<void> modifySchedule(
     int userId,
     Schedule originalSchedule,
-    Schedule modifySchedule,
+    Schedule newSchedule,
   ) async {
     final Map<String, dynamic> body = {
-      'user_id': userId,
-      'add_schedule': originalSchedule.toJson(),
-      'delete_schedule': modifySchedule.toJson(),
+      'add_schedule': newSchedule.toJson(),
+      'delete_schedule': {
+        'user_id': userId,
+        'schedule_id': originalSchedule.scheduleId,
+      },
     };
 
     body['add_schedule']['user_id'] = userId;
-    body['delete_schedule']['user_id'] = userId;
 
+    print(body);
     try {
       final response = await _apiClient.post(
         '/schedule/modifySchedule',
@@ -154,7 +209,7 @@ class ScheduleService with ChangeNotifier {
 
       if (message == "Modify Schedule Successed") {
         int scheduleId = json['schedule_id'] as int;
-        Schedule newSchedule = modifySchedule.copyWith(scheduleId: scheduleId);
+        newSchedule = originalSchedule.copyWith(scheduleId: scheduleId);
 
         modifyScheduleToList(originalSchedule, newSchedule);
 
@@ -164,7 +219,7 @@ class ScheduleService with ChangeNotifier {
         throw Exception('Get Schedule Failed: $message');
       }
     } catch (e) {
-      print('일정을 검색하는 과정에서 에러 발생: $e');
+      print('일정을 수정하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       rethrow;
     }

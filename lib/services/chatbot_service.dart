@@ -29,15 +29,36 @@ class ChatbotService with ChangeNotifier {
 
   // 일정 변경 요청 시의 챗봇이 답변한 일정 정보를 임시로 저장하는 변수
   Schedule? _pendingScheduleOriginal;
-  Schedule? _pendingScheduleModify;
+  Schedule? _pendingScheduleNew;
 
   // 외부에서 읽기 전용으로 접근할 getter
   Schedule? get pendingScheduleAdd => _pendingScheduleAdd;
   Schedule? get pendingScheduleDelete => _pendingScheduleDelete;
   Schedule? get pendingScheduleOriginal => _pendingScheduleOriginal;
-  Schedule? get pendingScheduleModify => _pendingScheduleModify;
+  Schedule? get pendingScheduleNew => _pendingScheduleNew;
 
   final bool _isLoading = false;
+
+  Future<void> getMessage(int userId) async {
+    final Map<String, dynamic> body = {"user_id": userId};
+
+    try {
+      final response = await _apiClient.post('/chatbot/getMessage', body: body);
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Get Message Successed") {
+        var messagesJson = json['chatHistory'];
+        // updateMessageListFromJson(messagesJson);
+      } else {
+        throw Exception('Get Message Failed: $message');
+      }
+    } catch (e) {
+      print('채팅 내역을 가져오는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
 
   // 매개변수로 전달받은 채팅 클래스를 채팅 내역을 저장하는 List 필드에 추가
   void addMessage(ChatMessage message) {
@@ -97,11 +118,11 @@ class ChatbotService with ChangeNotifier {
               showButtons: true,
             );
           } else if (intent == "일정 변경 요청") {
-            _pendingScheduleOriginal = Schedule.fromJson(output["add"]);
-            _pendingScheduleModify = Schedule.fromJson(output["delete"]);
+            _pendingScheduleOriginal = Schedule.fromJson(output["delete"]);
+            _pendingScheduleNew = Schedule.fromJson(output["add"]);
             final scheduleInfoText = _currentMessage.scheduleModifyMessage(
               _pendingScheduleOriginal!,
-              _pendingScheduleModify!,
+              _pendingScheduleNew!,
             );
 
             _currentMessage = ChatMessage(
@@ -112,7 +133,8 @@ class ChatbotService with ChangeNotifier {
             );
           } else {
             print('오류: 처리하려는 스케줄 객체가 null입니다.');
-            return;
+            throw Exception('Response Failed: $message');
+            // return;
             // null일 때의 처리
           }
 
@@ -120,6 +142,7 @@ class ChatbotService with ChangeNotifier {
           addMessage(_currentMessage);
         }
       } catch (e) {
+        print("챗봇의 응답 내용을 가져오는 과정에서 에러 발생");
         rethrow;
       }
     }
@@ -171,7 +194,7 @@ class ChatbotService with ChangeNotifier {
         _scheduleService.modifySchedule(
           userId,
           _pendingScheduleOriginal!,
-          _pendingScheduleModify!,
+          _pendingScheduleNew!,
         );
 
         _currentMessage = ChatMessage(
@@ -185,7 +208,7 @@ class ChatbotService with ChangeNotifier {
         rethrow;
       } finally {
         _pendingScheduleOriginal = null;
-        _pendingScheduleModify = null;
+        _pendingScheduleNew = null;
       }
     }
 
@@ -200,7 +223,7 @@ class ChatbotService with ChangeNotifier {
     _pendingScheduleAdd = null;
     _pendingScheduleDelete = null;
     _pendingScheduleOriginal = null;
-    _pendingScheduleModify = null;
+    _pendingScheduleNew = null;
 
     _messages.last.showButtons = false;
 
@@ -212,6 +235,41 @@ class ChatbotService with ChangeNotifier {
     );
     addMessage(_currentMessage);
 
+    notifyListeners();
+  }
+
+  // 채팅 내역을 하나의 문자열로 변경하는 메서드
+  String ChatHistoryToJson() {
+    final messageListForJson =
+        _messages.map((chatMessage) {
+          // speaker(enum)를 role(String)으로 변환
+          // 챗봇 API는 보통 'bot' 대신 'assistant' 역할을 사용합니다.
+          final role =
+              chatMessage.speaker == ChatMessageType.user
+                  ? 'user'
+                  : 'assistant';
+
+          // 3. API가 요구하는 형식의 Map을 생성하여 반환
+          return {'role': role, 'content': chatMessage.message};
+        }).toList(); // map의 결과를 다시 List로 만듦
+
+    // 4. List<Map>을 최종 JSON 문자열로 인코딩
+    return jsonEncode(messageListForJson);
+  }
+
+  void updateMessageListFromJson(dynamic messagesJson) {
+    // 기존 목록을 비움
+    _messages.clear();
+    final messagesMap = messagesJson as Map;
+    // 맵을 반복하며 모델의 fromJson 생성자를 사용
+    messagesMap.forEach((key, value) {
+      final message = ChatMessage.fromJson(value as Map<String, dynamic>);
+      _messages.add(message);
+    });
+
+    // 마지막에 currentMessage 지정
+
+    // UI에 변경사항 알림
     notifyListeners();
   }
 }

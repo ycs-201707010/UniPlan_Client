@@ -52,15 +52,15 @@ class ChatMessage {
     String scheduleInfoText =
         '다음 일정 추가를 확인해주세요:\n\n'
         '#추가#\n'
-        '제목: ${originalSchedule.title}\n'
-        '날짜: $formattedOriginalDate\n'
-        '시간: $formattedOriginalStartTime - $formattedOriginalEndTime\n'
-        '장소: ${originalSchedule.location!.isNotEmpty ? originalSchedule.location : '미정'}\n'
-        '#삭제#\n'
         '제목: ${modifySchedule.title}\n'
         '날짜: $formattedModifyDate\n'
         '시간: $formattedModifyStartTime - $formattedModifyEndTime\n'
-        '장소: ${modifySchedule.location!.isNotEmpty ? modifySchedule.location : '미정'}\n';
+        '장소: ${modifySchedule.location!.isNotEmpty ? modifySchedule.location : '미정'}\n'
+        '#삭제#\n'
+        '제목: ${originalSchedule.title}\n'
+        '날짜: $formattedOriginalDate\n'
+        '시간: $formattedOriginalStartTime - $formattedOriginalEndTime\n'
+        '장소: ${originalSchedule.location!.isNotEmpty ? originalSchedule.location : '미정'}\n';
 
     return scheduleInfoText;
   }

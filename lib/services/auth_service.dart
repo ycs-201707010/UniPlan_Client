@@ -25,7 +25,6 @@ class AuthService with ChangeNotifier {
 
       if (message == "Login Successed") {
         var userJson = json['user'];
-        print(userJson);
         User user = User.fromJson(userJson);
         _currentUser = user;
 
@@ -80,13 +79,57 @@ class AuthService with ChangeNotifier {
           email: email,
           joinDate: joinDate,
         );
-        // 만약 회원가입 시 바로 로그인 페이지로 이동하는 경우
-        // login(id, password);
+        notifyListeners();
       } else {
         throw Exception('Sign up Failed: $message');
       }
     } catch (e) {
-      print('로그인 과정에서 에러 발생: $e');
+      print('회원가입 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
+  Future<bool> checkUserId(String userId) async {
+    final Map<String, dynamic> body = {"username": userId};
+
+    try {
+      final response = await _apiClient.post('/login/checkUserId', body: body);
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Check Successed") {
+        bool available = json['available'] as bool;
+        return available;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('아이디 중복 확인 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
+  Future<bool> checkNickname(String nickName) async {
+    final Map<String, dynamic> body = {"nickname": nickName};
+
+    try {
+      final response = await _apiClient.post(
+        '/login/checkNickname',
+        body: body,
+      );
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Check Successed") {
+        bool available = json['available'] as bool;
+        return available;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('닉네임 중복 확인 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       rethrow;
     }

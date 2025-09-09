@@ -9,6 +9,16 @@ import 'package:all_new_uniplan/models/subject_model.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:all_new_uniplan/models/timetable_model.dart';
 
+class ScheduleConflict {
+  final Schedule existingSchedule;
+  final Schedule timetableSchedule;
+
+  ScheduleConflict({
+    required this.existingSchedule,
+    required this.timetableSchedule,
+  });
+}
+
 class EverytimeService with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
 
@@ -22,8 +32,9 @@ class EverytimeService with ChangeNotifier {
   Timetable? _currentTimetable;
   Timetable? get currentTimetable => _currentTimetable;
 
-  // DB로 부터 등록되어 있
-  // Future<void> getEverytimeScheduleFromDB() {}
+  // 시간표의 반복 일정을 생성하는 과정에서 충돌/비충돌 일정을 각각 저장하는 필드
+  List<ScheduleConflict>? _conflictingSchedules = [];
+  List<ScheduleConflict>? get conflictingSchedules => _conflictingSchedules;
 
   // 에브리타임 시간표 링크를 통해 정보를 크롤링하여 가져오는 메서드
   Future<void> getEverytimeSchedule(String everytimeUrl) async {
@@ -39,8 +50,6 @@ class EverytimeService with ChangeNotifier {
         var scheduleJsonList = json['output'] as List<dynamic>;
         // 시간표 정보가 나열된 jsonList을 순회
         for (var scheduleJson in scheduleJsonList) {
-          // print(scheduleJson);
-
           var subject = Subject.fromJson(scheduleJson);
           currentTimetable!.addSubjectToList(subject);
         }
@@ -159,7 +168,11 @@ class EverytimeService with ChangeNotifier {
           .where((s) => s != null && s.isNotEmpty) // null이 아니고 비어있지 않은 항목만 필터링
           .join(' - '); // 필터링된 항목들을 ' - '로 연결
 
-      final repeat = _currentTimetable!.getRepeatCount(subject.day);
+      final repeatCount = _currentTimetable!.getRepeatCount(subject.day);
+
+      if (repeatCount == 0) {
+        return;
+      }
 
       final Map<String, dynamic> body = {
         'user_id': userId,
@@ -170,7 +183,7 @@ class EverytimeService with ChangeNotifier {
         if (_currentTimetable!.location != null)
           'location': _currentTimetable!.location,
         if (memo.isNotEmpty) 'memo': memo,
-        'repeat_count': repeat,
+        'repeat_count': repeatCount,
       };
 
       try {
@@ -185,21 +198,46 @@ class EverytimeService with ChangeNotifier {
           var result = json['result'];
           print(result);
 
-          var scheduleJsonList = result["schedules"] as List<dynamic>;
+          var created_count = result["created_count"] as int;
 
-          // 충돌이 발생한 date를 통해 충돌된 일정을 _currentTimeTable.conflict~ 에 추가
-          // final schedule = Schedule(scheduleId: scheduleId, title: title, date: date, startTime: startTime, endTime: endTime)
+          // 개별 일정이 생성되지 않은 경우
+          if (created_count == 0) {
+            return;
+          } else {
+            var scheduleJsonList = result["schedules"] as List<dynamic>;
 
-          for (final scheduleJson in scheduleJsonList) {
-            final schedule = Schedule.fromJson(
-              scheduleJson as Map<String, dynamic>,
-            );
-            _scheduleService.addScheduleToList(schedule);
+            if (scheduleJsonList.length != 0) {
+              for (final scheduleJson in scheduleJsonList) {
+                final schedule = Schedule.fromJson(
+                  scheduleJson as Map<String, dynamic>,
+                );
+                _scheduleService.addScheduleToList(schedule);
+                _currentTimetable!.generatedSchedules!.add(schedule);
+              }
+            }
+
+            // 반복횟수와 일정 생성 개수가 같지 않은 경우
+            // 기존 일정과 충돌이 발생한 것
+            if (created_count != repeatCount) {
+              var skippedDates = result["skipped_dates"] as List<dynamic>;
+
+              // 충돌이 발생한 날짜 목록을 순회하며 충돌 일정 목록을 갱신
+              for (final date in skippedDates) {
+                final conflictDate = DateTime.parse(date as String);
+                Schedule timetableSchedule = Schedule(
+                  title: subject.title,
+                  date: conflictDate,
+                  startTime: subject.startTime,
+                  endTime: subject.endTime,
+                  location: _currentTimetable!.location,
+                );
+                findConflict(timetableSchedule);
+              }
+            }
           }
+        } else {
+          throw Exception('Add Schedule Faield: $message');
         }
-        // else if(
-
-        // )
       } catch (e) {
         print('시간표 정보를 저장하는 과정에서 에러 발생: $e');
         // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
@@ -207,60 +245,21 @@ class EverytimeService with ChangeNotifier {
       }
     }
   }
-  // void checkConflict(Schedule timetableSchedule) {
-  //   if (currentTimetable != null) {
-  //     // 매개변수로 전달받은 시간표의 개별 일정과 같은 날에 위치한 기존 일정들을 찾음
-  //     List<Schedule> schedules = _scheduleService.findSchedulesAtDate(
-  //       timetableSchedule.date,
-  //     );
 
-  //     // 시간표 일정과 같은 날에 위치한 기존 일정이 없다면
-  //     if (schedules.length == 0) {
-  //       _currentTimetableSchedule!.add(timetableSchedule);
-  //       _nonConflictingSchedules!.add(timetableSchedule);
-  //     }
-  //     // 시간표 일정과 같은 날에 위치한 기존 일정이 있다면
-  //     else {
-  //       // 일정의 기간(시작 시간 ~ 종료 시간)과 시간표의 기간을 비교하여 중복을 확인
-  //       // 시간표의 일정과 같은 날에 위치한 일정들을 순회하며 조건을 통해 같은 요일에서도 같은 시간대에 위치한 지에 대한 중복 확인
-  //       for (final schedule in schedules) {
-  //         // 시간대가 중복되는 경우
-  //         if (schedule.startTime.isBefore(timetableSchedule.endTime) &&
-  //             schedule.endTime.isAfter(timetableSchedule.startTime)) {
-  //           final conflicSchedule = ScheduleConflict(
-  //             timeTableSchedule: timetableSchedule,
-  //             existingSchedule: schedule,
-  //           );
-  //           _conflictingSchedules.add(conflicSchedule);
-  //         }
-  //         // 시간대가 중복되지 않는 경우
-  //         else {
-  //           _currentTimetableSchedule!.add(timetableSchedule);
-  //           _nonConflictingSchedules!.add(timetableSchedule);
-  //           // 사용자에게 해당 시간표를 일정에 추가할 건지 여부를 물어봄
-  //           // 만약 예 버튼을 클릭한 경우 일정을 추가하는 메서드를 호출
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  // 추가하려는 시간표의 개별 일정과 충돌이 발생하는 캘린더에 등록된 기존 일정을 찾는 메서드
+  void findConflict(Schedule timetableSchedule) {
+    // 충돌이 일어난 일정들을 찾음
+    List<Schedule> schedules = _scheduleService.findSchedulesAtDateAndTime(
+      timetableSchedule.date,
+      timetableSchedule.startTime,
+      timetableSchedule.endTime,
+    );
 
-  // void modifyConflict(Schedule newSchedule, Schedule modifySchedule) {
-  //   // 변경하는 일정이 캘린더의 존재하던 기존 일정인 경우
-  //   if (modifySchedule == _conflictingSchedules.first.existingSchedule) {
-  //   }
-  //   // 변경하는 일정이 시간표의 일정인 경우
-  //   else if (modifySchedule == _conflictingSchedules.first.timeTableSchedule) {
-  //     // currentTimeTableScheudle의 요소에서 해당 부분을 변경
-  //   }
-  //   // 둘 다 아닌 경우
-  //   else {
-  //     return;
-  //   }
-  //   _conflictingSchedules.removeAt(0);
-  // }
-
-  // 연쇄적으로 충돌을 일으키는 일정은 앞선 일정을 변경하면 변경 사항을 반영해야 하기 때문에
-  // 이를 수행하는 메서드
-  // void findChainSchedule() {}
+    for (final schedule in schedules) {
+      ScheduleConflict(
+        existingSchedule: schedule,
+        timetableSchedule: timetableSchedule,
+      );
+    }
+  }
 }

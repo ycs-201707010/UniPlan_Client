@@ -26,7 +26,7 @@ Map<int, String> weekdayISMap = {
 // 시간표 정보를 저장하는 클래스
 @immutable
 class Subject {
-  final subjectId;
+  int? subjectId;
   final String title;
   final int day;
   final TimeOfDay startTime;
@@ -34,7 +34,7 @@ class Subject {
   final String? classroom;
   final String? professor;
 
-  const Subject({
+  Subject({
     this.subjectId,
     required this.title,
     required this.day,
@@ -76,7 +76,7 @@ class Subject {
 
     // 최종 JSON Map 구성
     final Map<String, dynamic> jsonMap = {
-      'subject_id': subjectId,
+      if (subjectId != null) 'subject_id': subjectId,
       'title': title,
       'date': weekdayISMap[day],
       'start_time': formattedStartTime,

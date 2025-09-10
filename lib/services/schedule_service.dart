@@ -174,6 +174,32 @@ class ScheduleService with ChangeNotifier {
     }
   }
 
+  Future<void> deleteSchedule(int userId, int scheduleId) async {
+    final Map<String, dynamic> body = {
+      "user_id": userId,
+      "schedule_id": scheduleId,
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/schedule/deleteSchedule',
+        body: body,
+      );
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Delete Schedule Successed") {
+        deleteScheduleFromList(scheduleId);
+      } else {
+        throw Exception('Delete Schedule Failed: $message');
+      }
+    } catch (e) {
+      print('일정을 삭제하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
   void findRecentScheduleIndex() {
     // 1. 시스템의 현재 날짜와 시간을 가져옵니다.
     final now = DateTime.now();
@@ -266,16 +292,8 @@ class ScheduleService with ChangeNotifier {
     print('[Client log] : 챗봇을 통해 스케줄 수정');
   }
 
-  void removeScheduleByAppointment(Appointment appointment) {
-    _schedules.removeWhere(
-      (s) =>
-          s.title == appointment.subject &&
-          s.startTime.hour == appointment.startTime.hour &&
-          s.startTime.minute == appointment.startTime.minute,
-    );
-
-    // UI 갱신을 위해 notifyListeners() 호출
-    notifyListeners();
+  void deleteScheduleFromList(int scheduleId) {
+    _schedules.removeWhere((s) => s.scheduleId == scheduleId);
   }
 
   int? findScheduleId(Schedule targetSchedule) {

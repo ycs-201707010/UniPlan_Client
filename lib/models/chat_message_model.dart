@@ -6,6 +6,7 @@ enum ChatMessageType { user, bot }
 
 // 채팅 메시지 내용을 저장하는 클래스
 class ChatMessage {
+  // int logId;
   final String message; // 채팅 내용
   final ChatMessageType speaker; // 화자
   final DateTime timestamp; // 채팅 시간

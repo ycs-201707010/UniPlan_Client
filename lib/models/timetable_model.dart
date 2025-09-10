@@ -5,6 +5,8 @@ import 'package:all_new_uniplan/models/subject_model.dart';
 
 @immutable
 class Timetable {
+  String? title;
+
   // 사용자가 선택한 기간
   DateTime? startDate;
   DateTime? endDate;
@@ -25,7 +27,7 @@ class Timetable {
   Map<int, List<Subject>>? _dayWithSchedule = {};
   Map<int, List<Subject>>? get dayWithSchedule => _dayWithSchedule;
 
-  Timetable({this.startDate, this.endDate, this.tableId});
+  Timetable({this.title, this.startDate, this.endDate, this.tableId});
 
   void addSubjectToList(Subject subject) {
     _subjects!.add(subject);
@@ -128,16 +130,10 @@ class Timetable {
   //   return jsonMap;
   // }
   // JSON 데이터를 받아 SubProject 객체를 생성하는 factory 생성자
-  // factory SubProject.fromJson(Map<String, dynamic> json) {
-  //   return SubProject(
-  //     subProjectId: json['subproject_id'] as int,
-  //     subGoal: json['subgoal'] as String,
-  //     done: json['done'] as int?,
-  //     maxDone: json['max_done'] as int?,
-  //     cycle: json['cycle'] as int?,
-  //     date:
-  //         json['date'] == null ? null : DateTime.parse(json['date'] as String),
-  //     projectType: json['project_type'] as String?,
-  //   );
-  // }
+  factory Timetable.fromJson(Map<String, dynamic> json) {
+    return Timetable(
+      title: json['title'] as String,
+      tableId: json['class_id'] as int,
+    );
+  }
 }

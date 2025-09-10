@@ -1,6 +1,7 @@
 // ** 일정이 보여지는 화면 **
 
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
+import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -42,10 +43,12 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
     // context.read를 사용하여 서비스 인스턴스를 가져옴
     final authService = context.read<AuthService>();
     final scheduleService = context.read<ScheduleService>();
+    final everytimeService = context.read<EverytimeService>();
 
     try {
       if (authService.isLoggedIn) {
         await scheduleService.getSchedule(authService.currentUser!.userId);
+        await everytimeService.getTimetable(authService.currentUser!.userId);
       }
     } catch (e) {
       print("일정 로딩 중 에러 발생: $e");

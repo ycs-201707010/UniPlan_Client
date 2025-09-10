@@ -81,7 +81,15 @@ class EverytimeService with ChangeNotifier {
       var message = json['message'];
 
       if (message == "Get Timetable Successed") {
-        //
+        var timetableJsonList = json['result'] as List<dynamic>;
+
+        for (final timetableJson in timetableJsonList) {
+          _currentTimetable = Timetable.fromJson(
+            timetableJson as Map<String, dynamic>,
+          );
+          _currentTimetableList.add(_currentTimetable!);
+          getTimetableSubject(_currentTimetable!.tableId!);
+        }
       } else {
         throw Exception('Get Timetable Faield: $message');
       }
@@ -93,8 +101,8 @@ class EverytimeService with ChangeNotifier {
   }
 
   // 시간표에 존재하는 수업 정보들을 가져오는 메서드
-  Future<void> getTimetableSubject(int userId) async {
-    final Map<String, dynamic> body = {"user_id": userId};
+  Future<void> getTimetableSubject(int classId) async {
+    final Map<String, dynamic> body = {"class_id": classId};
 
     try {
       final response = await _apiClient.post(
@@ -104,10 +112,17 @@ class EverytimeService with ChangeNotifier {
       var json = jsonDecode(response.body);
       var message = json['message'];
 
-      if (message == "Get TimetableSubject Successed") {
-        //
+      if (message == "Get Timetable Subject Successed") {
+        var subjectJsonList = json['result'] as List<dynamic>;
+        if (subjectJsonList.length == 0) {
+          return;
+        }
+        for (final subjectJson in subjectJsonList) {
+          final subject = Subject.fromJson(subjectJson as Map<String, dynamic>);
+          _currentTimetable!.addSubjectToList(subject);
+        }
       } else {
-        throw Exception('Get TimetableSubject Faield: $message');
+        throw Exception('Get Timetable Subject Failed: $message');
       }
     } catch (e) {
       print('시간표의 수업 정보를 가져오는 과정에서 에러 발생: $e');
@@ -133,11 +148,46 @@ class EverytimeService with ChangeNotifier {
 
         int tableId = result["class_id"] as int;
         _currentTimetable!.tableId = tableId;
+        _currentTimetable!.title = title;
+
+        for (Subject subject in _currentTimetable!.subjects!) {
+          addTimetableSubject(userId, tableId, subject);
+        }
       } else {
         throw Exception('Add Timetable Faield: $message');
       }
     } catch (e) {
       print('시간표를 생성하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
+  // 시간표의 과목 정보를 저장하는 테이블을 DB에 생성하도록 요청하는 메서드
+  Future<void> addTimetableSubject(
+    int userId,
+    int classId,
+    Subject subject,
+  ) async {
+    final Map<String, dynamic> body = subject.toJson();
+    body.addAll({"user_id": userId, "class_id": classId});
+    print(body);
+    try {
+      final response = await _apiClient.post(
+        '/everytime/addTimetableSubject',
+        body: body,
+      );
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Add Timetable Subject Successed") {
+        int subjectId = json['lecture_id'] as int;
+        subject.subjectId = subjectId;
+      } else {
+        throw Exception('Add Timetable Subject Faield: $message');
+      }
+    } catch (e) {
+      print('시간표의 수업을 생성하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       rethrow;
     }

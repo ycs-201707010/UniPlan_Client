@@ -78,9 +78,9 @@ class Subject {
     final Map<String, dynamic> jsonMap = {
       if (subjectId != null) 'subject_id': subjectId,
       'title': title,
-      'date': weekdayISMap[day],
-      'start_time': formattedStartTime,
-      'end_time': formattedEndTime,
+      'day': weekdayISMap[day],
+      'startTime': formattedStartTime,
+      'endTime': formattedEndTime,
       if (classroom != null) 'classroom': classroom,
       if (professor != null) 'professor': professor,
     };

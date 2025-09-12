@@ -1,11 +1,12 @@
 // 장소를 생성 및 수정하는 페이지이다.
-// TODO :
+
 import 'package:all_new_uniplan/screens/location_deside_page.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 
 class AddressAddPage extends StatefulWidget {
   // 수정 모드로 입장시, 생성자에 수정할 데이터를 받을 파라미터 추가
+  // TODO : 나중엔 DB에서 데이터를 불러와야 하니까, 그에 맞춰 양식도 수정해야겠다.
   final String? initialTitle;
   final String? initialAddress;
 

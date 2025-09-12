@@ -120,6 +120,52 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                       timeIntervalHeight: 70,
                       timeFormat: 'HH:mm',
                     ),
+
+                    onLongPress: (details) {
+                      print("매개변수엔 뭐가들었니: ${details.appointments!.first}");
+
+                      if (details.appointments != null &&
+                          details.appointments!.isNotEmpty) {
+                        final appointment = details.appointments!.first;
+
+                        // TODO : 여기에 상세 정보를 출력할 BottomSheet를 출력.
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                          ),
+                          builder:
+                              (_) => ScheduleDetailSheet(
+                                appointment: appointment,
+                                onEdit: () async {
+                                  Navigator.pop(context); // 상세 시트 닫기
+
+                                  // 기존 일정 정보를 Schedule 객체로 변환
+
+                                  final edited = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => AddSchedulePage(
+                                            rootContext: context,
+                                            // 기존 Schedule을 전달해야 함.
+                                          ),
+                                    ),
+                                  );
+
+                                  // 결과 적용
+                                },
+                                // 삭제 로직
+                                onDelete: () {
+                                  Navigator.pop(context); // 시트 닫기
+                                },
+                              ),
+                        );
+                      }
+                    },
                   ),
                 ),
               ],

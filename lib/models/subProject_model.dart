@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 @immutable
 class SubProject {
-  final int subProjectId;
+  final int? subProjectId;
   final String subGoal;
   final int? done;
   final int? maxDone;
@@ -12,7 +12,7 @@ class SubProject {
   final String? projectType;
 
   const SubProject({
-    required this.subProjectId,
+    this.subProjectId,
     required this.subGoal,
     this.done,
     this.maxDone,
@@ -47,7 +47,7 @@ class SubProject {
 
     // 최종 JSON Map 구성
     final Map<String, dynamic> jsonMap = {
-      'schedule_id': subProjectId,
+      if (subProjectId != null) 'subproject_id': subProjectId,
       'subgoal': subGoal,
       if (done != null) 'done': done,
       if (maxDone != null) 'max_done': maxDone,

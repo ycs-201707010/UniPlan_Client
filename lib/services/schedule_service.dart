@@ -83,7 +83,6 @@ class ScheduleService with ChangeNotifier {
     try {
       final response = await _apiClient.post(
         '/schedule/addSchedule',
-
         body: body,
       );
 

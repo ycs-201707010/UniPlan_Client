@@ -174,12 +174,17 @@ class ProjectService with ChangeNotifier {
 
       var json = jsonDecode(response.body);
       var message = json['message'];
-      if (message == "Get SubProject Successed") {
+      if (message == "Update SubProject Successed") {
+        var result = json["result"];
+        Project updateProject = Project.fromJson(result);
+        updateProjectToList(project.projectId, updateProject);
       } else {
-        throw Exception('Get SubProject Failed: $message');
+        throw Exception('Update SubProject Failed: $message');
       }
     } catch (e) {
-      // 에러 처리
+      print('프로젝트 정보를 수정하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -204,7 +209,9 @@ class ProjectService with ChangeNotifier {
         throw Exception('Get SubProject Failed: $message');
       }
     } catch (e) {
-      // 에러 처리
+      print('하위 프로젝트 정보를 검색하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -251,6 +258,9 @@ class ProjectService with ChangeNotifier {
         throw Exception('Add SubProject Failed: $message');
       }
     } catch (e) {
+      print('하위 프로젝트를 검색하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -306,6 +316,9 @@ class ProjectService with ChangeNotifier {
         throw Exception('Add Mutltiple SubProject Failed: $message');
       }
     } catch (e) {
+      print('하위 프로젝트를 다중 생성하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -334,7 +347,9 @@ class ProjectService with ChangeNotifier {
         throw Exception('Update SubProject Endpoint Failed: $message');
       }
     } catch (e) {
-      // 에러 처리
+      print('하위 프로젝트 정보를 수정하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -361,7 +376,9 @@ class ProjectService with ChangeNotifier {
         throw Exception('Update SubProject Endpoint Failed: $message');
       }
     } catch (e) {
-      // 에러 처리
+      print('하위 프로젝트 진척도를 수정하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();

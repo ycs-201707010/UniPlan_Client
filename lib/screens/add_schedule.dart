@@ -24,6 +24,7 @@ class AddSchedulePage extends StatefulWidget {
 
 class _AddSchedulePageState extends State<AddSchedulePage> {
   String barTitle = '일정 추가하기';
+  String buttonTitle = '일정 추가하기';
 
   // 이미 등록된 일정 수정 시, 날짜를 포맷
   String _formatTime(TimeOfDay time) {
@@ -38,6 +39,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 
     if (widget.initialSchedule != null) {
       barTitle = '일정 수정하기';
+      buttonTitle = '일정 수정하기';
 
       final schedule = widget.initialSchedule!;
       selectedDate = schedule.date;
@@ -147,6 +149,29 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     );
 
     if (picked != null) {
+      // 유효성 검사
+      final now = DateTime.now();
+      final isToday =
+          selectedDate!.year == now.year &&
+          selectedDate!.month == now.month &&
+          selectedDate!.day == now.day;
+
+      // 선택한 날짜가 오늘이고, 선택한 시간이 현재 시간보다 이전인 경우
+      if (isToday &&
+          (picked.hour < now.hour ||
+              (picked.hour == now.hour && picked.minute < now.minute))) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('현재 시간보다 이전 시간을 선택할 수 없습니다.'),
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.only(bottom: 80, left: 16, right: 16),
+          ),
+        );
+        return;
+      }
+      //유효성 검사 끝
+
       setState(() {
         /// final 변수 3종 :
         final now = DateTime.now(); // 아무 날짜나 쓰면 됨
@@ -388,8 +413,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
               Navigator.of(context).pop(isSuccess);
             },
 
-            child: const Text(
-              '일정 추가하기',
+            child: Text(
+              buttonTitle,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),

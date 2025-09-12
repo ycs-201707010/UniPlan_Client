@@ -8,7 +8,7 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 class ScheduleService with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
 
-  List<Schedule> _schedules = [];
+  final List<Schedule> _schedules = [];
   List<Schedule> get schedules => _schedules;
 
   // 메서드가 실행되고 있음을 나타내는 필드
@@ -133,8 +133,8 @@ class ScheduleService with ChangeNotifier {
   // 일정을 DB 상에서 변경하고
   Future<void> modifySchedule(
     int userId,
-    Schedule originalSchedule,
-    Schedule newSchedule,
+    Schedule originalSchedule, // 기존 일정
+    Schedule newSchedule, // 새 일정
   ) async {
     final Map<String, dynamic> body = {
       'add_schedule': newSchedule.toJson(),
@@ -388,5 +388,24 @@ class ScheduleService with ChangeNotifier {
       // 즉, 같거나 이후인 경우에만 true를 반환합니다.
       return !schedule.date.isBefore(startOfTargetDay);
     }).toList(); // where의 결과(Iterable)를 최종적으로 List로 변환합니다.
+  }
+
+  // **  **
+  Schedule? findScheduleByAppointment(dynamic appointment) {
+    try {
+      // schedules 리스트에서 appointment의 속성과 일치하는 첫 번째 Schedule을 찾음
+      return _schedules.firstWhere(
+        (schedule) =>
+            schedule.title == appointment.subject &&
+            schedule.startTime.hour == appointment.startTime.hour &&
+            schedule.startTime.minute == appointment.startTime.minute &&
+            schedule.endTime.hour == appointment.endTime.hour &&
+            schedule.endTime.minute == appointment.endTime.minute &&
+            schedule.location == appointment.location,
+      );
+    } catch (e) {
+      // 일치하는 항목이 없으면 firstWhere는 에러를 던지므로, null을 반환
+      return null;
+    }
   }
 }

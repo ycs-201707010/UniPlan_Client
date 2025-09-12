@@ -5,13 +5,10 @@ import 'package:all_new_uniplan/models/subject_model.dart';
 
 @immutable
 class Timetable {
+  int? tableId;
   String? title;
-
-  // 사용자가 선택한 기간
   DateTime? startDate;
   DateTime? endDate;
-  int? tableId;
-
   String? location;
 
   // 1. 각 수업 정보를 담은 클래스를 저장하는 필드

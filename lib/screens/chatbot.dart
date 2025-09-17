@@ -2,6 +2,7 @@
 
 import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:all_new_uniplan/widgets/recording_bottom_sheet.dart';
+import 'package:all_new_uniplan/widgets/typing_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/models/chat_message_model.dart';
@@ -192,7 +193,17 @@ class _ChatPageState extends State<ChatbotPage> {
               },
             ),
           ),
-          // Divider(height: 1),
+
+          // ✅ 4. isTyping이 true일 때만 TypingIndicator를 보여줌
+          if (chatbotService.isLoading)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TypingIndicator(), // 직접 만든 애니메이션 위젯
+              ),
+            ),
+
           Container(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
             child: Row(

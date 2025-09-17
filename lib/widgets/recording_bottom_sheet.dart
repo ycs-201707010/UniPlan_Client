@@ -52,6 +52,7 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
 
     return await recordService.getSpeechToText();
   }
+  // TODO : 현재는 API에 최종적으로 ㅈ
 
   // (클라이언트) 타이머 시작
   void _startTimer() {

@@ -122,11 +122,28 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                     ),
 
                     onLongPress: (details) {
-                      print("매개변수엔 뭐가들었니: ${details.appointments!.first}");
-
                       if (details.appointments != null &&
                           details.appointments!.isNotEmpty) {
+                        // SfCalendar에서 탭한 appointment 객체를 가져온다.
+                        // appointment class의 객체이기 때문에, Schedule 타입으로 변환하여 원본 스케줄을 찾아 수정해야 한다.
                         final appointment = details.appointments!.first;
+
+                        final authService =
+                            context
+                                .read<
+                                  AuthService
+                                >(); // 일정을 추가하는데 userId를 가져오기 위함
+                        final userId = authService.currentUser!.userId;
+
+                        // ScheduleService에서 appointment와 일치하는 원본 Schedule 객체를 찾는다.
+                        final Schedule? originalSchedule = scheduleService
+                            .findScheduleByAppointment(appointment);
+
+                        // 만약 일치하는 Schedule 객체를 찾지 못했다면 아무것도 하지 않음
+                        if (originalSchedule == null) {
+                          print("Error: 원본 Schedule 객체를 찾을 수 없습니다.");
+                          return;
+                        }
 
                         // TODO : 여기에 상세 정보를 출력할 BottomSheet를 출력.
                         showModalBottomSheet(
@@ -143,23 +160,98 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                 onEdit: () async {
                                   Navigator.pop(context); // 상세 시트 닫기
 
-                                  // 기존 일정 정보를 Schedule 객체로 변환
-
-                                  final edited = await Navigator.push(
+                                  // 원본 Schedule 객체를 수정 페이지에 전달한다.
+                                  final editedResult = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder:
                                           (context) => AddSchedulePage(
                                             rootContext: context,
                                             // 기존 Schedule을 전달해야 함.
+                                            initialSchedule:
+                                                originalSchedule, // 원본 스케줄 객체를 전달.
                                           ),
                                     ),
                                   );
 
-                                  // 결과 적용
+                                  //수정이 성공적으로 완료되었다면 (true가 반환되면) Toast 알림을 띄웁니다.
+                                  if (editedResult == true) {
+                                    if (!context.mounted) return;
+                                    toastification.show(
+                                      context: context,
+                                      type: ToastificationType.success,
+                                      style: ToastificationStyle.flatColored,
+                                      autoCloseDuration: const Duration(
+                                        seconds: 3,
+                                      ),
+                                      title: const Text('일정이 성공적으로 수정되었습니다.'),
+                                    );
+
+                                    _loadSchedules();
+                                  }
                                 },
                                 // 삭제 로직
-                                onDelete: () {
+                                onDelete: () async {
+                                  // TODO : Dialog를 띄워 정말로 일정을 삭제할 것인지 묻고, 확인 버튼이 눌리면 그때 일정 삭제 후 시트를 닫는걸로.
+                                  bool deleteDesided =
+                                      false; // 일정 삭제 여부를 저장하는 bool 변수
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('팝업 메시지'),
+                                        content: Text('해당 일정을 정말 삭제하시겠습니까?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              deleteDesided = true;
+                                              Navigator.of(
+                                                context,
+                                              ).pop(); // Dialog를 지움
+                                            },
+                                            child: Text('예'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('아니오'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+
+                                  if (deleteDesided == true) {
+                                    // 삭제하기를 결정하였다면 여기에서 deleteSchedule() 함수 실행.
+                                    bool deletedResult = await scheduleService
+                                        .deleteSchedule(
+                                          userId,
+                                          originalSchedule.scheduleId!,
+                                        );
+
+                                    // 삭제 처리가 성공적으로 완료되었다면 (true가 반환되면) Toast 알림을 띄웁니다.
+                                    if (deletedResult == true) {
+                                      if (!context.mounted) return;
+                                      toastification.show(
+                                        context: context,
+                                        type: ToastificationType.custom(
+                                          "Schedule Delete",
+                                          Colors.redAccent,
+                                          Icons.edit_calendar_outlined,
+                                        ),
+                                        style: ToastificationStyle.flatColored,
+                                        autoCloseDuration: const Duration(
+                                          seconds: 3,
+                                        ),
+                                        title: const Text('일정이 성공적으로 수정되었습니다.'),
+                                      );
+
+                                      _loadSchedules();
+                                    }
+                                  }
+
                                   Navigator.pop(context); // 시트 닫기
                                 },
                               ),

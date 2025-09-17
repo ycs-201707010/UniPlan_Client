@@ -37,7 +37,9 @@ class ChatbotService with ChangeNotifier {
   Schedule? get pendingScheduleOriginal => _pendingScheduleOriginal;
   Schedule? get pendingScheduleNew => _pendingScheduleNew;
 
-  final bool _isLoading = false;
+  // LLM 모델이 응답을 생성 중인지 나타내는 상태 변수
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
   Future<void> getMessage(int userId) async {
     final Map<String, dynamic> body = {"user_id": userId};
@@ -79,6 +81,10 @@ class ChatbotService with ChangeNotifier {
         showButtons: false,
       );
       addMessage(_currentMessage);
+
+      // LLM 모델에 메시지를 전송하기 전에, isTyping을 true로 전환.
+      _isLoading = true;
+      notifyListeners(); // UI에 '입력 중' 애니메이션을 표시하도록 알림
 
       final Map<String, dynamic> body = {"message": message, "user_id": userId};
       try {
@@ -153,6 +159,10 @@ class ChatbotService with ChangeNotifier {
       } catch (e) {
         print("챗봇의 응답 내용을 가져오는 과정에서 에러 발생");
         rethrow;
+      } finally {
+        // ✅ 3. 응답을 받거나 오류가 발생하면 isLoading을 false로 설정
+        _isLoading = false;
+        notifyListeners(); // UI에 '입력 중' 애니메이션을 숨기도록 알림
       }
     }
   }

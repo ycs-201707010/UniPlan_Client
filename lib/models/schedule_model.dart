@@ -43,6 +43,7 @@ class Schedule {
     DateTime? timestamp,
   }) {
     return Schedule(
+      // ?? : 왼쪽의 값이 null이면, 오른쪽의 값을 사용하라.
       scheduleId: scheduleId ?? this.scheduleId,
       title: title ?? this.title,
       date: date ?? this.date,

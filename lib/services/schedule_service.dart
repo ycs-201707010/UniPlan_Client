@@ -132,7 +132,7 @@ class ScheduleService with ChangeNotifier {
   }
 
   // 일정을 DB 상에서 변경하고
-  Future<void> modifySchedule(
+  Future<bool> modifySchedule(
     int userId,
     Schedule originalSchedule, // 기존 일정
     Schedule newSchedule, // 새 일정
@@ -164,17 +164,23 @@ class ScheduleService with ChangeNotifier {
 
         // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
         notifyListeners();
+
+        //성공 시 true 반환
+        return true;
       } else {
-        throw Exception('Modify Schedule Failed: $message');
+        print('일정을 추가하는 과정에서 에러 발생: $message');
+        // throw Exception('Modify Schedule Failed: $message');
+        return false;
       }
     } catch (e) {
       print('일정을 수정하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
-      rethrow;
+      // rethrow;
+      return false;
     }
   }
 
-  Future<void> deleteSchedule(int userId, int scheduleId) async {
+  Future<bool> deleteSchedule(int userId, int scheduleId) async {
     final Map<String, dynamic> body = {
       "user_id": userId,
       "schedule_id": scheduleId,
@@ -190,13 +196,18 @@ class ScheduleService with ChangeNotifier {
 
       if (message == "Delete Schedule Successed") {
         deleteScheduleFromList(scheduleId);
+
+        return true;
       } else {
-        throw Exception('Delete Schedule Failed: $message');
+        print('일정을 추가하는 과정에서 에러 발생: $message');
+        return false;
+        // throw Exception('Delete Schedule Failed: $message');
       }
     } catch (e) {
       print('일정을 삭제하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
-      rethrow;
+      // rethrow;
+      return false;
     }
   }
 
@@ -391,7 +402,7 @@ class ScheduleService with ChangeNotifier {
     }).toList(); // where의 결과(Iterable)를 최종적으로 List로 변환합니다.
   }
 
-  // **  **
+  // ** 전달받은 Appointment 객체를 사용해서 원본 Schedule 객체를 찾아내는 헬퍼 함수. **
   Schedule? findScheduleByAppointment(dynamic appointment) {
     try {
       // schedules 리스트에서 appointment의 속성과 일치하는 첫 번째 Schedule을 찾음

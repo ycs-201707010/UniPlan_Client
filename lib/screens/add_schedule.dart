@@ -23,6 +23,8 @@ class AddSchedulePage extends StatefulWidget {
 }
 
 class _AddSchedulePageState extends State<AddSchedulePage> {
+  Schedule? originalSchedule;
+
   String barTitle = '일정 추가하기';
   String buttonTitle = '일정 추가하기';
 
@@ -42,6 +44,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
       buttonTitle = '일정 수정하기';
 
       final schedule = widget.initialSchedule!;
+
       selectedDate = schedule.date;
       startTime = schedule.startTime;
       endTime = schedule.endTime;
@@ -55,6 +58,8 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
       locationController.text =
           schedule.location!; // 느낌표를 붙여서 값이 존재하지 않을 수 있는 필드에 대한 처리를 해줌.
       memoController.text = schedule.memo!;
+
+      originalSchedule = widget.initialSchedule!;
     }
   }
 
@@ -220,6 +225,120 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   /// 메모 작성
   final TextEditingController memoController = TextEditingController();
 
+  // 일정 추가. initialSchedule을 받지 않았다면 onPressed에서 이 메서드를 실행.
+  void addSchedule() async {
+    final authService =
+        context.read<AuthService>(); // 일정을 추가하는데 userId를 가져오기 위함
+    final scheduleService = context.read<ScheduleService>();
+
+    final userId = authService.currentUser!.userId;
+    final title = titleController.text.trim();
+    final date = selectedDate;
+    final start = startTime;
+    final end = endTime;
+    String? location;
+    String? memo;
+
+    if (locationController.text != "") {
+      location = locationController.text;
+    }
+
+    if (memoController.text != "") {
+      memo = memoController.text.trim();
+    }
+
+    // ✅ 통합 유효성 검사
+    if (title.isEmpty || date == null || start == null || end == null) {
+      showAlert("장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
+      return;
+    }
+    if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
+      showAlert("시작 시간은 종료 시간보다 이전이어야 합니다.");
+      return;
+    }
+
+    // print("🟣 [일정 등록 시도]");
+    // print("일정명: $title");
+    // print("날짜: $date");
+    // print("시작 시간: ${start?.format(context)}");
+    // print("종료 시간: ${end?.format(context)}");
+    // print("장소: $location");
+    // print("메모: $memo");
+
+    // 이후 캘린더에 넘길 데이터 구조로 저장
+    // 느낌표는 지워도, 그대로 작성해도 무방함
+    final bool isSuccess = await scheduleService.addSchedule(
+      userId,
+      title,
+      date,
+      start,
+      end,
+      location: location,
+      memo: memo,
+      isLongProject: false,
+    );
+
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop(isSuccess);
+  }
+
+  // 일정 수정. initialSchedule을 받았다면 이 메서드를 실행.
+  void modifySchedule() async {
+    final authService =
+        context.read<AuthService>(); // 일정을 추가하는데 userId를 가져오기 위함
+    final scheduleService = context.read<ScheduleService>();
+
+    final userId = authService.currentUser!.userId;
+    final title = titleController.text.trim();
+    final date = selectedDate;
+    final start = startTime;
+    final end = endTime;
+    String? location;
+    String? memo;
+
+    if (locationController.text != "") {
+      location = locationController.text;
+    }
+
+    if (memoController.text != "") {
+      memo = memoController.text.trim();
+    }
+
+    // ✅ 통합 유효성 검사
+    if (title.isEmpty || date == null || start == null || end == null) {
+      showAlert("장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
+      return;
+    }
+    if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
+      showAlert("시작 시간은 종료 시간보다 이전이어야 합니다.");
+      return;
+    }
+
+    // 이후 캘린더에 넘길 데이터 구조로 저장
+    // scheduleService의 modifySchedule에 전달할 newSchedule 객체를 만들기
+    Schedule newSchedule = Schedule(
+      title: title,
+      date: date,
+      startTime: startTime!,
+      endTime: endTime!,
+      location: location,
+      memo: memo,
+      isLongProject: false,
+    );
+
+    // TODO : 여기에서 modifySchedule() 함수 실행
+    final bool isSuccess = await scheduleService.modifySchedule(
+      userId,
+      originalSchedule!,
+      newSchedule,
+    );
+
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop(isSuccess);
+  }
+
   @override
   void dispose() {
     // 컨트롤러들을 해제합니다.
@@ -235,7 +354,6 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final scheduleService = context.watch<ScheduleService>();
 
     return Scaffold(
       appBar: TopBar(title: barTitle),
@@ -354,63 +472,13 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
+            // ** 눌렀을 때 이벤트 **
             onPressed: () async {
-              final authService =
-                  context.read<AuthService>(); // 일정을 추가하는데 userId를 가져오기 위함
-
-              final userId = authService.currentUser!.userId;
-              final title = titleController.text.trim();
-              final date = selectedDate;
-              final start = startTime;
-              final end = endTime;
-              String? location;
-              String? memo;
-
-              if (locationController.text != "") {
-                location = locationController.text;
+              if (originalSchedule != null) {
+                modifySchedule();
+              } else {
+                addSchedule();
               }
-
-              if (memoController.text != "") {
-                memo = memoController.text.trim();
-              }
-
-              // ✅ 통합 유효성 검사
-              if (title.isEmpty ||
-                  date == null ||
-                  start == null ||
-                  end == null) {
-                showAlert("장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
-                return;
-              }
-              if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
-                showAlert("시작 시간은 종료 시간보다 이전이어야 합니다.");
-                return;
-              }
-
-              // print("🟣 [일정 등록 시도]");
-              // print("일정명: $title");
-              // print("날짜: $date");
-              // print("시작 시간: ${start?.format(context)}");
-              // print("종료 시간: ${end?.format(context)}");
-              // print("장소: $location");
-              // print("메모: $memo");
-
-              // 이후 캘린더에 넘길 데이터 구조로 저장
-              // 느낌표는 지워도, 그대로 작성해도 무방함
-              final bool isSuccess = await scheduleService.addSchedule(
-                userId,
-                title,
-                date,
-                start,
-                end,
-                location: location,
-                memo: memo,
-                isLongProject: false,
-              );
-
-              if (!context.mounted) return;
-
-              Navigator.of(context).pop(isSuccess);
             },
 
             child: Text(

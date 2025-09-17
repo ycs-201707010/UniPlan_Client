@@ -187,6 +187,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                       title: const Text('일정이 성공적으로 수정되었습니다.'),
                                     );
 
+                                    // 일정 목록 새로고침
                                     _loadSchedules();
                                   }
                                 },
@@ -196,7 +197,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                   bool deleteDesided =
                                       false; // 일정 삭제 여부를 저장하는 bool 변수
 
-                                  showDialog(
+                                  await showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
@@ -224,6 +225,10 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                   );
 
                                   if (deleteDesided == true) {
+                                    print(
+                                      "삭제하기로 한 $userId의 스케쥴 ID : ${originalSchedule.scheduleId!}",
+                                    );
+
                                     // 삭제하기를 결정하였다면 여기에서 deleteSchedule() 함수 실행.
                                     bool deletedResult = await scheduleService
                                         .deleteSchedule(
@@ -245,7 +250,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                         autoCloseDuration: const Duration(
                                           seconds: 3,
                                         ),
-                                        title: const Text('일정이 성공적으로 수정되었습니다.'),
+                                        title: const Text('일정이 성공적으로 삭제되었습니다.'),
                                       );
 
                                       _loadSchedules();

@@ -97,13 +97,14 @@ class Subject {
     }
 
     return Subject(
+      subjectId: json['lecture_id'] as int,
       title: json['title'] as String,
       day: weekdaySIMap[json['day'] as String]!,
-      startTime: parseTimeOfDay(json['start_time'] as String),
-      endTime: parseTimeOfDay(json['end_time'] as String),
+      startTime: parseTimeOfDay(json['startTime'] as String),
+      endTime: parseTimeOfDay(json['endTime'] as String),
 
       // json에 해당 키가 없으면 null로 처리
-      classroom: json['classroom'] as String?,
+      classroom: json['classRoom'] as String?,
       professor: json['professor'] as String?,
     );
   }

@@ -296,6 +296,39 @@ class EverytimeService with ChangeNotifier {
     }
   }
 
+  // 시간표의 제목을 수정하는 메서드
+  Future<void> modifyTimetableTitle(
+    int userId,
+    int tableId,
+    String title,
+  ) async {
+    final Map<String, dynamic> body = {
+      "user_id": userId,
+      "table_id": tableId,
+      "title": title,
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/everytime/modifyTimetableTitle',
+        body: body,
+      );
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Modify Timetable Title Successed") {
+        final timetable = findTimetable(tableId);
+        updateTimetableTitle(tableId, title);
+      } else {
+        throw Exception('Modify Timetable Title Failed: $message');
+      }
+    } catch (e) {
+      print('시간표 정보를 가져오는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
   // 추가하려는 시간표의 개별 일정과 충돌이 발생하는 캘린더에 등록된 기존 일정을 찾는 메서드
   void findConflict(Schedule timetableSchedule) {
     // 충돌이 일어난 일정들을 찾음
@@ -311,5 +344,17 @@ class EverytimeService with ChangeNotifier {
         timetableSchedule: timetableSchedule,
       );
     }
+  }
+
+  // 지정한 tableId를 가지는 시간표를 찾는 메서드
+  Timetable findTimetable(int tableId) {
+    // _currentTimetableList에서 각 Timetable 인스턴스(s)의 tableId가
+    // 메서드로 전달된 tableId와 일치하는 첫 번째 요소를 찾습니다.
+    return _currentTimetableList.firstWhere((s) => s.tableId == tableId);
+  }
+
+  void updateTimetableTitle(int tableId, String title) {
+    _currentTimetableList.firstWhere((s) => s.tableId == tableId).title = title;
+    notifyListeners();
   }
 }

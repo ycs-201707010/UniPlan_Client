@@ -68,6 +68,19 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
     }
   }
 
+  // 오늘 날짜의 요일에 따라 색상을 반환하는 함수
+  Color _getTodayHighlightColor() {
+    final DateTime today = DateTime.now();
+    // DateTime.saturday == 6, DateTime.sunday == 7
+    if (today.weekday == DateTime.saturday) {
+      return Colors.blue; // 토요일이면 파란색
+    } else if (today.weekday == DateTime.sunday) {
+      return Colors.red; // 일요일이면 빨간색
+    } else {
+      return const Color(0xEE265A3A); // 평일이면 기존 색상
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheduleService = context.watch<ScheduleService>();
@@ -106,7 +119,8 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                     viewHeaderStyle: ViewHeaderStyle(
                       backgroundColor: Color(0xEEE5FFD2),
                     ),
-                    todayHighlightColor: Color(0xEE265A3A),
+                    todayHighlightColor:
+                        _getTodayHighlightColor(), //Color(0xEE265A3A),
                     selectionDecoration: BoxDecoration(
                       color: Colors.transparent,
                       border: Border.all(color: Color(0xEE009425), width: 2),

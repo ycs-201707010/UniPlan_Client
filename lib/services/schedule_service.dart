@@ -167,7 +167,7 @@ class ScheduleService with ChangeNotifier {
         //성공 시 true 반환
         return true;
       } else {
-        print('일정을 추가하는 과정에서 에러 발생: $message');
+        print('일정을 수정하는 과정에서 에러 발생: $message');
         // throw Exception('Modify Schedule Failed: $message');
         return false;
       }
@@ -198,7 +198,7 @@ class ScheduleService with ChangeNotifier {
 
         return true;
       } else {
-        print('일정을 추가하는 과정에서 에러 발생: $message');
+        print('일정을 삭제하는 과정에서 에러 발생: $message');
         return false;
         // throw Exception('Delete Schedule Failed: $message');
       }

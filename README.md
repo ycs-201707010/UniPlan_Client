@@ -25,16 +25,13 @@ samples, guidance on mobile development, and a full API reference.
 
 ## TO-DO List
 
-- 캘린더 시트 화면의 상단 날짜 부분, 오늘이 토요일 일요일일 시 강조 색상 변경 테스트.
 - 일정 추가 시 저장된 장소/직접 입력 선택하는 기능
-- 등록된 일정 1.5초간 홀드시 일정 상세보기 bottomSheet 출력
 - Elevated, outlined Button 위젯을 사용한 것이 아닌 다른 위젯으로 구현된 버튼의 경우, 이 위젯으로 통일
-- 장기 프로젝트 화면/기능 구현
-- Discord, KakaoTalk의 예시처럼, 챗봇의 답변 내용을 응답받기 전까지 로딩 연출 출력을 구현.
+- 장기 프로젝트 화면/기능 구현 (table_calendar 라이브러리 사용)
+  day가 한자리 수 일 때, select시 원 크기가 작은 디테일 수정하기
 - 다크모드 테마 설정
-- Toast의 경우, Toastification 라이브러리를 사용
 - 일정 생성 시, 색상 지정 및 랜덤 색상 기능 지원.
-- 음성 녹음 기능 개선 : 녹음 종료 후 반환받은 텍스트 내용을 사용자에게 보여주며 피드백.
+- Google Calendar API를 사용하여 공휴일 데이터 불러오기. (Schedule, Project 공통.)
 
 ## TroubleShooting
 

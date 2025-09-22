@@ -15,6 +15,7 @@ class _SettingPageState extends State<SettingPage> {
   final bool _isScheduleEndEnabled = false;
   final bool _isCustomerServiceEnabled = true;
   final bool _isHapticEnabled = true;
+  bool _isDarkModeEnabled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +45,30 @@ class _SettingPageState extends State<SettingPage> {
               onChanged: (value) {
                 setState(() {
                   _isScheduleEnabled = value;
+                });
+              },
+            ),
+
+            Container(
+              padding: EdgeInsets.only(left: 12, top: 20, bottom: 10),
+              child: Text(
+                "디스플레이",
+                style: TextStyle(
+                  color: Color(0xEE7E7E7E),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            SettingPageButton(
+              mainText: "다크모드",
+              subText: "눈부심 방지 기능입니다.",
+              value: _isDarkModeEnabled,
+              onChanged: (value) {
+                setState(() {
+                  // 다크모드
+                  _isDarkModeEnabled = value;
                 });
               },
             ),

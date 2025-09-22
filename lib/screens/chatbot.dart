@@ -166,6 +166,18 @@ class _ChatPageState extends State<ChatbotPage> {
     );
   }
 
+  // 사용자가 메시지를 보내거나, LLM 모델로부터 응답을 받을 때 자동으로 스크롤을 해주는 함수.
+  void _scrollToBottom() {
+    // 스크롤 컨트롤러가 리스트에 연결되어 있고, 스크롤할 내용이 있을 때만 실행
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent, // 가장 아래 스크롤 위치
+        duration: const Duration(milliseconds: 300), // 0.3초 동안 애니메이션
+        curve: Curves.easeOut, // 부드럽게 끝나는 효과
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Provider를 통해 ChatbotService와 AuthService의 상태를 구독
@@ -174,6 +186,9 @@ class _ChatPageState extends State<ChatbotPage> {
     final authService = context.watch<AuthService>();
     final recordService = context.watch<RecordService>();
     // final projectChatbotService = context.watch<ProjectChatbotService>();
+
+    // 화면이 다시 그려질 때마다 스크롤을 맨 아래로 내리도록 예약
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
       backgroundColor: Color(0xEEEBF2E8),
@@ -184,27 +199,29 @@ class _ChatPageState extends State<ChatbotPage> {
             // 스크롤이 가능한 리스트를 생성
             child: ListView.builder(
               controller: _scrollController,
-              itemCount: chatbotService.messages.length,
+              itemCount:
+                  chatbotService.messages.length +
+                  (chatbotService.isLoading ? 1 : 0),
 
               // 각 항목이 화면에 보일 때마다 호출되어 해당 위치의 위젯을 생성하며
               // index에 해당하는 메시지 객체를 buildMessage 함수에 전달하여 말풍선 위젯을 생성하는 흐름으로
               // 즉, chatbotService 객체에서 채팅 내역을 저장하는 messages 필드에 저장되어 있는
               // 마지막 채팅을 말풍선으로 그리는 부분
               itemBuilder: (context, index) {
+                if (index == chatbotService.messages.length) {
+                  // 마지막 인덱스이고, 챗봇이 입력 중이면 TypingIndicator 반환
+                  return const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: TypingIndicator(),
+                    ),
+                  );
+                }
                 return buildMessage(chatbotService.messages[index]);
               },
             ),
           ),
-
-          // ✅ 4. isTyping이 true일 때만 TypingIndicator를 보여줌
-          if (chatbotService.isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TypingIndicator(), // 직접 만든 애니메이션 위젯
-              ),
-            ),
 
           Container(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
@@ -250,7 +267,18 @@ class _ChatPageState extends State<ChatbotPage> {
 
                               // ✅ 2. resultText 할당 로직을 if 블록 안으로 이동 (충돌 방지)
                               if (resultText != null) {
-                                _controller.text = resultText;
+                                // _controller.text = resultText;
+
+                                chatbotService.sendMessage(
+                                  resultText,
+                                  authService.currentUser!.userId,
+                                );
+
+                                // 메시지 전송 후, 약간의 딜레이동안 채팅 내역을 갱신하고 스크롤 함수 실행.
+                                Future.delayed(
+                                  const Duration(milliseconds: 50),
+                                  _scrollToBottom,
+                                );
                               }
                             } else {
                               print("[System log] 마이크 권한이 거부되었거나 초기화에 실패했습니다.");
@@ -270,19 +298,22 @@ class _ChatPageState extends State<ChatbotPage> {
                 const SizedBox(width: 12),
                 // 전송 버튼
                 GestureDetector(
-                  onTap:
-                      () => {
-                        chatbotService.sendMessage(
-                          _controller.text,
-                          authService.currentUser!.userId,
-                        ),
-                        // projectChatbotService.sendMessage(
-                        //   authService.currentUser!.userId,
-                        //   "운동",
-                        //   _controller.text,
-                        // ),
-                        _controller.text = "",
-                      },
+                  onTap: () {
+                    if (_controller.text.isEmpty) return; // 빈 메시지 전송 방지
+
+                    chatbotService.sendMessage(
+                      _controller.text,
+                      authService.currentUser!.userId,
+                    );
+
+                    _controller.clear();
+
+                    // 메시지 전송 후, 약간의 딜레이동안 채팅 내역을 갱신하고 스크롤 함수 실행.
+                    Future.delayed(
+                      const Duration(milliseconds: 50),
+                      _scrollToBottom,
+                    );
+                  },
                   child: Container(
                     width: 46,
                     height: 46,

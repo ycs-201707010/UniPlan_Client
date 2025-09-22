@@ -203,7 +203,7 @@ class ProjectService with ChangeNotifier {
       var json = jsonDecode(response.body);
       var message = json['message'];
       if (message == "Get SubProject Successed") {
-        var subProjectsJson = json['subprojects'];
+        var subProjectsJson = json['subProjects'];
         updateSubProjectListFromJson(projectId, subProjectsJson);
       } else {
         throw Exception('Get SubProject Failed: $message');
@@ -384,7 +384,7 @@ class ProjectService with ChangeNotifier {
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
     projectMap.forEach((key, value) {
       final project = Project.fromJson(value as Map<String, dynamic>);
-      projects![project.projectId] = project;
+      _projects![project.projectId] = project;
     });
 
     // UI에 변경사항 알림
@@ -394,12 +394,13 @@ class ProjectService with ChangeNotifier {
   // json에 지정된 여러 개의 SubProject 정보들을 추출하여 이를 저장하는 List 타입 필드에 저장하는 메서드
   void updateSubProjectListFromJson(int projectId, dynamic subProjectsJson) {
     // 기존 목록을 비움
-    _projects![projectId]!.subProjects!.clear();
+    // _projects![projectId]!.subProjects!.clear();
     final subProjectMap = subProjectsJson as Map;
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
+
     subProjectMap.forEach((key, value) {
       final subProject = SubProject.fromJson(value as Map<String, dynamic>);
-      projects![projectId]!.subProjects!.add(subProject);
+      _projects![projectId]!.addSubProjectToList(subProject);
     });
 
     // UI에 변경사항 알림

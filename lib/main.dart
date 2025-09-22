@@ -25,7 +25,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => ScheduleService()),
         ChangeNotifierProvider(create: (context) => RecordService()),
-
+        ChangeNotifierProvider(create: (context) => ProjectService()),
         ChangeNotifierProxyProvider<ScheduleService, ChatbotService>(
           // create는 다른 Provider를 참조할 수 없으므로,
           // update에서 모든 것을 처리하는 것이 일반적입니다.

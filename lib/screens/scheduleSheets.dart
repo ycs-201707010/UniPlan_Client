@@ -4,6 +4,7 @@ import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -21,7 +22,8 @@ class scheduleSheetsPage extends StatefulWidget {
   State<scheduleSheetsPage> createState() => _scheduleSheetsPageState();
 }
 
-class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
+class _scheduleSheetsPageState extends State<scheduleSheetsPage>
+    with TickerProviderStateMixin {
   final CalendarController _calendarController =
       CalendarController(); // SfCalendar에서 날짜를 선택하기 위한 컨트롤러.
 
@@ -73,6 +75,19 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
     }
   }
 
+  // 오늘 날짜의 요일에 따라 색상을 반환하는 함수
+  Color _getTodayHighlightColor() {
+    final DateTime today = DateTime.now();
+    // DateTime.saturday == 6, DateTime.sunday == 7
+    if (today.weekday == DateTime.saturday) {
+      return Colors.blue; // 토요일이면 파란색
+    } else if (today.weekday == DateTime.sunday) {
+      return Colors.red; // 일요일이면 빨간색
+    } else {
+      return const Color(0xEE265A3A); // 평일이면 기존 색상
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheduleService = context.watch<ScheduleService>();
@@ -111,7 +126,8 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                     viewHeaderStyle: ViewHeaderStyle(
                       backgroundColor: Color(0xEEE5FFD2),
                     ),
-                    todayHighlightColor: Color(0xEE265A3A),
+                    todayHighlightColor:
+                        _getTodayHighlightColor(), //Color(0xEE265A3A),
                     selectionDecoration: BoxDecoration(
                       color: Colors.transparent,
                       border: Border.all(color: Color(0xEE009425), width: 2),
@@ -192,6 +208,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                       title: const Text('일정이 성공적으로 수정되었습니다.'),
                                     );
 
+                                    // 일정 목록 새로고침
                                     _loadSchedules();
                                   }
                                 },
@@ -201,7 +218,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                   bool deleteDesided =
                                       false; // 일정 삭제 여부를 저장하는 bool 변수
 
-                                  showDialog(
+                                  await showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
@@ -229,6 +246,10 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                   );
 
                                   if (deleteDesided == true) {
+                                    print(
+                                      "삭제하기로 한 $userId의 스케쥴 ID : ${originalSchedule.scheduleId!}",
+                                    );
+
                                     // 삭제하기를 결정하였다면 여기에서 deleteSchedule() 함수 실행.
                                     bool deletedResult = await scheduleService
                                         .deleteSchedule(
@@ -250,7 +271,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
                                         autoCloseDuration: const Duration(
                                           seconds: 3,
                                         ),
-                                        title: const Text('일정이 성공적으로 수정되었습니다.'),
+                                        title: const Text('일정이 성공적으로 삭제되었습니다.'),
                                       );
 
                                       _loadSchedules();

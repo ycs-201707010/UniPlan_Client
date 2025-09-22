@@ -32,9 +32,9 @@ class _TypingIndicatorState extends State<TypingIndicator>
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8E8EE),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
       child: AnimatedBuilder(
@@ -67,10 +67,10 @@ class _TypingIndicatorState extends State<TypingIndicator>
   Widget _buildDot() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 3),
-      width: 8,
-      height: 8,
+      width: 10,
+      height: 10,
       decoration: const BoxDecoration(
-        color: Colors.black54,
+        color: Color(0xEE8CFF1A),
         shape: BoxShape.circle,
       ),
     );

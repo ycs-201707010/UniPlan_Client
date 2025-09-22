@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:wave_blob/wave_blob.dart';
 
@@ -19,6 +20,8 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
   Timer? _timer; // 타이머 객체
 
   bool _isDeciding = false; // 녹음이 완료되었는지 여부 (사용자는 여기에서 전송할지 되돌아갈지 선택.)
+
+  String recordedText = "";
 
   @override
   void initState() {
@@ -52,7 +55,6 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
 
     return await recordService.getSpeechToText();
   }
-  // TODO : 현재는 API에 최종적으로 ㅈ
 
   // (클라이언트) 타이머 시작
   void _startTimer() {
@@ -71,7 +73,7 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
   }
 
   // 녹음 시작/중지 토글 함수
-  void _toggleRecording() {
+  void _toggleRecording() async {
     setState(() {
       _isRecording = !_isRecording;
 
@@ -83,10 +85,27 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
       } else {
         print("[System log] _toggleService 실행. 녹음 종료됨");
         _stopTimer();
-        // ✅ 녹음이 끝났으므로, 결정 화면으로 전환
+
+        // 녹음이 끝났으므로, 결정 화면으로 전환
         _isDeciding = true;
       }
     });
+
+    // UI 상태 변경 후, 필요한 비동기 작업 수행
+    if (!_isRecording && _isDeciding) {
+      // 로딩 상태를 true로 설정 (선택 사항)
+      // setState(() => _isLoading = true);
+      try {
+        recordedText = await _sendToAPI();
+      } catch (e) {
+        // 에러 처리
+        print("STT API 호출 실패: $e");
+        recordedText = "음성을 인식하지 못했습니다."; // 실패 메시지 설정
+      } finally {
+        // 로딩 상태를 false로 설정 (선택 사항)
+        // setState(() => _isLoading = false);
+      }
+    }
   }
 
   // 녹음 시간을 '0:03' 형식으로 포맷 (UI에 출력하기 위함)
@@ -208,14 +227,31 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // TODO : 다시 들어볼 수 있게 플레이어 기능 추가?
+            // TODO : API로부터 반환받은 텍스트를 여기서 확인
+            if (recordedText != "")
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 18),
+                child: Text(
+                  '"$recordedText"',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+
+            // API로부터 응답을 아직 받지 못했을 경우 로딩 연출.
+            if (recordedText == "") SpinKitFadingCube(color: Color(0xEE8CFF1A)),
+
+            SizedBox(height: 30),
+
             // 닫기 버튼
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.88,
               child: OutlinedButton(
                 onPressed:
                     () => {
-                      // TODO : 녹음 화면으로 되돌아가는 기능 만들기. setState() 사용할 것.
                       setState(() {
                         _isDeciding = false;
                       }),
@@ -230,11 +266,9 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.88,
               child: ElevatedButton(
-                onPressed: () async {
-                  // TODO : 버튼 클릭 후 로딩(추후 추가) -> bottomSheet 닫힘 -> Toast 알림 (Text : 음성 변환 완료!) -> 입력란(Controller)의 내용을 응답받은 텍스트로 변경.
+                onPressed: () {
+                  // TODO : 버튼 클릭 후 로딩(추후 추가) -> bottomSheet 닫힘 -> Toast 알림 (Text : 음성 변환 완료!)
                   // 여기에선 bottomSheet를 닫으며 응답받은 텍스트를 chatbot.dart에 전달하는 기능을 수행.
-
-                  final recordedText = await _sendToAPI();
 
                   if (!context.mounted) return;
 

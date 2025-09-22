@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:all_new_uniplan/models/subProject_model.dart';
 
-@immutable
 class Project {
   final int projectId;
   final String title;
@@ -11,9 +10,9 @@ class Project {
   final DateTime endDate;
   final DateTime? timestamp;
   final String? project_type;
-  final List<SubProject>? subProjects;
+  List<SubProject>? subProjects;
 
-  const Project({
+  Project({
     required this.projectId,
     required this.title,
     required this.goal,
@@ -83,6 +82,11 @@ class Project {
               : DateTime.parse(json['timestamp'] as String),
       project_type:
           json['project_type'] == null ? null : json['project_type'] as String,
+      subProjects: [],
     );
+  }
+
+  void addSubProjectToList(SubProject subProject) {
+    subProjects!.add(subProject);
   }
 }

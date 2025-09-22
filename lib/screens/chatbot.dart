@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/models/chat_message_model.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
+import 'package:all_new_uniplan/services/project_chatbot_service.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -184,6 +185,7 @@ class _ChatPageState extends State<ChatbotPage> {
     final chatbotService = context.watch<ChatbotService>();
     final authService = context.watch<AuthService>();
     final recordService = context.watch<RecordService>();
+    // final projectChatbotService = context.watch<ProjectChatbotService>();
 
     // 화면이 다시 그려질 때마다 스크롤을 맨 아래로 내리도록 예약
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
@@ -311,7 +313,6 @@ class _ChatPageState extends State<ChatbotPage> {
                       const Duration(milliseconds: 50),
                       _scrollToBottom,
                     );
-                  },
                   child: Container(
                     width: 46,
                     height: 46,

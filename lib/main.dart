@@ -13,6 +13,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
+import 'package:all_new_uniplan/services/project_chatbot_service.dart';
 
 void main() async {
   await initializeDateFormatting(); // Project 화면의 TableCalendar는 한글 지원이 안됨. 따라서 한글 포맷을 지원하도록 intl 라이브러리의 메서드를 실행함.
@@ -45,6 +46,25 @@ void main() async {
             return previousChatbotService ?? ChatbotService(scheduleService);
           },
         ),
+        // ChangeNotifierProxyProvider<ProjectService, ProjectChatbotService>(
+        //   // create는 다른 Provider를 참조할 수 없으므로,
+        //   // update에서 모든 것을 처리하는 것이 일반적입니다.
+        //   // 초기 인스턴스를 여기서 생성할 수도 있습니다.
+        //   create:
+        //       (context) => ProjectChatbotService(
+        //         // create 시점에는 context.read를 통해 다른 Provider에 접근할 수 있습니다.
+        //         context.read<ProjectService>(),
+        //       ),
+
+        //   // ScheduleService가 변경될 때마다 update가 호출됩니다.
+        //   update: (context, projectService, previousProjectChatbotService) {
+        //     // scheduleService 인스턴스를 ChatbotService에 전달하여
+        //     // 항상 최신 상태를 유지하게 합니다.
+        //     // previousChatbotService가 null이 아니라면 재사용할 수도 있습니다.
+        //     return previousProjectChatbotService ??
+        //         ProjectChatbotService(projectService);
+        //   },
+        // ),
         ChangeNotifierProxyProvider<ScheduleService, EverytimeService>(
           create:
               (context) => EverytimeService(context.read<ScheduleService>()),

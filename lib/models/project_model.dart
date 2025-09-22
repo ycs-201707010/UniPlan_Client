@@ -10,6 +10,7 @@ class Project {
   final DateTime startDate;
   final DateTime endDate;
   final DateTime? timestamp;
+  final String? project_type;
   final List<SubProject>? subProjects;
 
   const Project({
@@ -19,6 +20,7 @@ class Project {
     required this.startDate,
     required this.endDate,
     this.timestamp,
+    this.project_type,
     this.subProjects,
   });
 
@@ -29,6 +31,7 @@ class Project {
     DateTime? startDate,
     DateTime? endDate,
     DateTime? timestamp,
+    String? project_type,
     List<SubProject>? subProjects,
   }) {
     return Project(
@@ -38,6 +41,7 @@ class Project {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       timestamp: timestamp ?? this.timestamp,
+      project_type: project_type ?? this.project_type,
       subProjects: subProjects ?? this.subProjects,
     );
   }
@@ -50,30 +54,16 @@ class Project {
 
     final String formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
 
-    // // Pydantic의 time 타입에 맞추기 위해 'HH:mm:ss' 또는 'HH:mm' 형식으로 변환
-    // // Fast API Pydantic은 보통 "HH:MM:SS" 또는 "HH:MM"을 잘 파싱합니다.
-    // final String formattedStartTime =
-    //     '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
-    // final String formattedEndTime =
-    //     '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00';
-
     // 최종 JSON Map 구성
     final Map<String, dynamic> jsonMap = {
       'project_id': projectId,
       'title': title,
       'goal': goal,
-      'start_time': formattedStartDate,
-      'end_time': formattedEndDate,
+      'start_date': formattedStartDate,
+      'end_date': formattedEndDate,
       if (timestamp != null) 'timestamp': timestamp,
+      if (project_type != null) 'project_type': project_type,
     };
-
-    /*
-    if (subProject != null){
-      for (i in subProject.size){sub.json}{
-        jsonMap['sub_project'][i to String] = subProject.at(i).toJson:
-      }
-    }
-    */
 
     return jsonMap;
   }
@@ -91,14 +81,8 @@ class Project {
           json['timestamp'] == null
               ? null
               : DateTime.parse(json['timestamp'] as String),
-
-      /*
-      subProject: if (DateTime.parse(json['timestamp'] as String) != null){
-        for(int i = 0; i < (DateTime.parse(json['timestamp'] as String).size; i++){
-          subProject.fromJson(DateTime.parse(json['timestamp'] as String[i])
-        }
-      },
-      */
+      project_type:
+          json['project_type'] == null ? null : json['project_type'] as String,
     );
   }
 }

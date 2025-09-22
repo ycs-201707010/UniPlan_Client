@@ -2,6 +2,7 @@
 
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
+import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -46,11 +47,15 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     final authService = context.read<AuthService>();
     final scheduleService = context.read<ScheduleService>();
     final everytimeService = context.read<EverytimeService>();
+    final projectService = context.read<ProjectService>();
 
     try {
       if (authService.isLoggedIn) {
         await scheduleService.getSchedule(authService.currentUser!.userId);
         await everytimeService.getTimetable(authService.currentUser!.userId);
+        await projectService.getProjectByUserId(
+          authService.currentUser!.userId,
+        );
       }
     } catch (e) {
       print("일정 로딩 중 에러 발생: $e");

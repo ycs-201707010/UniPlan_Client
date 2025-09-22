@@ -317,7 +317,6 @@ class EverytimeService with ChangeNotifier {
       var message = json['message'];
 
       if (message == "Modify Timetable Title Successed") {
-        final timetable = findTimetable(tableId);
         updateTimetableTitle(tableId, title);
       } else {
         throw Exception('Modify Timetable Title Failed: $message');

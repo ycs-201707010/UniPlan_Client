@@ -149,8 +149,6 @@ class ChatbotService with ChangeNotifier {
           } else {
             print('오류: 처리하려는 스케줄 객체가 null입니다.');
             throw Exception('Response Failed: $message');
-            // return;
-            // null일 때의 처리
           }
 
           // 위의 if문을 통해 갱신된 마지막 채팅을 채팅 내역에 저장한다.

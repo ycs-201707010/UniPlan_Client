@@ -5,12 +5,14 @@ import 'package:all_new_uniplan/screens/home.dart';
 import 'package:all_new_uniplan/screens/welcome.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
+import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
 import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
+import 'package:all_new_uniplan/services/project_chatbot_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,25 @@ void main() async {
             return previousChatbotService ?? ChatbotService(scheduleService);
           },
         ),
+        // ChangeNotifierProxyProvider<ProjectService, ProjectChatbotService>(
+        //   // create는 다른 Provider를 참조할 수 없으므로,
+        //   // update에서 모든 것을 처리하는 것이 일반적입니다.
+        //   // 초기 인스턴스를 여기서 생성할 수도 있습니다.
+        //   create:
+        //       (context) => ProjectChatbotService(
+        //         // create 시점에는 context.read를 통해 다른 Provider에 접근할 수 있습니다.
+        //         context.read<ProjectService>(),
+        //       ),
+
+        //   // ScheduleService가 변경될 때마다 update가 호출됩니다.
+        //   update: (context, projectService, previousProjectChatbotService) {
+        //     // scheduleService 인스턴스를 ChatbotService에 전달하여
+        //     // 항상 최신 상태를 유지하게 합니다.
+        //     // previousChatbotService가 null이 아니라면 재사용할 수도 있습니다.
+        //     return previousProjectChatbotService ??
+        //         ProjectChatbotService(projectService);
+        //   },
+        // ),
         ChangeNotifierProxyProvider<ScheduleService, EverytimeService>(
           create:
               (context) => EverytimeService(context.read<ScheduleService>()),

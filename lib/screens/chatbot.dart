@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/models/chat_message_model.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
+import 'package:all_new_uniplan/services/project_chatbot_service.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -172,6 +173,7 @@ class _ChatPageState extends State<ChatbotPage> {
     final chatbotService = context.watch<ChatbotService>();
     final authService = context.watch<AuthService>();
     final recordService = context.watch<RecordService>();
+    // final projectChatbotService = context.watch<ProjectChatbotService>();
 
     return Scaffold(
       backgroundColor: Color(0xEEEBF2E8),
@@ -274,7 +276,11 @@ class _ChatPageState extends State<ChatbotPage> {
                           _controller.text,
                           authService.currentUser!.userId,
                         ),
-
+                        // projectChatbotService.sendMessage(
+                        //   authService.currentUser!.userId,
+                        //   "운동",
+                        //   _controller.text,
+                        // ),
                         _controller.text = "",
                       },
                   child: Container(

@@ -225,17 +225,13 @@ class ProjectService with ChangeNotifier {
     String subGoal, {
     int? done,
     int? maxDone,
-    int? cycle,
     DateTime? date,
-    String? projectType,
   }) async {
     SubProject subProject = SubProject(
       subGoal: subGoal,
       done: done,
       maxDone: maxDone,
-      cycle: cycle,
       date: date,
-      projectType: projectType,
     );
 
     final Map<String, dynamic> body = subProject.toJson();
@@ -258,7 +254,7 @@ class ProjectService with ChangeNotifier {
         throw Exception('Add SubProject Failed: $message');
       }
     } catch (e) {
-      print('하위 프로젝트를 검색하는 과정에서 에러 발생: $e');
+      print('하위 프로젝트를 추가하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       rethrow;
     } finally {
@@ -270,29 +266,18 @@ class ProjectService with ChangeNotifier {
   // 서브 프로젝트의 다중 생성을 하는 메서드
   Future<void> addSubProjectMultiple(
     int projectId,
-    String subGoal,
-    DateTime startDate,
-    DateTime endDate, {
-    int? done,
+    String subGoal, {
     int? maxDone,
-    int? cycle,
-    DateTime? date,
-    String? projectType,
+    bool? daily,
+    List<String>? weekdays,
   }) async {
-    SubProject subProject = SubProject(
-      subGoal: subGoal,
-      done: done,
-      maxDone: maxDone,
-      cycle: cycle,
-      date: date,
-      projectType: projectType,
-    );
+    SubProject subProject = SubProject(subGoal: subGoal, maxDone: maxDone);
 
     final Map<String, dynamic> body = subProject.toJson();
     body.addAll({
       "project_id": projectId,
-      "start_date": startDate,
-      "end_date": endDate,
+      "daily": daily,
+      "weekdays": weekdays,
     });
 
     try {

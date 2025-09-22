@@ -1,6 +1,7 @@
 // 메인화면
 import 'package:all_new_uniplan/screens/chatbot.dart';
 import 'package:all_new_uniplan/screens/my_page.dart';
+import 'package:all_new_uniplan/screens/project_page.dart';
 import 'package:all_new_uniplan/screens/timeTable.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
@@ -35,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
       const scheduleSheetsPage(), // 0번 탭: 캘린더 화면 (이제 Scaffold 포함)
-      const TimetablePage(), // 1번 탭 : 대학 시간표 화면
+      const ProjectPage(), //TimetablePage(), // 1번 탭 : 대학 시간표 화면
       const MyPage(), // 임시 위젯 (추후 Scaffold로 변경)
       const ChatbotPage(), // 임시 위젯 (추후 ChatBotPage()로 변경)
     ];

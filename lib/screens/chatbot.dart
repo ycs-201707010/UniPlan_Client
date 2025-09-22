@@ -313,6 +313,7 @@ class _ChatPageState extends State<ChatbotPage> {
                       const Duration(milliseconds: 50),
                       _scrollToBottom,
                     );
+                  },
                   child: Container(
                     width: 46,
                     height: 46,

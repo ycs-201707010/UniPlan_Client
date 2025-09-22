@@ -3,6 +3,7 @@
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -20,7 +21,8 @@ class scheduleSheetsPage extends StatefulWidget {
   State<scheduleSheetsPage> createState() => _scheduleSheetsPageState();
 }
 
-class _scheduleSheetsPageState extends State<scheduleSheetsPage> {
+class _scheduleSheetsPageState extends State<scheduleSheetsPage>
+    with TickerProviderStateMixin {
   final CalendarController _calendarController =
       CalendarController(); // SfCalendar에서 날짜를 선택하기 위한 컨트롤러.
 

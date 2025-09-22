@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today_outlined),
-            label: '시간표',
+            label: '프로젝트',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

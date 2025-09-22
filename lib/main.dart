@@ -5,6 +5,7 @@ import 'package:all_new_uniplan/screens/home.dart';
 import 'package:all_new_uniplan/screens/welcome.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
+import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
@@ -25,6 +26,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => ScheduleService()),
         ChangeNotifierProvider(create: (context) => RecordService()),
+        ChangeNotifierProvider(create: (context) => ProjectService()),
         ChangeNotifierProxyProvider<ScheduleService, ChatbotService>(
           // create는 다른 Provider를 참조할 수 없으므로,
           // update에서 모든 것을 처리하는 것이 일반적입니다.
@@ -141,7 +143,7 @@ class uniPlanApp extends StatelessWidget {
           if (authService.isLoggedIn) {
             return HomeScreen(); // BottomNavigationBar를 포함하는 페이지
           } else {
-            return HomeScreen(); //welcomePage();
+            return welcomePage();
           }
         },
       ),

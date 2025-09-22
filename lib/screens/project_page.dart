@@ -1,9 +1,11 @@
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:toastification/toastification.dart';
 
 class ProjectPage extends StatefulWidget {
   const ProjectPage({super.key});
@@ -38,9 +40,17 @@ class _ProjectPageState extends State<ProjectPage> {
       await projectService.getProjectByUserId(authService.currentUser!.userId);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('프로젝트를 불러오는 데 실패했습니다: $e')));
+        // todo : toastification로 변경
+        // ScaffoldMessenger.of(
+        //   context,
+        // ).showSnackBar(SnackBar(content: Text('프로젝트를 불러오는 데 실패했습니다: $e')));
+        toastification.show(
+          context: context,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flatColored,
+          autoCloseDuration: const Duration(seconds: 3),
+          title: const Text('프로젝트를 불러오는 데 실패했습니다'),
+        );
       }
     } finally {
       if (mounted) {
@@ -65,6 +75,10 @@ class _ProjectPageState extends State<ProjectPage> {
 
   @override
   Widget build(BuildContext context) {
+    // watch를 사용하여 ProjectService의 데이터 변경을 감지
+    final projectService = context.watch<ProjectService>();
+    final projects = projectService.projects?.values.toList() ?? [];
+
     return Scaffold(
       // todo : Schedule 화면에서 쓴 appBar를 컴포넌트화 시켜서 여기서도 사용
       appBar: CustomAppBar(
@@ -145,7 +159,7 @@ class _ProjectPageState extends State<ProjectPage> {
                                   ? Colors.red
                                   : (day.weekday == DateTime.saturday)
                                   ? Colors.blue
-                                  : Colors.black,
+                                  : Color(0xEE009425),
                           width: 2.0,
                         ),
                         borderRadius: BorderRadius.circular(50),
@@ -211,21 +225,128 @@ class _ProjectPageState extends State<ProjectPage> {
 
             SizedBox(height: 32),
 
-            Container(
-              margin: EdgeInsets.only(left: 15),
-              child: Text(
-                '등록된 과목을 다수 불러와\n시간표에 저장할 수 있습니다.',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+            // Container(
+            //   margin: EdgeInsets.only(left: 15),
+            //   child: Text(
+            //     '등록된 과목을 다수 불러와\n시간표에 저장할 수 있습니다.',
+            //     style: TextStyle(
+            //       color: Colors.black,
+            //       fontWeight: FontWeight.w600,
+            //       fontSize: 16,
+            //     ),
+            //   ),
+            // ),
+            for (final project in projects)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 32.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // --- 프로젝트(카테고리) 제목 ---
+                    Text(
+                      project.title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ), // 색상은 동적으로 변경 가능
+                    ),
+                    Divider(color: Colors.orange.shade300, thickness: 2),
+                    const SizedBox(height: 8),
+
+                    // --- 하위 프로젝트(목표) 목록 ---
+                    if (project.subProjects != null &&
+                        project.subProjects!.isNotEmpty)
+                      for (final subProject in project.subProjects!)
+                        ProjectProgressCard(
+                          title: subProject.subGoal,
+                          currentStep: subProject.done ?? 0,
+                          maxStep:
+                              subProject.maxDone ?? 1, // maxDone이 null이면 1로 처리
+                        )
+                    else
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('등록된 하위 목표가 없습니다.'),
+                      ),
+                  ],
                 ),
               ),
-            ),
           ],
         ),
       ),
-    ); // Scaffold로 변경
+
+      floatingActionButton: SpeedDial(
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        backgroundColor: Color(0xEE265A3A), // 버튼 배경색
+        foregroundColor: Colors.white, // 버튼 내부의 아이콘 색
+
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.calendar_today),
+            label: '세부 목표 짜기',
+            onTap: () async {
+              // 일정 추가 창으로 이동, 일정 추가 결과에 따른 결과를 반환받음.
+              // final result = await Navigator.push<bool>(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder:
+              //         (pageContext) =>
+              //             AddSchedulePage(rootContext: context),
+              //   ),
+              // );
+
+              // // TODO : 일정이 성공적으로 추가되었다면, 일정 추가창에서 캘린더 창으로 bool 형식의 응답을 하고, 일정 추가에 성공한 응답을 받으면 일정이 추가되었다는 Dialog 알림 주기
+              // if (result == true) {
+              //   // 성공했을 때 Toast 알림
+              //   if (!context.mounted) return; // context 유효성 검사
+
+              //   toastification.show(
+              //     context:
+              //         context, // optional if you use ToastificationWrapper
+              //     type: ToastificationType.success,
+              //     style: ToastificationStyle.flatColored,
+              //     autoCloseDuration: const Duration(seconds: 3),
+              //     title: Text('제하하하하하!! 일정을 등록했다!!'),
+              //   );
+              // }
+            },
+          ),
+
+          SpeedDialChild(
+            child: Icon(Icons.calendar_today),
+            label: '프로젝트 생성',
+            onTap: () async {
+              // 일정 추가 창으로 이동, 일정 추가 결과에 따른 결과를 반환받음.
+              // final result = await Navigator.push<bool>(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder:
+              //         (pageContext) =>
+              //             AddSchedulePage(rootContext: context),
+              //   ),
+              // );
+
+              // // TODO : 일정이 성공적으로 추가되었다면, 일정 추가창에서 캘린더 창으로 bool 형식의 응답을 하고, 일정 추가에 성공한 응답을 받으면 일정이 추가되었다는 Dialog 알림 주기
+              // if (result == true) {
+              //   // 성공했을 때 Toast 알림
+              //   if (!context.mounted) return; // context 유효성 검사
+
+              //   toastification.show(
+              //     context:
+              //         context, // optional if you use ToastificationWrapper
+              //     type: ToastificationType.success,
+              //     style: ToastificationStyle.flatColored,
+              //     autoCloseDuration: const Duration(seconds: 3),
+              //     title: Text('제하하하하하!! 일정을 등록했다!!'),
+              //   );
+              // }
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -322,4 +443,88 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class ProjectProgressCard extends StatelessWidget {
+  final String title;
+  final int currentStep;
+  final int maxStep;
+
+  const ProjectProgressCard({
+    super.key,
+    required this.title,
+    required this.currentStep,
+    required this.maxStep,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // 진행률 계산 (0.0 ~ 1.0)
+    final double progress = (maxStep == 0) ? 0.0 : currentStep / maxStep;
+    final bool isCompleted = currentStep >= maxStep;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.shade300, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // ✅ 2. 목표 제목과 진행도 바 (대부분의 공간 차지)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // ✅ 3. 진행도 바
+                LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    Colors.orange,
+                  ),
+                  minHeight: 6,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+
+          // ✅ 4. 진행률 텍스트와 아이콘
+          Column(
+            children: [
+              Text(
+                '$currentStep/$maxStep',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Icon(
+                isCompleted ? Icons.check_circle : Icons.directions_run,
+                color: isCompleted ? Colors.orange : Colors.black,
+                size: 28,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

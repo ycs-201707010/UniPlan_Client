@@ -32,27 +32,6 @@ class ProjectChatbotService with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  // Future<void> getMessage(int userId) async {
-  //   final Map<String, dynamic> body = {"user_id": userId};
-
-  //   try {
-  //     final response = await _apiClient.post('/chatbot/getMessage', body: body);
-  //     var json = jsonDecode(response.body);
-  //     var message = json['message'];
-
-  //     if (message == "Get Message Successed") {
-  //       var messagesJson = json['chatHistory'];
-  //       // updateMessageListFromJson(messagesJson);
-  //     } else {
-  //       throw Exception('Get Message Failed: $message');
-  //     }
-  //   } catch (e) {
-  //     print('채팅 내역을 가져오는 과정에서 에러 발생: $e');
-  //     // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
-  //     rethrow;
-  //   }
-  // }
-
   // 매개변수로 전달받은 채팅 클래스를 채팅 내역을 저장하는 List 필드에 추가
   void addMessage(ProjectChatMessage message) {
     _messages.add(message);
@@ -85,7 +64,7 @@ class ProjectChatbotService with ChangeNotifier {
       final Map<String, dynamic> body = {
         "user_id": userId,
         "project_type": projectType,
-        "message": message,
+        "message": ChatHistoryToJson(),
       };
 
       try {
@@ -98,16 +77,28 @@ class ProjectChatbotService with ChangeNotifier {
 
         // 정상적으로 서버로부터 응답받은 경우
         if (message == "Response Successed") {
-          print("Test");
-        } else {
-          print('챗봇이 응답을 생성하는 과정에서 에러 발생');
-          throw Exception('Response Failed: $message');
-          // return;
-          // null일 때의 처리
-        }
+          var intent = json['intent'];
+          var output = json['output'];
 
-        // 위의 if문을 통해 갱신된 마지막 채팅을 채팅 내역에 저장한다.
-        addMessage(_currentMessage);
+          // 챗봇이 판단한 사용자의 입력 의도가 단순 채팅인 경우 가장 마지막 채팅을 챗봇의 대답으로 갱신한다.
+          if (intent == "단순 채팅" || intent == "프로젝트 질문") {
+            _currentMessage = ProjectChatMessage(
+              message: output,
+              speaker: ProjectChatMessageType.bot,
+              timestamp: DateTime.now(),
+              showButtons: false,
+            );
+          } else if (intent == "프로젝트 생성") {
+          } else {
+            print('챗봇이 응답을 생성하는 과정에서 에러 발생');
+            throw Exception('Response Failed: $message');
+            // return;
+            // null일 때의 처리
+          }
+
+          // 위의 if문을 통해 갱신된 마지막 채팅을 채팅 내역에 저장한다.
+          addMessage(_currentMessage);
+        }
       } catch (e) {
         print("챗봇이 응답을 생성하는 과정에서 에러 발생");
         rethrow;
@@ -156,7 +147,7 @@ class ProjectChatbotService with ChangeNotifier {
     _messages.last.showButtons = false;
 
     _currentMessage = ProjectChatMessage(
-      message: "일정의 변경을 반영하지 않습니다.",
+      message: "프로젝트를 추가하지 않습니다.",
       speaker: ProjectChatMessageType.bot,
       timestamp: DateTime.now(),
       showButtons: false,
@@ -185,21 +176,7 @@ class ProjectChatbotService with ChangeNotifier {
     return jsonEncode(messageListForJson);
   }
 
-  void updateMessageListFromJson(dynamic messagesJson) {
-    // 기존 목록을 비움
+  void clearMessages() {
     _messages.clear();
-    final messagesMap = messagesJson as Map;
-    // 맵을 반복하며 모델의 fromJson 생성자를 사용
-    messagesMap.forEach((key, value) {
-      final message = ProjectChatMessage.fromJson(
-        value as Map<String, dynamic>,
-      );
-      _messages.add(message);
-    });
-
-    // 마지막에 currentMessage 지정
-
-    // UI에 변경사항 알림
-    notifyListeners();
   }
 }

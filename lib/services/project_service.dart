@@ -148,7 +148,6 @@ class ProjectService with ChangeNotifier {
         if (_projects.isNotEmpty) {
           print("_projects 모음집 안의 내용 : $_projects");
           _projects.forEach((key, value) {
-            print("_projects가 가지고 있는 sub : ${_projects[key]!.subProjects!}");
             getSubProject(key);
           });
         }
@@ -386,7 +385,7 @@ class ProjectService with ChangeNotifier {
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
     projectMap.forEach((key, value) {
       final project = Project.fromJson(value as Map<String, dynamic>);
-      _projects![project.projectId] = project;
+      _projects[project.projectId] = project;
     });
 
     // UI에 변경사항 알림

@@ -10,14 +10,12 @@ import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:all_new_uniplan/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:all_new_uniplan/services/project_chatbot_service.dart';
 
 void main() async {
-  await initializeDateFormatting(); // Project 화면의 TableCalendar는 한글 지원이 안됨. 따라서 한글 포맷을 지원하도록 intl 라이브러리의 메서드를 실행함.
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
@@ -203,7 +201,7 @@ class uniPlanApp extends StatelessWidget {
           if (authService.isLoggedIn) {
             return HomeScreen(); // BottomNavigationBar를 포함하는 페이지
           } else {
-            return welcomePage();
+            return welcomePage(); //welcomePage();
           }
         },
       ),

@@ -86,7 +86,10 @@ class ChatbotService with ChangeNotifier {
       _isLoading = true;
       notifyListeners(); // UI에 '입력 중' 애니메이션을 표시하도록 알림
 
-      final Map<String, dynamic> body = {"message": message, "user_id": userId};
+      final Map<String, dynamic> body = {
+        "message": ChatHistoryToJson(),
+        "user_id": userId,
+      };
       try {
         final response = await _apiClient.post('/chatbot', body: body);
         var json = jsonDecode(response.body);
@@ -288,5 +291,9 @@ class ChatbotService with ChangeNotifier {
 
     // UI에 변경사항 알림
     notifyListeners();
+  }
+
+  void clearMessages() {
+    _messages.clear();
   }
 }

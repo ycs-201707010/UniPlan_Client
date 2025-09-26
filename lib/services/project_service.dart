@@ -148,7 +148,6 @@ class ProjectService with ChangeNotifier {
         if (_projects.isNotEmpty) {
           print("_projects 모음집 안의 내용 : $_projects");
           _projects.forEach((key, value) {
-            print("_projects가 가지고 있는 sub : ${_projects[key]!.subProjects!}");
             getSubProject(key);
           });
         }
@@ -396,12 +395,13 @@ class ProjectService with ChangeNotifier {
   // json에 지정된 여러 개의 SubProject 정보들을 추출하여 이를 저장하는 List 타입 필드에 저장하는 메서드
   void updateSubProjectListFromJson(int projectId, dynamic subProjectsJson) {
     // 기존 목록을 비움
-
+    _projects![projectId]!.subProjects!.clear();
     final subProjectMap = subProjectsJson as Map;
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
+
     subProjectMap.forEach((key, value) {
       final subProject = SubProject.fromJson(value as Map<String, dynamic>);
-      _projects[projectId]!.addSubProjectToList(subProject);
+      projects![projectId]!.subProjects!.add(subProject);
     });
 
     // UI에 변경사항 알림

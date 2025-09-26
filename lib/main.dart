@@ -7,6 +7,7 @@ import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:all_new_uniplan/services/record_service.dart';
+import 'package:all_new_uniplan/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
 import 'package:provider/provider.dart';
@@ -26,6 +27,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => ScheduleService()),
         ChangeNotifierProvider(create: (context) => RecordService()),
         ChangeNotifierProvider(create: (context) => ProjectService()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProxyProvider<ScheduleService, ChatbotService>(
           // create는 다른 Provider를 참조할 수 없으므로,
           // update에서 모든 것을 처리하는 것이 일반적입니다.
@@ -44,25 +46,6 @@ void main() async {
             return previousChatbotService ?? ChatbotService(scheduleService);
           },
         ),
-        // ChangeNotifierProxyProvider<ProjectService, ProjectChatbotService>(
-        //   // create는 다른 Provider를 참조할 수 없으므로,
-        //   // update에서 모든 것을 처리하는 것이 일반적입니다.
-        //   // 초기 인스턴스를 여기서 생성할 수도 있습니다.
-        //   create:
-        //       (context) => ProjectChatbotService(
-        //         // create 시점에는 context.read를 통해 다른 Provider에 접근할 수 있습니다.
-        //         context.read<ProjectService>(),
-        //       ),
-
-        //   // ScheduleService가 변경될 때마다 update가 호출됩니다.
-        //   update: (context, projectService, previousProjectChatbotService) {
-        //     // scheduleService 인스턴스를 ChatbotService에 전달하여
-        //     // 항상 최신 상태를 유지하게 합니다.
-        //     // previousChatbotService가 null이 아니라면 재사용할 수도 있습니다.
-        //     return previousProjectChatbotService ??
-        //         ProjectChatbotService(projectService);
-        //   },
-        // ),
         ChangeNotifierProxyProvider<ScheduleService, EverytimeService>(
           create:
               (context) => EverytimeService(context.read<ScheduleService>()),
@@ -85,10 +68,13 @@ class uniPlanApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    ThemeProvider themeProvider = context.watch<ThemeProvider>();
+
     return MaterialApp(
       title: 'UniPlan',
+      // 라이트모드의 테마
       theme: ThemeData(
-        // 컬러 테마를 정리함.
+        // 라이트모드의 컬러 테마를 정리함.
 
         // 어플 전체에 적용될 기본 폰트
         fontFamily: 'NanumSquare',
@@ -103,7 +89,7 @@ class uniPlanApp extends StatelessWidget {
             backgroundColor: const Color(0xFF6BE347), // ElevatedButton의 배경색
             disabledBackgroundColor: Colors.grey.shade300,
             disabledForegroundColor: Colors.grey.shade500,
-            foregroundColor: Colors.black, // ElevatedButton의 텍스트/아이콘 색상
+            foregroundColor: Colors.white, // ElevatedButton의 텍스트/아이콘 색상
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12), // 버튼 모서리 둥글게
             ),
@@ -137,10 +123,36 @@ class uniPlanApp extends StatelessWidget {
             fontSize: 16,
           ),
         ),
+      ), // end of light Theme
+
+      darkTheme: ThemeData(
+        // 어플 전체에 적용될 기본 폰트
+        fontFamily: 'NanumSquare',
+
+        // 배경색
+        scaffoldBackgroundColor: Color(0xFF121212),
+
+        // 채워진 버튼의 색상 테마
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF6BE347), // ElevatedButton의 배경색
+            disabledBackgroundColor: Colors.grey.shade300,
+            disabledForegroundColor: Colors.grey.shade500,
+            foregroundColor: Colors.black, // ElevatedButton의 텍스트/아이콘 색상
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12), // 버튼 모서리 둥글게
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
-      themeMode: ThemeMode.system, // 시스템 설정에 따라 라이트/다크 모드 자동 전환
-      // themeMode: ThemeMode.light, // 항상 라이트 모드
-      // themeMode: ThemeMode.dark,  // 항상 다크 모드
+
+      themeMode: themeProvider.themeMode,
+
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

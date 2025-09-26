@@ -10,7 +10,7 @@ class ProjectService with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
 
   // projectId, Project 쌍
-  Map<int, Project>? _projects = {};
+  final Map<int, Project> _projects = {};
   Map<int, Project>? get projects => _projects;
 
   // 메서드가 실행되고 있음을 나타내는 필드
@@ -145,8 +145,10 @@ class ProjectService with ChangeNotifier {
       if (message == "Get Project Successed") {
         var projectsJson = json["projects"];
         updateProjectMapFromJson(projectsJson);
-        if (_projects!.length != 0) {
-          _projects!.forEach((key, value) {
+        if (_projects.isNotEmpty) {
+          print("_projects 모음집 안의 내용 : $_projects");
+          _projects.forEach((key, value) {
+            print("_projects가 가지고 있는 sub : ${_projects[key]!.subProjects!}");
             getSubProject(key);
           });
         }
@@ -372,14 +374,14 @@ class ProjectService with ChangeNotifier {
 
   // 장기 프로젝트를 이를 저장하는 Map타입의 필드에 추가하는 메서드
   void addProjectToMap(Project project) {
-    _projects![project.projectId] = project;
+    _projects[project.projectId] = project;
     notifyListeners();
   }
 
   // json에 지정된 여러 개의 Project 정보들을 추출하여 이를 저장하는 Map 타입 필드에 저장하는 메서드
   void updateProjectMapFromJson(dynamic projectsJson) {
     // 기존 목록을 비움
-    _projects!.clear();
+    _projects.clear();
     final projectMap = projectsJson as Map;
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
     projectMap.forEach((key, value) {
@@ -394,13 +396,13 @@ class ProjectService with ChangeNotifier {
   // json에 지정된 여러 개의 SubProject 정보들을 추출하여 이를 저장하는 List 타입 필드에 저장하는 메서드
   void updateSubProjectListFromJson(int projectId, dynamic subProjectsJson) {
     // 기존 목록을 비움
-    // _projects![projectId]!.subProjects!.clear();
+    _projects![projectId]!.subProjects!.clear();
     final subProjectMap = subProjectsJson as Map;
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
 
     subProjectMap.forEach((key, value) {
       final subProject = SubProject.fromJson(value as Map<String, dynamic>);
-      _projects![projectId]!.addSubProjectToList(subProject);
+      projects![projectId]!.subProjects!.add(subProject);
     });
 
     // UI에 변경사항 알림
@@ -409,7 +411,7 @@ class ProjectService with ChangeNotifier {
 
   // 서브 프로젝트를 해당 장기 프로젝트의 이를 저장하는 List 타입 필드에 추가하는 메서드
   void addSubProjectToList(int projectId, SubProject subProject) {
-    _projects![projectId]!.subProjects!.add(subProject);
+    _projects[projectId]!.subProjects!.add(subProject);
     notifyListeners();
   }
 

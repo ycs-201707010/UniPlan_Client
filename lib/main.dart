@@ -126,7 +126,7 @@ class uniPlanApp extends StatelessWidget {
           ),
         ),
       ), // end of light Theme
-
+      // 다크모드의 테마
       darkTheme: ThemeData(
         // 어플 전체에 적용될 기본 폰트
         fontFamily: 'NanumSquare',
@@ -149,6 +149,34 @@ class uniPlanApp extends StatelessWidget {
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
+          ),
+        ),
+
+        // 채워지지 않은 버튼(Out)
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            // 테두리 색상.
+            side: BorderSide(color: const Color(0xFF6BE347), width: 2),
+            // 텍스트 색상은 다크모드의 어두운 배경에 잘 보이도록 테두리와 같은 밝은 색으로 변경.
+            foregroundColor: const Color(0xFF6BE347),
+            // 터치 시 물결 효과.
+            overlayColor: const Color(0xFF6BE347).withValues(alpha: 0.1),
+
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12), // 버튼 모서리 둥글게
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+
+        inputDecorationTheme: InputDecorationTheme(
+          hintStyle: const TextStyle(
+            color: Color.fromARGB(255, 139, 139, 139),
+            fontSize: 16,
           ),
         ),
       ),

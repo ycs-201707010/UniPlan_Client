@@ -38,7 +38,7 @@ class _ChatPageState extends State<ChatbotPage> {
           chatMessage.message,
 
           // 채팅 내용은 전부 검은색으로 지정.
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
         ),
       );
     }
@@ -127,7 +127,13 @@ class _ChatPageState extends State<ChatbotPage> {
                   SizedBox(width: 6),
 
                 if (chatMessage.speaker == ChatMessageType.bot)
-                  Text('UniBot', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    'UniBot',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
               ],
             ),
             SizedBox(height: 8),
@@ -143,8 +149,8 @@ class _ChatPageState extends State<ChatbotPage> {
                   color:
                       // 메시지 화자에 따라 배경색을 다르게 지정
                       chatMessage.speaker != ChatMessageType.user
-                          ? Colors.white
-                          : Color(0xEE8CFF1A),
+                          ? Theme.of(context).colorScheme.secondary
+                          : Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -191,7 +197,7 @@ class _ChatPageState extends State<ChatbotPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
-      backgroundColor: Color(0xEEEBF2E8),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: chatTopBar(),
       body: Column(
         children: [

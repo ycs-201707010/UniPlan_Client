@@ -1,6 +1,8 @@
+import 'package:all_new_uniplan/theme/theme_provider.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -19,6 +21,8 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.read<ThemeProvider>();
+
     return Scaffold(
       appBar: TopBar(title: "환경설정"),
       backgroundColor: Color(0xEEEEEEEE),
@@ -70,6 +74,11 @@ class _SettingPageState extends State<SettingPage> {
                   // 다크모드
                   _isDarkModeEnabled = value;
                 });
+                if (value != true) {
+                  themeProvider.setThemeMode(ThemeMode.light);
+                } else if (value) {
+                  themeProvider.setThemeMode(ThemeMode.dark);
+                }
               },
             ),
           ],

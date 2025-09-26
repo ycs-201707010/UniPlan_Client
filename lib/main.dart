@@ -7,6 +7,7 @@ import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:all_new_uniplan/services/record_service.dart';
+import 'package:all_new_uniplan/theme/theme.dart';
 import 'package:all_new_uniplan/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
@@ -82,6 +83,10 @@ class uniPlanApp extends StatelessWidget {
         // 배경색
         scaffoldBackgroundColor: Colors.white,
 
+        // 라이트모드 컬러 스키마
+        // colorSchema를 사용하여 색상을 체계적으로 관리
+        colorScheme: MaterialTheme.lightScheme(),
+
         // 채워진 버튼(ElevatedButton)의 색상 테마.
         // 버튼을 생성할 때 따로 Theme.of(context)를 통해 불러오지 않아도 된다.
         elevatedButtonTheme: ElevatedButtonThemeData(
@@ -131,6 +136,10 @@ class uniPlanApp extends StatelessWidget {
 
         // 배경색
         scaffoldBackgroundColor: Color(0xFF121212),
+
+        // 다크모드 컬러 스키마
+        // colorSchema를 사용하여 색상을 체계적으로 관리
+        colorScheme: MaterialTheme.darkScheme(),
 
         // 채워진 버튼의 색상 테마
         elevatedButtonTheme: ElevatedButtonThemeData(

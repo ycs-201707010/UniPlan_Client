@@ -84,7 +84,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     } else if (today.weekday == DateTime.sunday) {
       return Colors.red; // 일요일이면 빨간색
     } else {
-      return const Color(0xEE265A3A); // 평일이면 기존 색상
+      return Theme.of(context).colorScheme.onSecondaryContainer; // 평일이면 기존 색상
     }
   }
 
@@ -105,15 +105,18 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                     view: CalendarView.week,
                     controller: _calendarController,
                     dataSource: ScheduleDataSource(scheduleService.schedules),
+
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainer,
+
                     headerDateFormat: 'yyyy년 MMMM', // 헤더에 표시되는 날짜 형식을 지정
                     headerHeight: 40, // 헤더의 높이를 지정. 이 속성을 0으로 설정하여 헤더 영역을 숨김
                     headerStyle: CalendarHeaderStyle(
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
                       textAlign: TextAlign.left,
                       textStyle: TextStyle(
                         // 텍스트 스타일 지정
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.onSecondary,
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
@@ -124,7 +127,8 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                     firstDayOfWeek: 1,
                     allowDragAndDrop: false,
                     viewHeaderStyle: ViewHeaderStyle(
-                      backgroundColor: Color(0xEEE5FFD2),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.secondaryContainer,
                     ),
                     todayHighlightColor:
                         _getTodayHighlightColor(), //Color(0xEE265A3A),
@@ -260,11 +264,12 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                                     // 삭제 처리가 성공적으로 완료되었다면 (true가 반환되면) Toast 알림을 띄웁니다.
                                     if (deletedResult == true) {
                                       if (!context.mounted) return;
+                                      // TODO : 라이트모드, 다크모드 구분하기
                                       toastification.show(
                                         context: context,
                                         type: ToastificationType.custom(
                                           "Schedule Delete",
-                                          Colors.redAccent,
+                                          Theme.of(context).colorScheme.error,
                                           Icons.edit_calendar_outlined,
                                         ),
                                         style: ToastificationStyle.flatColored,
@@ -293,8 +298,9 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
           floatingActionButton: SpeedDial(
             icon: Icons.add,
             activeIcon: Icons.close,
-            backgroundColor: Color(0xEE265A3A), // 버튼 배경색
-            foregroundColor: Colors.white, // 버튼 내부의 아이콘 색
+            backgroundColor: Theme.of(context).colorScheme.primary, // 버튼 배경색
+            foregroundColor:
+                Theme.of(context).colorScheme.onPrimary, // 버튼 내부의 아이콘 색
 
             children: [
               SpeedDialChild(
@@ -316,6 +322,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                     // 성공했을 때 Toast 알림
                     if (!context.mounted) return; // context 유효성 검사
 
+                    // TODO : 라이트모드, 다크모드 구분하기
                     toastification.show(
                       context:
                           context, // optional if you use ToastificationWrapper
@@ -336,6 +343,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
           Container(
             color: const Color(0x80000000), // 반투명 검은 배경 (암전)
             child: const Center(
+              // TODO : 챗봇에서 사용했던 로딩 연출로 변경
               child: CircularProgressIndicator(color: Colors.white),
             ),
           ),
@@ -364,7 +372,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
     return AppBar(
       automaticallyImplyLeading: false, // 강제로 뒤로가기 버튼 제거
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
       title: Row(

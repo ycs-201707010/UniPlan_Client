@@ -49,6 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
         // ✅ 1. 타입을 fixed로 강제 지정
         type: BottomNavigationBarType.fixed,
 
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
         // ✅ 2. 비활성화된 아이템의 색상을 명확하게 지정 (선택 사항이지만 권장)
         unselectedItemColor: Colors.grey,
         items: const <BottomNavigationBarItem>[
@@ -70,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xEE265A3A),
+        selectedItemColor: Theme.of(context).colorScheme.primary,
         onTap: _onItemTapped,
       ),
     );

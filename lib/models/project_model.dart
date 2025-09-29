@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:all_new_uniplan/models/subProject_model.dart';
 
 class Project {
-  final int projectId;
+  int? projectId;
   final String title;
   final String goal;
   final DateTime startDate;
@@ -13,7 +13,7 @@ class Project {
   List<SubProject>? subProjects;
 
   Project({
-    required this.projectId,
+    this.projectId,
     required this.title,
     required this.goal,
     required this.startDate,
@@ -67,10 +67,10 @@ class Project {
     return jsonMap;
   }
 
-  //   // JSON 데이터를 받아 Project 객체를 생성하는 factory 생성자
+  // JSON 데이터를 받아 Project 객체를 생성하는 factory 생성자
   factory Project.fromJson(Map<String, dynamic> json) {
     return Project(
-      projectId: json['project_id'] as int,
+      projectId: json['project_id'] as int?,
       title: json['title'] as String,
       goal: json['goal'] as String,
       startDate: DateTime.parse(json['start_date'] as String),
@@ -88,5 +88,15 @@ class Project {
 
   void addSubProjectToList(SubProject subProject) {
     subProjects!.add(subProject);
+  }
+
+  void deleteSubProjectFromList(int subProjectId) {
+    subProjects!.removeWhere(
+      (subProject) => subProject.subProjectId == subProjectId,
+    );
+  }
+
+  void clearSubProjectList() {
+    subProjects!.clear();
   }
 }

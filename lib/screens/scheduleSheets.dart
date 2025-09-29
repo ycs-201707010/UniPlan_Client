@@ -1,5 +1,6 @@
 // ** 일정이 보여지는 화면 **
 
+import 'package:all_new_uniplan/models/subProject_model.dart';
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
@@ -49,23 +50,56 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     final everytimeService = context.read<EverytimeService>();
     final projectService = context.read<ProjectService>();
 
-    try {
-      if (authService.isLoggedIn) {
+    if (authService.isLoggedIn) {
+      try {
         await scheduleService.getSchedule(authService.currentUser!.userId);
+      } on Exception catch (e) {
+        if (e.toString().contains('404')) {
+          print("일정이 비어있습니다.");
+        } else {
+          print("일정 로딩 중 에러 발생: $e");
+          // 사용자에게 에러 알림 (예: 스낵바)
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('일정 정보를 불러오는 데 실패했습니다.')),
+            );
+          }
+        }
+      }
+      try {
         await everytimeService.getTimetable(authService.currentUser!.userId);
+      } on Exception catch (e) {
+        if (e.toString().contains('404')) {
+          print("시간표가 비어있습니다.");
+        } else {
+          print("시간표 로딩 중 에러 발생: $e");
+          // 사용자에게 에러 알림 (예: 스낵바)
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('시간표 정보를 불러오는 데 실패했습니다.')),
+            );
+          }
+        }
+      }
+
+      try {
         await projectService.getProjectByUserId(
           authService.currentUser!.userId,
         );
+      } on Exception catch (e) {
+        if (e.toString().contains('404')) {
+          print("프로젝트가 비어있습니다.");
+        } else {
+          print("프로젝트 로딩 중 에러 발생: $e");
+          // 사용자에게 에러 알림 (예: 스낵바)
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('프로젝트 정보를 불러오는 데 실패했습니다.')),
+            );
+          }
+        }
       }
-    } catch (e) {
-      print("일정 로딩 중 에러 발생: $e");
-      // 사용자에게 에러 알림 (예: 스낵바)
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('일정 정보를 불러오는 데 실패했습니다.')));
-      }
-    } finally {
+
       // 성공/실패 여부와 관계없이 로딩 상태를 false로 변경
       if (mounted) {
         setState(() {

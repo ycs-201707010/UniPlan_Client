@@ -7,6 +7,7 @@ import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/screens/scheduleSheets.dart';
+// import 'package:all_new_uniplan/screens/project_chatbot.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {

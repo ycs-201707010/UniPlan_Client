@@ -81,6 +81,9 @@ class EverytimeService with ChangeNotifier {
       var message = json['message'];
 
       if (message == "Get Timetable Successed") {
+        _currentTimetable = null;
+        _currentTimetableList.clear();
+
         var timetableJsonList = json['result'] as List<dynamic>;
 
         for (final timetableJson in timetableJsonList) {
@@ -113,6 +116,7 @@ class EverytimeService with ChangeNotifier {
       var message = json['message'];
 
       if (message == "Get Timetable Subject Successed") {
+        _currentTimetable!.subjects!.clear();
         var subjectJsonList = json['result'] as List<dynamic>;
         if (subjectJsonList.length == 0) {
           return;

@@ -1,20 +1,48 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // color를 위해 import
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:all_new_uniplan/models/subProject_progress_model.dart';
+
+Map<String, String> weekdaySEMap = {
+  '월': "mon",
+  '화': "tue",
+  '수': "wed",
+  '목': "thu",
+  '금': "fri",
+  '토': "sat",
+  '일': "sun",
+};
+
+Map<String, String> weekdayESMap = {
+  "mon": '월',
+  "tue": '화',
+  "wed": '수',
+  "thu": '목',
+  "fri": '금',
+  "sat": '토',
+  "sun": '일',
+};
 
 @immutable
 class SubProject {
   final int? subProjectId;
-  final String subGoal;
-  final int? done;
+  final String? subGoal;
+  int? done = 0;
   final int? maxDone;
-  final DateTime? date;
+  final String? weekDay;
+  bool? multiPerDay = false;
+  final String? color;
+  List<SubProjectProgress>? progresses;
 
-  const SubProject({
+  SubProject({
     this.subProjectId,
-    required this.subGoal,
+    this.subGoal,
     this.done,
     this.maxDone,
-    this.date,
+    this.weekDay,
+    this.multiPerDay,
+    this.color,
+    this.progresses,
   });
 
   SubProject copyWith({
@@ -22,44 +50,75 @@ class SubProject {
     String? subGoal,
     int? done,
     int? maxDone,
-    int? cycle,
-    DateTime? date,
-    String? projectType,
+    String? weekDay,
+    bool? multiPerDay,
+    String? color,
+    List<SubProjectProgress>? progresses,
   }) {
     return SubProject(
       subProjectId: subProjectId ?? this.subProjectId,
       subGoal: subGoal ?? this.subGoal,
       done: done ?? this.done,
       maxDone: maxDone ?? this.maxDone,
-      date: date ?? this.date,
+      weekDay: weekDay ?? this.weekDay,
+      multiPerDay: multiPerDay ?? this.multiPerDay,
+      color: color ?? this.color,
+      progresses: progresses ?? this.progresses,
     );
   }
 
   Map<String, dynamic> toJson() {
-    // Pydantic의 date 타입에 맞추기 위해 'yyyy-MM-dd' 형식으로 변환 (시간 정보 제거)
-    final String formattedDate = DateFormat('yyyy-MM-dd').format(date!);
-
     // 최종 JSON Map 구성
     final Map<String, dynamic> jsonMap = {
+      // 값이 null이 아닐 경우에만 JSON에 포함
       if (subProjectId != null) 'subproject_id': subProjectId,
       if (subGoal != null) 'subgoal': subGoal,
-      if (done != null) 'done': done,
+      if (done != null) 'done': maxDone,
       if (maxDone != null) 'max_done': maxDone,
-      if (date != null) 'date': formattedDate,
+      if (weekDay != null) 'week_day': weekDay,
+      if (multiPerDay != null) 'multi_per_day': multiPerDay,
+      if (color != null) 'color': color,
     };
-
     return jsonMap;
   }
 
-  // JSON 데이터를 받아 SubProject 객체를 생성하는 factory 생성자
   factory SubProject.fromJson(Map<String, dynamic> json) {
     return SubProject(
       subProjectId: json['subproject_id'] as int?,
-      subGoal: json['subgoal'] as String,
+      subGoal: json['subgoal'] as String?,
       done: json['done'] as int?,
       maxDone: json['max_done'] as int?,
-      date:
-          json['date'] == null ? null : DateTime.parse(json['date'] as String),
+      weekDay: json['weekday'] as String?,
+      multiPerDay: json['multi_per_day'] as bool?,
+      color: json['color'] as String?,
     );
+  }
+
+  // List<SubProject> fromLLMJson(List<dynamic> subProjectListJson) {
+  //   List<SubProject> subProjectList = [];
+
+  //   for (var subProjectJson in subProjectListJson) {
+  //     subProjectJson = subProjectJson as Map<String, dynamic>;
+
+  //     List<String> weekDays = subProjectJson['weekdays'] as List<String>;
+
+  //     for (final weekDay in weekDays) {
+  //       SubProject(
+  //         subProjectId: subProjectJson['subproject_id'] as int?,
+  //         subGoal: subProjectJson['subgoal'] as String?,
+  //         done: subProjectJson['done'] as int?,
+  //         maxDone: subProjectJson['max_done'] as int?,
+  //         weekDay: weekDay,
+  //         multiPerDay: false,
+  //         color: subProjectJson['color'] as String?,
+  //       );
+  //     }
+  //   }
+
+  //   return subProjectList;
+  // }
+
+  void addProgressToList(SubProjectProgress progress) {
+    progresses!.add(progress);
   }
 }

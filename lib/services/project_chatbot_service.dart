@@ -41,9 +41,9 @@ class ProjectChatbotService with ChangeNotifier {
   // 입력받은 메시지를 서버 측에 전송하고 사용자의 채팅 의도에 따른
   // 챗봇의 대답을 변환하여 메시지를 생성하고 채팅 내역을 갱신하는 함수
   Future<void> sendMessage(
-    int userId,
-    String projectType,
     String message,
+    String projectType,
+    int userId,
   ) async {
     // 사용자가 입력한 내용이 존재하는 경우에 한해 진행
     if (message.trim().isNotEmpty) {
@@ -80,7 +80,8 @@ class ProjectChatbotService with ChangeNotifier {
           var intent = json['intent'];
           var output = json['output'];
 
-          // 챗봇이 판단한 사용자의 입력 의도가 단순 채팅인 경우 가장 마지막 채팅을 챗봇의 대답으로 갱신한다.
+          // 챗봇이 판단한 사용자의 입력 의도가 단순 채팅 or 프로젝트 질문인 경우
+          // 가장 마지막 채팅을 챗봇의 대답으로 갱신한다.
           if (intent == "단순 채팅" || intent == "프로젝트 질문") {
             _currentMessage = ProjectChatMessage(
               message: output,
@@ -89,6 +90,40 @@ class ProjectChatbotService with ChangeNotifier {
               showButtons: false,
             );
           } else if (intent == "프로젝트 생성") {
+            final projectJson = Map<String, dynamic>.from(output["project"]);
+            _pendingProjectAdd = Project.fromJson(projectJson);
+
+            final subProjectJsonList = output["sub_projects"] as List<dynamic>;
+
+            for (var subProjectJson in subProjectJsonList) {
+              subProjectJson = subProjectJson as Map<String, dynamic>;
+              final weekDays = subProjectJson['weekdays'] as List<dynamic>;
+
+              for (final weekDay in weekDays) {
+                final subProject = SubProject(
+                  subProjectId: subProjectJson['subproject_id'] as int?,
+                  subGoal: subProjectJson['goal'] as String?,
+                  done: subProjectJson['done'] as int?,
+                  maxDone: subProjectJson['max_done'] as int?,
+                  weekDay: weekdaySEMap[(weekDay as String).trim()],
+                  multiPerDay: false,
+                  color: subProjectJson['color'] as String?,
+                );
+                _pendingProjectAdd!.addSubProjectToList(subProject);
+              }
+            }
+
+            final projectInfoText = _currentMessage.projectAddMessage(
+              _pendingProjectAdd!,
+            );
+            // 이때 showButtons을 true로 지정하여 말풍선 생성 시
+            // 예, 아니오 버튼을 통해 사용자의 입력을 받을 수 있도록 한다.
+            _currentMessage = ProjectChatMessage(
+              message: projectInfoText,
+              speaker: ProjectChatMessageType.bot,
+              timestamp: DateTime.now(),
+              showButtons: true,
+            );
           } else {
             print('챗봇이 응답을 생성하는 과정에서 에러 발생');
             throw Exception('Response Failed: $message');
@@ -122,16 +157,27 @@ class ProjectChatbotService with ChangeNotifier {
 
     if (_pendingProjectAdd != null) {
       try {
+        _projectService.addProjectAndSubProjectByLLM(
+          _pendingProjectAdd!,
+          userId,
+        );
+
         _currentMessage = ProjectChatMessage(
-          message: "일정이 정상적으로 추가되었습니다.",
+          message: "프로젝트가 정상적으로 추가되었습니다.",
           speaker: ProjectChatMessageType.bot,
           timestamp: DateTime.now(),
           showButtons: false,
         );
-        addMessage(_currentMessage);
       } catch (e) {
+        _currentMessage = ProjectChatMessage(
+          message: "프로젝트를 추가하는데 실패했습니다.",
+          speaker: ProjectChatMessageType.bot,
+          timestamp: DateTime.now(),
+          showButtons: false,
+        );
         rethrow;
       } finally {
+        addMessage(_currentMessage);
         _pendingProjectAdd = null;
       }
     }

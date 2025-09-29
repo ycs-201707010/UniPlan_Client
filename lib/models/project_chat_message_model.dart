@@ -1,6 +1,7 @@
+import 'package:all_new_uniplan/models/subProject_model.dart';
 import 'package:all_new_uniplan/utils/formatters.dart';
 import 'package:intl/intl.dart';
-import 'package:all_new_uniplan/models/schedule_model.dart';
+import 'package:all_new_uniplan/models/project_model.dart';
 
 enum ProjectChatMessageType { user, bot }
 
@@ -39,5 +40,32 @@ class ProjectChatMessage {
       timestamp: DateTime.parse(json['timestamp'] as String),
       showButtons: false,
     );
+  }
+
+  String projectAddMessage(Project addProject) {
+    final formattedStartDate = formatDate(addProject.startDate);
+    final formattedEndDate = formatDate(addProject.endDate);
+
+    String projectInfoText =
+        '다음 프로젝트 추가를 확인해주세요:\n\n'
+        '# 프로젝트 정보\n'
+        '제목: ${addProject.title}\n'
+        '목표: ${addProject.goal}\n'
+        '종류: ${addProject.project_type}\n'
+        '기간: $formattedStartDate - $formattedEndDate\n\n'
+        '- 하위 프로젝트 정보\n';
+
+    int i = 1;
+    for (final subProject in addProject.subProjects!) {
+      final subProjectInfoText =
+          '${i}번 일정.\n'
+          '목표: ${subProject.subGoal}\n'
+          '목표 수행 횟수: ${subProject.maxDone}\n'
+          '요일: ${weekdayESMap[subProject.weekDay]}요일\n\n';
+      projectInfoText += subProjectInfoText;
+      i++;
+    }
+
+    return projectInfoText;
   }
 }

@@ -255,20 +255,20 @@ class _ProjectPageState extends State<ProjectPage> {
                     const SizedBox(height: 8),
 
                     // --- 하위 프로젝트(목표) 목록 ---
-                    if (project.subProjects != null &&
-                        project.subProjects!.isNotEmpty)
-                      for (final subProject in project.subProjects!)
-                        ProjectProgressCard(
-                          title: subProject.subGoal,
-                          currentStep: subProject.done ?? 0,
-                          maxStep:
-                              subProject.maxDone ?? 1, // maxDone이 null이면 1로 처리
-                        )
-                    else
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('등록된 하위 목표가 없습니다.'),
-                      ),
+                    // if (project.subProjects != null &&
+                    //     project.subProjects!.isNotEmpty)
+                    //   for (final subProject in project.subProjects!)
+                    //     ProjectProgressCard(
+                    //       title: subProject.subGoal!,
+                    //       currentStep: subProject.done ?? 0,
+                    //       maxStep:
+                    //           subProject.maxDone ?? 1, // maxDone이 null이면 1로 처리
+                    //     )
+                    // else
+                    //   const Padding(
+                    //     padding: EdgeInsets.all(8.0),
+                    //     child: Text('등록된 하위 목표가 없습니다.'),
+                    //   ),
                   ],
                 ),
               ),

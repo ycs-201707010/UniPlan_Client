@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:all_new_uniplan/models/subject_model.dart';
+import 'package:all_new_uniplan/utils/formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/api/api_client.dart';
 import 'package:all_new_uniplan/models/project_model.dart';
@@ -63,41 +64,97 @@ class ProjectService with ChangeNotifier {
     }
   }
 
-  // Future<void> addProjectAndSubProject(
-  //   int userId,
-  //   String title,
-  //   String goal,
-  //   DateTime startDate,
-  //   DateTime endDate,
-  // ) async {
-  //   final Map<String, dynamic> body = {
-  //     'user_id': userId,
-  //     'title': title,
-  //     'goal': goal,
-  //     'start_date': startDate,
-  //     'end_time': endDate,
-  //   };
+  // LLM 프로젝트 추가 응답에 대해 사용자가 추가를 요청한 경우
+  // 프로젝트와 하위 프로젝트를 추가하는 메서드
+  // 먼저 서버에 프로젝트 DB 추가 요청을 보내고 projectId를 반환받아 Project 클래스 초기화
+  // 이후 서버에 하위 프로젝트 DB 추가 요청을 보내고 subProjectId를 반환받아 SubProject 클래스를 초기화하여
+  // Project 클래스의 subProjects 리스트에 추가
+  Future<void> addProjectAndSubProjectByLLM(Project project, int userId) async {
+    final Map<String, dynamic> projectBody = project.toJson();
+    projectBody['user_id'] = userId;
+    try {
+      final projectResponse = await _apiClient.post(
+        '/project/addProject',
+        body: projectBody,
+      );
 
-  //   try {
-  //     final response = await _apiClient.post('/project/addProject', body: body);
+      var projectJson = jsonDecode(projectResponse.body);
+      var projectMessage = projectJson['message'];
 
-  //     var json = jsonDecode(response.body);
-  //     var message = json['message'];
+      if (projectMessage == "Add Project Successed") {
+        var projectId = projectJson['project_id'] as int;
+        project = project.copyWith(projectId: projectId);
+        addProjectToMap(project);
 
-  //     if (message == "Add Project Successed") {
-  //       // _project = Project.fromJson(json['project'] as Map<String, dynamic>);
+        for (int i = 0; i < project.subProjects!.length; i++) {
+          var originalSubProject = project.subProjects![i]; // 원본 객체 가져오기
 
-  //       // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
-  //       notifyListeners();
-  //     } else {
-  //       throw Exception('Add Project Failed: $message');
-  //     }
-  //   } catch (e) {
-  //     print('프로젝트를 추가하는 과정에서 에러 발생: $e');
-  //     // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
-  //     rethrow;
-  //   }
-  // }
+          final Map<String, dynamic> subProjectBody =
+              originalSubProject.toJson();
+          subProjectBody['project_id'] = projectId;
+
+          try {
+            final subProjectResponse = await _apiClient.post(
+              '/project/addSubProject',
+              body: subProjectBody,
+            );
+
+            var subProjecJson = jsonDecode(subProjectResponse.body);
+            var subProjecMessage = subProjecJson['message'];
+
+            if (subProjecMessage == "Add SubProject Successed") {
+              var subProjectId = subProjecJson['subproject_id'] as int;
+
+              project.subProjects![i] = originalSubProject.copyWith(
+                subProjectId: subProjectId,
+              );
+            } else {
+              throw Exception('Add SubProject Failed: $subProjecMessage');
+            }
+          } catch (e) {
+            print('하위 프로젝트를 추가하는 과정에서 에러 발생: $e');
+            rethrow;
+          }
+        }
+        // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
+        notifyListeners();
+      } else {
+        throw Exception('Add Project Failed: $projectMessage');
+      }
+    } catch (e) {
+      print('프로젝트를 추가하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
+  // 프로젝트를 DB에서 삭제하도록 요청을 보내는 메서드
+  Future<void> deleteProject(int userId, int projectId) async {
+    final Map<String, dynamic> body = {
+      'user_id': userId,
+      'project_id': projectId,
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/project/deleteProject',
+        body: body,
+      );
+
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Delete Project Successed") {
+        _projects.remove(projectId);
+      } else {
+        throw Exception('Delete Project Failed: $message');
+      }
+    } catch (e) {
+      print('프로젝트를 삭제하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
 
   // projectId를 가진 장기 프로젝트를 검색하여 Project를 초기화하여
   // 이를 저장하는 Map 타입 필드에 추가하고
@@ -178,7 +235,7 @@ class ProjectService with ChangeNotifier {
       if (message == "Update SubProject Successed") {
         var result = json["result"];
         Project updateProject = Project.fromJson(result);
-        updateProjectToList(project.projectId, updateProject);
+        updateProjectToList(project.projectId!, updateProject);
       } else {
         throw Exception('Update SubProject Failed: $message');
       }
@@ -219,20 +276,61 @@ class ProjectService with ChangeNotifier {
     }
   }
 
+  // 프로젝트의 특정 날짜의 하위 프로젝트 목록을 DB에서 가져오는 메서드
+  Future<List<SubProject>> getSubProjectByDate(
+    int projectId,
+    DateTime date,
+  ) async {
+    final Map<String, dynamic> body = {
+      'project_id': projectId,
+      'date': formatDate(date),
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/project/getSubProjectByDate',
+        body: body,
+      );
+
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+      if (message == "Get SubProject By Date Successed") {
+        var subProjectsJson = json['subProjects'];
+        final subProjectList = jsonToSubProjectTist(subProjectsJson);
+        print(subProjectList.length);
+        return subProjectList;
+      } else {
+        throw Exception('Get SubProject By Date Failed: $message');
+      }
+    } on Exception catch (e) {
+      if (e.toString().contains('404')) {
+        return [];
+      }
+      print('하위 프로젝트 정보를 검색하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // 장기 프로젝트의 서브 프로젝트를 DB에 추가하고 subProjectId를 반환받아
   // 해당 장기 프로젝트의 _subProjects 필드에 추가하는 메서드
   Future<void> addSubProject(
     int projectId,
-    String subGoal, {
-    int? done,
-    int? maxDone,
-    DateTime? date,
+    String subGoal,
+    int maxDone,
+    bool multiPerDay, {
+    String? color,
+    String? weekDay,
   }) async {
     SubProject subProject = SubProject(
       subGoal: subGoal,
-      done: done,
       maxDone: maxDone,
-      date: date,
+      multiPerDay: multiPerDay,
+      weekDay: weekDay,
+      color: color,
     );
 
     final Map<String, dynamic> body = subProject.toJson();
@@ -265,51 +363,51 @@ class ProjectService with ChangeNotifier {
   }
 
   // 서브 프로젝트의 다중 생성을 하는 메서드
-  Future<void> addSubProjectMultiple(
-    int projectId,
-    String subGoal, {
-    int? maxDone,
-    bool? daily,
-    List<String>? weekdays,
-  }) async {
-    SubProject subProject = SubProject(subGoal: subGoal, maxDone: maxDone);
+  // Future<void> addSubProjectMultiple(
+  //   int projectId,
+  //   String subGoal, {
+  //   int? maxDone,
+  //   bool? daily,
+  //   List<String>? weekdays,
+  // }) async {
+  //   SubProject subProject = SubProject(subGoal: subGoal, maxDone: maxDone);
 
-    final Map<String, dynamic> body = subProject.toJson();
-    body.addAll({
-      "project_id": projectId,
-      "daily": daily,
-      "weekdays": weekdays,
-    });
+  //   final Map<String, dynamic> body = subProject.toJson();
+  //   body.addAll({
+  //     "project_id": projectId,
+  //     "daily": daily,
+  //     "weekdays": weekdays,
+  //   });
 
-    try {
-      final response = await _apiClient.post(
-        '/project/addSubProjectMultiple',
-        body: body,
-      );
+  //   try {
+  //     final response = await _apiClient.post(
+  //       '/project/addSubProjectMultiple',
+  //       body: body,
+  //     );
 
-      var json = jsonDecode(response.body);
-      var message = json['message'];
+  //     var json = jsonDecode(response.body);
+  //     var message = json['message'];
 
-      if (message == "Add Mutltiple SubProject Successed") {
-        var subProjectJsonList = json['result'] as List<dynamic>;
-        for (final subProjectJson in subProjectJsonList) {
-          SubProject newSubProject = SubProject.fromJson(
-            subProjectJson as Map<String, dynamic>,
-          );
-          projects![projectId]!.subProjects!.add(newSubProject);
-        }
-      } else {
-        throw Exception('Add Mutltiple SubProject Failed: $message');
-      }
-    } catch (e) {
-      print('하위 프로젝트를 다중 생성하는 과정에서 에러 발생: $e');
-      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
-      rethrow;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+  //     if (message == "Add Mutltiple SubProject Successed") {
+  //       var subProjectJsonList = json['result'] as List<dynamic>;
+  //       for (final subProjectJson in subProjectJsonList) {
+  //         SubProject newSubProject = SubProject.fromJson(
+  //           subProjectJson as Map<String, dynamic>,
+  //         );
+  //         projects![projectId]!.subProjects!.add(newSubProject);
+  //       }
+  //     } else {
+  //       throw Exception('Add Mutltiple SubProject Failed: $message');
+  //     }
+  //   } catch (e) {
+  //     print('하위 프로젝트를 다중 생성하는 과정에서 에러 발생: $e');
+  //     // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+  //     rethrow;
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   }
+  // }
 
   // 특정 장기 프로젝트 하위 프로젝트의 정보를 수정하는 메서드
   Future<void> updateSubProjectEndpoint(
@@ -342,27 +440,94 @@ class ProjectService with ChangeNotifier {
     }
   }
 
-  // 특정 장기 프로젝트 하위 프로젝트의 정보를 수정하는 메서드
-  Future<void> updateSubProjectProgress(int subprojectId, int delta) async {
+  // 하위 프로젝트 진행도 증가
+  Future<int> addSubProjectProgress(int subprojectId, DateTime date) async {
     final Map<String, dynamic> body = {
       "subproject_id": subprojectId,
-      "delta": delta,
+      "date": formatDate(date),
     };
 
     try {
       final response = await _apiClient.post(
-        '/project/updateSubProjectProgress',
+        '/project/addSubProjectProgress',
         body: body,
       );
 
       var json = jsonDecode(response.body);
       var message = json['message'];
-      if (message == "Update SubProject Endpoint Successed") {
+      if (message == "Add SubProject Progress Successed") {
+        var result = json['result'];
+        var count = result['count'] as int;
+
+        return count;
       } else {
-        throw Exception('Update SubProject Endpoint Failed: $message');
+        throw Exception('Add SubProject Progress Failed: $message');
       }
     } catch (e) {
-      print('하위 프로젝트 진척도를 수정하는 과정에서 에러 발생: $e');
+      print('하위 프로젝트 진척도를 증가하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 하위 프로젝트 삭제
+  Future<void> deleteSubProject(int projectId, int subProjectId) async {
+    final Map<String, dynamic> body = {
+      "project_id": projectId,
+      "subproject_id": subProjectId,
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/project/deleteSubProject',
+        body: body,
+      );
+
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+      if (message == "Delete SubProject Successed") {
+        _projects[projectId]!.deleteSubProjectFromList(subProjectId);
+      } else {
+        throw Exception('message SubProject Progress Failed: $message');
+      }
+    } catch (e) {
+      print('하위 프로젝트를 삭제하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 하위 프로젝트 진행도 감소
+  Future<int> cancelSubProjectProgress(int subprojectId, DateTime date) async {
+    final Map<String, dynamic> body = {
+      "subproject_id": subprojectId,
+      "date": formatDate(date),
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/project/cancelSubProjectProgress',
+        body: body,
+      );
+
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+      if (message == "Cancel SubProject Progress Successed") {
+        var result = json['result'];
+        var count = result['count'] as int;
+
+        return count;
+      } else {
+        throw Exception('Cancel SubProject Progress Failed: $message');
+      }
+    } catch (e) {
+      print('하위 프로젝트 진척도를 감소하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       rethrow;
     } finally {
@@ -373,7 +538,7 @@ class ProjectService with ChangeNotifier {
 
   // 장기 프로젝트를 이를 저장하는 Map타입의 필드에 추가하는 메서드
   void addProjectToMap(Project project) {
-    _projects[project.projectId] = project;
+    _projects[project.projectId!] = project;
     notifyListeners();
   }
 
@@ -385,7 +550,7 @@ class ProjectService with ChangeNotifier {
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
     projectMap.forEach((key, value) {
       final project = Project.fromJson(value as Map<String, dynamic>);
-      _projects[project.projectId] = project;
+      _projects[project.projectId!] = project;
     });
 
     // UI에 변경사항 알림
@@ -437,5 +602,20 @@ class ProjectService with ChangeNotifier {
       // 해당 인덱스의 요소를 전달받은 updateSubProject 객체로 교체합니다.
       projects![projectId]!.subProjects![index] = updateSubProject;
     }
+  }
+
+  List<SubProject> jsonToSubProjectTist(dynamic subProjectListJson) {
+    List<SubProject> subProjectList = [];
+
+    subProjectListJson = subProjectListJson as List<dynamic>;
+
+    for (final subProjectJson in subProjectListJson) {
+      final subProject = SubProject.fromJson(
+        subProjectJson as Map<String, dynamic>,
+      );
+      subProjectList.add(subProject);
+    }
+
+    return subProjectList;
   }
 }

@@ -55,6 +55,17 @@ void main() async {
               (context, scheduleService, previousEverytimeService) =>
                   previousEverytimeService ?? EverytimeService(scheduleService),
         ),
+        ChangeNotifierProxyProvider<ProjectService, ProjectChatbotService>(
+          create:
+              (context) =>
+                  ProjectChatbotService(context.read<ProjectService>()),
+          // update는 ScheduleService가 변경될 때 호출되며,
+          // 기존 EverytimeService 인스턴스를 재사용하여 상태를 유지합니다.
+          update:
+              (context, projectService, previousProjectChatbotService) =>
+                  previousProjectChatbotService ??
+                  ProjectChatbotService(projectService),
+        ),
       ],
 
       child: const uniPlanApp(),

@@ -37,17 +37,16 @@ class _addressEditPageState extends State<addressEditPage> {
               Container(
                 child: Text(
                   '자주 방문하는 장소를 저장하여\n일정 등록 시 사용하실 수 있습니다',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                 ),
               ),
 
               SizedBox(height: 30),
 
-              Text("목록", style: TextStyle()),
+              Text(
+                "목록",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
 
               SizedBox(height: 15),
 
@@ -60,8 +59,11 @@ class _addressEditPageState extends State<addressEditPage> {
                         width: double.infinity, // 부모 위젯의 너비에 맞춤
 
                         decoration: BoxDecoration(
-                          border: Border.all(color: Color(0xEE7E7E7E)),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
                           borderRadius: BorderRadius.circular(10),
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
@@ -126,7 +128,10 @@ class _addressEditPageState extends State<addressEditPage> {
                                     entry.value,
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[600],
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],

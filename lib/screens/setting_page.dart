@@ -25,7 +25,7 @@ class _SettingPageState extends State<SettingPage> {
 
     return Scaffold(
       appBar: TopBar(title: "환경설정"),
-      backgroundColor: Color(0xEEEEEEEE),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +35,7 @@ class _SettingPageState extends State<SettingPage> {
               child: Text(
                 "알림",
                 style: TextStyle(
-                  color: Color(0xEE7E7E7E),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -58,7 +58,7 @@ class _SettingPageState extends State<SettingPage> {
               child: Text(
                 "디스플레이",
                 style: TextStyle(
-                  color: Color(0xEE7E7E7E),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -123,7 +123,10 @@ class SettingPageButton extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subText,
-                style: TextStyle(fontSize: 12, color: Color(0xEE505050)),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -131,7 +134,7 @@ class SettingPageButton extends StatelessWidget {
           CupertinoSwitch(
             value: value,
             onChanged: onChanged,
-            activeTrackColor: Color(0xEE5CE546), // 켜졌을 때 색상
+            activeTrackColor: Theme.of(context).colorScheme.primary, // 켜졌을 때 색상
           ),
         ],
       ),

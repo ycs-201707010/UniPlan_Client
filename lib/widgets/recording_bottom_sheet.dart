@@ -146,21 +146,21 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
           amplitude: _isRecording ? 7000 : 0,
           scale: _isRecording ? 1.3 : 0.0,
 
-          circleColors: const [
+          circleColors: [
             /// If you don't want use Gradient, set just one color
-            Color(0xFF5CE546),
+            Theme.of(context).colorScheme.primary,
           ],
 
           child:
               _isRecording
-                  ? const Icon(
+                  ? Icon(
                     Icons.pause_rounded,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     size: 50.0,
                   )
-                  : const Icon(
+                  : Icon(
                     Icons.mic_rounded,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     size: 50.0,
                   ),
         ),
@@ -178,7 +178,11 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
           top: 10,
           left: 15,
           child: IconButton(
-            icon: Icon(Icons.close, color: Colors.grey, size: 24),
+            icon: Icon(
+              Icons.close,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 24,
+            ),
             onPressed:
                 () => {
                   // TODO : 녹음을 즉시 중단하도록
@@ -202,7 +206,7 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
               style: TextStyle(
                 fontSize: _isRecording ? 32 : 20,
                 fontWeight: FontWeight.bold,
-                color: _isRecording ? Colors.black : Colors.grey[700],
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -242,7 +246,8 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
               ),
 
             // API로부터 응답을 아직 받지 못했을 경우 로딩 연출.
-            if (recordedText == "") SpinKitFadingCube(color: Color(0xEE8CFF1A)),
+            if (recordedText == "")
+              SpinKitFadingCube(color: Theme.of(context).colorScheme.primary),
 
             SizedBox(height: 30),
 

@@ -146,7 +146,7 @@ class uniPlanApp extends StatelessWidget {
         fontFamily: 'NanumSquare',
 
         // 배경색
-        scaffoldBackgroundColor: Color(0xFF121212),
+        scaffoldBackgroundColor: Color(0xFF141517),
 
         // 다크모드 컬러 스키마
         // colorSchema를 사용하여 색상을 체계적으로 관리
@@ -155,7 +155,7 @@ class uniPlanApp extends StatelessWidget {
         // 채워진 버튼의 색상 테마
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF6BE347), // ElevatedButton의 배경색
+            backgroundColor: Color(0xFF00FFA3), // ElevatedButton의 배경색
             disabledBackgroundColor: Colors.grey.shade300,
             disabledForegroundColor: Colors.grey.shade500,
             foregroundColor: Colors.black, // ElevatedButton의 텍스트/아이콘 색상
@@ -174,11 +174,11 @@ class uniPlanApp extends StatelessWidget {
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             // 테두리 색상.
-            side: BorderSide(color: const Color(0xFF6BE347), width: 2),
+            side: BorderSide(color: Color(0xFF00FFA3), width: 2),
             // 텍스트 색상은 다크모드의 어두운 배경에 잘 보이도록 테두리와 같은 밝은 색으로 변경.
-            foregroundColor: const Color(0xFF6BE347),
+            foregroundColor: Color(0xFF00FFA3),
             // 터치 시 물결 효과.
-            overlayColor: const Color(0xFF6BE347).withValues(alpha: 0.1),
+            overlayColor: Color(0xFF00FFA3).withValues(alpha: 0.1),
 
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12), // 버튼 모서리 둥글게

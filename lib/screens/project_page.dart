@@ -279,8 +279,9 @@ class _ProjectPageState extends State<ProjectPage> {
       floatingActionButton: SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
-        backgroundColor: Color(0xEE265A3A), // 버튼 배경색
-        foregroundColor: Colors.white, // 버튼 내부의 아이콘 색
+        backgroundColor: Theme.of(context).colorScheme.primary, // 버튼 배경색
+        foregroundColor:
+            Theme.of(context).colorScheme.onPrimary, // 버튼 내부의 아이콘 색
 
         children: [
           SpeedDialChild(
@@ -366,7 +367,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
       title: Row(
@@ -376,7 +377,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           // 토글 버튼 컨테이너
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Theme.of(context).colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -417,7 +418,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color:
+              isSelected
+                  ? Theme.of(context).colorScheme.surfaceContainerHigh
+                  : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           boxShadow:
               isSelected

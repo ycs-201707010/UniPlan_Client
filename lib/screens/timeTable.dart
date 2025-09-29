@@ -59,82 +59,82 @@ class _TimetablePageState extends State<TimetablePage> {
         foregroundColor: Colors.white, // 버튼 내부의 아이콘 색
 
         children: [
-          SpeedDialChild(
-            child: Icon(Icons.calendar_today),
-            label: 'Link Everytime',
-            onTap: () async {
-              final result = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(builder: (context) => EverytimeLinkPage()),
-              );
+          // SpeedDialChild(
+          //   child: Icon(Icons.calendar_today),
+          //   label: 'Link Everytime',
+          //   onTap: () async {
+          //     final result = await Navigator.push<bool>(
+          //       context,
+          //       MaterialPageRoute(builder: (context) => EverytimeLinkPage()),
+          //     );
 
-              if (result == true) {
-                final currentSubjects =
-                    everytimeService.currentTimetable!.subjects!;
+          //     if (result == true) {
+          //       final currentSubjects =
+          //           everytimeService.currentTimetable!.subjects!;
 
-                int dayIndex = 0;
+          //       int dayIndex = 0;
 
-                setState(() {
-                  // TODO : 실제 과목을 추가할 수 있도록 서버 단 코드와 연결하기
-                  _subjects.clear();
+          //       setState(() {
+          //         // TODO : 실제 과목을 추가할 수 있도록 서버 단 코드와 연결하기
+          //         _subjects.clear();
 
-                  _tableEvents[0]['list'].clear();
-                  _tableEvents[1]['list'].clear();
-                  _tableEvents[2]['list'].clear();
-                  _tableEvents[3]['list'].clear();
-                  _tableEvents[4]['list'].clear();
+          //         _tableEvents[0]['list'].clear();
+          //         _tableEvents[1]['list'].clear();
+          //         _tableEvents[2]['list'].clear();
+          //         _tableEvents[3]['list'].clear();
+          //         _tableEvents[4]['list'].clear();
 
-                  for (int i = 0; i < currentSubjects.length; i++) {
-                    switch (weekdayISMap[currentSubjects[i].day]) {
-                      case '월':
-                        dayIndex = 0;
-                        break;
-                      case '화':
-                        dayIndex = 1;
-                        break;
-                      case '수':
-                        dayIndex = 2;
-                        break;
-                      case '목':
-                        dayIndex = 3;
-                        break;
-                      case '금':
-                        dayIndex = 4;
-                        break;
-                    }
+          //         for (int i = 0; i < currentSubjects.length; i++) {
+          //           switch (weekdayISMap[currentSubjects[i].day]) {
+          //             case '월':
+          //               dayIndex = 0;
+          //               break;
+          //             case '화':
+          //               dayIndex = 1;
+          //               break;
+          //             case '수':
+          //               dayIndex = 2;
+          //               break;
+          //             case '목':
+          //               dayIndex = 3;
+          //               break;
+          //             case '금':
+          //               dayIndex = 4;
+          //               break;
+          //           }
 
-                    _tableEvents[dayIndex]['list'].add(
-                      TableEvent(
-                        title:
-                            '${currentSubjects[i].title} \n\n ${currentSubjects[i].classroom}',
-                        eventId: dayIndex + (i * 12),
-                        startTime: TableEventTime(
-                          hour: currentSubjects[i].startTime.hour,
-                          minute: currentSubjects[i].startTime.minute,
-                        ),
-                        endTime: TableEventTime(
-                          hour: currentSubjects[i].endTime.hour,
-                          minute: currentSubjects[i].endTime.minute,
-                        ),
-                        laneIndex: dayIndex, // 월요일
-                        backgroundColor: Colors.deepOrangeAccent,
-                        textStyle: TextStyle(fontSize: 12),
-                      ),
-                    );
-                  }
+          //           _tableEvents[dayIndex]['list'].add(
+          //             TableEvent(
+          //               title:
+          //                   '${currentSubjects[i].title} \n\n ${currentSubjects[i].classroom}',
+          //               eventId: dayIndex + (i * 12),
+          //               startTime: TableEventTime(
+          //                 hour: currentSubjects[i].startTime.hour,
+          //                 minute: currentSubjects[i].startTime.minute,
+          //               ),
+          //               endTime: TableEventTime(
+          //                 hour: currentSubjects[i].endTime.hour,
+          //                 minute: currentSubjects[i].endTime.minute,
+          //               ),
+          //               laneIndex: dayIndex, // 월요일
+          //               backgroundColor: Colors.deepOrangeAccent,
+          //               textStyle: TextStyle(fontSize: 12),
+          //             ),
+          //           );
+          //         }
 
-                  for (int i = 0; i < _tableEvents.length; i++) {
-                    _subjects.add(
-                      LaneEvents(
-                        lane: Lane(name: _tableEvents[i]['day'], laneIndex: i),
-                        events: _tableEvents[i]['list'],
-                      ),
-                    );
-                  }
-                });
-              }
-            },
-          ),
+          //         for (int i = 0; i < _tableEvents.length; i++) {
+          //           _subjects.add(
+          //             LaneEvents(
+          //               lane: Lane(name: _tableEvents[i]['day'], laneIndex: i),
+          //               events: _tableEvents[i]['list'],
+          //             ),
+          //           );
+          //         }
+          //       });
+          //     }
+          //   },
+          // ),
         ],
       ),
     );

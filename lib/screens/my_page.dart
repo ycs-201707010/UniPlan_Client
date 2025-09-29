@@ -43,7 +43,10 @@ class _MyPageState extends State<MyPage> {
                               vertical: -4,
                               horizontal: -4,
                             ), // IconButton의 기본 padding 제거
-                            onPressed: () => {},
+                            onPressed:
+                                () => {
+                                  // TODO : 프로필 변경 창으로 이동
+                                },
                             icon: Icon(Icons.arrow_forward_ios, size: 15),
                             splashColor: Colors.transparent, // 클릭 시 음영 제거
                             highlightColor:
@@ -175,9 +178,11 @@ class MyPageButton extends StatelessWidget {
       child: Container(
         width: double.infinity, // 부모 위젯의 너비에 맞춤
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+
         decoration: BoxDecoration(
-          border: Border.all(color: Color(0xEE6BE347)),
+          border: Border.all(color: Theme.of(context).colorScheme.primary),
           borderRadius: BorderRadius.circular(10),
+          color: Theme.of(context).colorScheme.surface,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -192,12 +197,19 @@ class MyPageButton extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subText,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
 
-            const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 18,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ],
         ),
       ),

@@ -42,7 +42,8 @@ class SubjectListItem extends StatelessWidget {
 }
 
 class EverytimeLinkPage extends StatefulWidget {
-  const EverytimeLinkPage({super.key});
+  final BuildContext rootContext;
+  const EverytimeLinkPage({super.key, required this.rootContext});
 
   @override
   State<EverytimeLinkPage> createState() => _EverytimeLinkPageState();

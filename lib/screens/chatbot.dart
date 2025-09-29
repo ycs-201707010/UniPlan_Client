@@ -38,7 +38,12 @@ class _ChatPageState extends State<ChatbotPage> {
           chatMessage.message,
 
           // 채팅 내용은 전부 검은색으로 지정.
-          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+          style: TextStyle(
+            color: // 메시지 화자에 따라 배경색을 다르게 지정
+                chatMessage.speaker != ChatMessageType.user
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Theme.of(context).colorScheme.onPrimary,
+          ),
         ),
       );
     }
@@ -149,17 +154,18 @@ class _ChatPageState extends State<ChatbotPage> {
                   color:
                       // 메시지 화자에 따라 배경색을 다르게 지정
                       chatMessage.speaker != ChatMessageType.user
-                          ? Theme.of(context).colorScheme.secondary
+                          ? Theme.of(context).colorScheme.surfaceContainer
                           : Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Color.fromRGBO(0, 0, 0, 0.25),
+                      color: Theme.of(context).colorScheme.shadow,
                       blurRadius: 4,
                       offset: const Offset(0, 1),
                     ),
                   ],
                 ),
+
                 child: content, // 텍스트와 버튼이 포함된 Column을 여기에 넣습니다.
               ),
             ),
@@ -246,6 +252,7 @@ class _ChatPageState extends State<ChatbotPage> {
                         Expanded(
                           child: TextField(
                             controller: _controller,
+                            style: TextStyle(color: Color(0xFF0e0f10)),
                             decoration: const InputDecoration(
                               hintText: '여기에 메시지를 입력...',
                               border: InputBorder.none,
@@ -253,7 +260,10 @@ class _ChatPageState extends State<ChatbotPage> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.mic_none),
+                          icon: const Icon(
+                            Icons.mic_none,
+                            color: Color(0xFF0E0F10),
+                          ),
                           onPressed: () async {
                             final initResult = await recordService.initialize();
 
@@ -323,11 +333,14 @@ class _ChatPageState extends State<ChatbotPage> {
                   child: Container(
                     width: 46,
                     height: 46,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFF22553D), // 초록색 배경
+                      color: Theme.of(context).colorScheme.primary, // 초록색 배경
                     ),
-                    child: const Icon(Icons.send, color: Colors.white),
+                    child: Icon(
+                      Icons.send,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
                   ),
                 ),
               ],

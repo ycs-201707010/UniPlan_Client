@@ -1,6 +1,7 @@
 // ** 일정이 보여지는 화면 **
 
 import 'package:all_new_uniplan/models/subProject_model.dart';
+import 'package:all_new_uniplan/screens/everytime_link_page.dart';
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
@@ -118,7 +119,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     } else if (today.weekday == DateTime.sunday) {
       return Colors.red; // 일요일이면 빨간색
     } else {
-      return Theme.of(context).colorScheme.onSecondaryContainer; // 평일이면 기존 색상
+      return Theme.of(context).colorScheme.onPrimaryContainer; // 평일이면 기존 색상
     }
   }
 
@@ -140,17 +141,16 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                     controller: _calendarController,
                     dataSource: ScheduleDataSource(scheduleService.schedules),
 
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainer,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
 
                     headerDateFormat: 'yyyy년 MMMM', // 헤더에 표시되는 날짜 형식을 지정
                     headerHeight: 40, // 헤더의 높이를 지정. 이 속성을 0으로 설정하여 헤더 영역을 숨김
                     headerStyle: CalendarHeaderStyle(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       textAlign: TextAlign.left,
                       textStyle: TextStyle(
                         // 텍스트 스타일 지정
-                        color: Theme.of(context).colorScheme.onSecondary,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
@@ -162,13 +162,16 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                     allowDragAndDrop: false,
                     viewHeaderStyle: ViewHeaderStyle(
                       backgroundColor:
-                          Theme.of(context).colorScheme.secondaryContainer,
+                          Theme.of(context).colorScheme.surfaceContainer,
                     ),
                     todayHighlightColor:
                         _getTodayHighlightColor(), //Color(0xEE265A3A),
                     selectionDecoration: BoxDecoration(
                       color: Colors.transparent,
-                      border: Border.all(color: Color(0xEE009425), width: 2),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.all(Radius.circular(4)),
                       shape: BoxShape.rectangle,
                     ),
@@ -337,6 +340,22 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                 Theme.of(context).colorScheme.onPrimary, // 버튼 내부의 아이콘 색
 
             children: [
+              SpeedDialChild(
+                child: Icon(Icons.calendar_today),
+                label: 'Link Everytime',
+                onTap: () async {
+                  // 에브리타임 연동 창으로 이동, 일정 추가 결과에 따른 결과를 반환받음.
+                  final result = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (pageContext) =>
+                              EverytimeLinkPage(rootContext: context),
+                    ),
+                  );
+                },
+              ),
+
               SpeedDialChild(
                 child: Icon(Icons.calendar_today),
                 label: 'Add Schedule',

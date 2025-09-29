@@ -17,13 +17,16 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(
         title,
         style: TextStyle(
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.onSurface,
           fontWeight: FontWeight.w600,
           fontSize: 20,
         ),
       ),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(
+          Icons.arrow_back,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
         onPressed: onBack ?? () => Navigator.of(context).pop(),
       ),
     );

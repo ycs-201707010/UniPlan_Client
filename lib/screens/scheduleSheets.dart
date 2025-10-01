@@ -7,6 +7,7 @@ import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -395,9 +396,11 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
         if (_isLoading)
           Container(
             color: const Color(0x80000000), // 반투명 검은 배경 (암전)
-            child: const Center(
+            child: Center(
               // TODO : 챗봇에서 사용했던 로딩 연출로 변경
-              child: CircularProgressIndicator(color: Colors.white),
+              child: SpinKitFadingCube(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
       ],

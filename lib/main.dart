@@ -1,5 +1,6 @@
 // ** 프로그램 진입점 **
 
+import 'package:all_new_uniplan/screens/add_schedule.dart';
 import 'package:all_new_uniplan/screens/address_edit_page.dart';
 import 'package:all_new_uniplan/screens/home.dart';
 import 'package:all_new_uniplan/screens/welcome.dart';
@@ -102,7 +103,7 @@ class uniPlanApp extends StatelessWidget {
         // 버튼을 생성할 때 따로 Theme.of(context)를 통해 불러오지 않아도 된다.
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF6BE347), // ElevatedButton의 배경색
+            backgroundColor: Color(0xFF00FFA3), // ElevatedButton의 배경색
             disabledBackgroundColor: Colors.grey.shade300,
             disabledForegroundColor: Colors.grey.shade500,
             foregroundColor: Colors.white, // ElevatedButton의 텍스트/아이콘 색상
@@ -221,7 +222,7 @@ class uniPlanApp extends StatelessWidget {
           if (authService.isLoggedIn) {
             return HomeScreen(); // BottomNavigationBar를 포함하는 페이지
           } else {
-            return welcomePage(); //welcomePage();
+            return welcomePage();
           }
         },
       ),

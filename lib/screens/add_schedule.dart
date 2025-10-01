@@ -5,6 +5,7 @@ import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; // 시간 및 날짜 포맷팅
 
@@ -283,6 +284,69 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     Navigator.of(context).pop(isSuccess);
   }
 
+  // 현재 선택된 색상을 저장할 상태 변수. 초기값은 녹색
+  Color _pickerColor = Color(0xFF00FFA3); // 컬러피커로 고른 색상
+  Color _selectedColor = Color(0xFF00FFA3); // 실제 일정 생성 시 적용 될 색상
+
+  // 색상을 변경하는 함수
+  void changeColor(color) {
+    setState(() {
+      _pickerColor = color;
+    });
+  }
+
+  // 컬러피커 호출 함수
+  Future pickColor(type) {
+    // 매개변수로 받은 컬러피커의 종류 확인
+    Widget pickerType;
+
+    if (type == 'ColorPicker') {
+      pickerType = ColorPicker(
+        pickerColor: _pickerColor,
+        onColorChanged: changeColor,
+      );
+    } else if (type == 'MaterialPicker') {
+      pickerType = MaterialPicker(
+        pickerColor: _pickerColor,
+        onColorChanged: changeColor,
+      );
+    } else {
+      pickerType = BlockPicker(
+        pickerColor: _pickerColor,
+        onColorChanged: changeColor,
+      );
+    }
+
+    // 컬러피커 다이얼로그 호출
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('색상을 선택하세요.'),
+          content: SingleChildScrollView(child: pickerType),
+          actions: <Widget>[
+            // 버튼 터치 시 선택한 색상으로 업데이트
+            ElevatedButton(
+              child: const Text('색 선택'),
+              onPressed: () {
+                setState(() => _selectedColor = _pickerColor);
+                print("selected: $_selectedColor, picked: $_pickerColor");
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Color 형식의 데이터를 6자리의
+  String colorToHex(Color color) {
+    String argb = color.toARGB32().toRadixString(16).padLeft(8, "0");
+
+    return '#${argb.substring(2, 8)}';
+  }
+
   // 일정 수정. initialSchedule을 받았다면 이 메서드를 실행.
   void modifySchedule() async {
     final authService =
@@ -455,6 +519,24 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                 ),
               ),
               const SizedBox(height: 24),
+
+              Text("색상 선택"),
+              SizedBox(height: 15),
+
+              GestureDetector(
+                onTap: () => pickColor('ColorPicker'),
+                child: Container(
+                  width: 150,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: _selectedColor,
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

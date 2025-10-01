@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:all_new_uniplan/services/project_chatbot_service.dart';
+import 'package:all_new_uniplan/services/place_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => ScheduleService()),
         ChangeNotifierProvider(create: (context) => RecordService()),
         ChangeNotifierProvider(create: (context) => ProjectService()),
+        ChangeNotifierProvider(create: (context) => PlaceService()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProxyProvider<ScheduleService, ChatbotService>(
           // create는 다른 Provider를 참조할 수 없으므로,

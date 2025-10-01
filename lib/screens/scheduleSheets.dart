@@ -16,6 +16,7 @@ import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:all_new_uniplan/models/schedule_model.dart';
 import 'package:all_new_uniplan/classes/schedule_data_source.dart';
 import 'package:toastification/toastification.dart';
+import 'package:all_new_uniplan/services/place_service.dart';
 
 class scheduleSheetsPage extends StatefulWidget {
   const scheduleSheetsPage({super.key});
@@ -50,6 +51,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     final scheduleService = context.read<ScheduleService>();
     final everytimeService = context.read<EverytimeService>();
     final projectService = context.read<ProjectService>();
+    final placeService = context.read<PlaceService>();
 
     if (authService.isLoggedIn) {
       try {
@@ -96,6 +98,22 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('프로젝트 정보를 불러오는 데 실패했습니다.')),
+            );
+          }
+        }
+      }
+
+      try {
+        await placeService.getPlaces(authService.currentUser!.userId);
+      } on Exception catch (e) {
+        if (e.toString().contains('404')) {
+          print("장소가 비어있습니다.");
+        } else {
+          print("장소 로딩 중 에러 발생: $e");
+          // 사용자에게 에러 알림 (예: 스낵바)
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('장소 정보를 불러오는 데 실패했습니다.')),
             );
           }
         }

@@ -11,6 +11,8 @@ class ScheduleService with ChangeNotifier {
   final List<Schedule> _schedules = [];
   List<Schedule> get schedules => _schedules;
 
+  // final List<Schedule> _currentPageScheudules = [];
+
   // 메서드가 실행되고 있음을 나타내는 필드
   final bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -32,12 +34,47 @@ class ScheduleService with ChangeNotifier {
 
       if (message == "Get Schedule Successed") {
         var schedulesJson = json["schedule"];
+        print(schedulesJson);
         updateScheduleListFromJson(schedulesJson);
         sortSchedulesByDate();
 
         // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
         notifyListeners();
       } else if (message == 'Get Empty Schedule') {
+        return;
+      } else {
+        throw Exception('Get Schedule Failed: $message');
+      }
+    } catch (e) {
+      print('일정을 검색하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
+  // 서버에 user_id를 통해 DB를 검색하여 일정 정보를 가져와 ScheduleService의 List 타입 필드에 추가하고
+  // 상태 변화를 알리는 메서드
+  Future<void> getScheduleByMonth(int year, int month, int userId) async {
+    final Map<String, dynamic> body = {
+      "user_id": userId,
+      "year": year,
+      "month": month,
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/schedule/getScheduleByMonth',
+        body: body,
+      );
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Get Schedule By Month Successed") {
+        // TODO : 년, 월을 통해 불러온 스케줄 정보를 _currentPageSchedules에 추가하는 로직
+
+        // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
+        notifyListeners();
+      } else if (message == 'Get Schedule By Failed') {
         return;
       } else {
         throw Exception('Get Schedule Failed: $message');
@@ -59,6 +96,7 @@ class ScheduleService with ChangeNotifier {
     TimeOfDay endTime, {
     String? location,
     String? memo,
+    String? color,
     bool? isLongProject,
   }) async {
     final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
@@ -77,6 +115,7 @@ class ScheduleService with ChangeNotifier {
       'end_time': formattedEndTime,
       if (location != null) 'location': location,
       if (memo != null) 'memo': memo,
+      if (color != null) 'color': color,
       if (isLongProject != null) 'long_project': isLongProject,
     };
 

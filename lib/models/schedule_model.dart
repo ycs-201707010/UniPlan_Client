@@ -11,6 +11,7 @@ class Schedule {
   final String? location;
   final String? memo;
   final double? fatigue_level;
+  final String? color;
   final bool? isLongProject;
   final int? projectId;
   final DateTime? timestamp;
@@ -23,6 +24,7 @@ class Schedule {
     required this.endTime,
     this.location,
     this.memo,
+    this.color,
     this.fatigue_level,
     this.isLongProject,
     this.projectId,
@@ -38,6 +40,7 @@ class Schedule {
     String? location,
     String? memo,
     double? fatigue_level,
+    String? color,
     bool? isLongProject,
     int? projectId,
     DateTime? timestamp,
@@ -52,6 +55,7 @@ class Schedule {
       location: location ?? this.location,
       memo: memo ?? this.memo,
       fatigue_level: fatigue_level ?? this.fatigue_level,
+      color: color ?? this.color,
       isLongProject: isLongProject ?? this.isLongProject,
       projectId: projectId ?? this.projectId,
       timestamp: timestamp ?? this.timestamp,
@@ -79,6 +83,7 @@ class Schedule {
       if (location != null) 'location': location,
       if (memo != null) 'memo': memo,
       if (fatigue_level != null) 'fatigue_level': fatigue_level,
+      if (color != null) 'color': color,
       if (isLongProject != null) 'isLongProject': isLongProject,
       if (projectId != null) 'project_id': projectId,
       if (timestamp != null) 'timestamp': timestamp,
@@ -106,6 +111,7 @@ class Schedule {
       location: json['location'] as String?,
       memo: json['memo'] as String?,
       fatigue_level: (json['fatigue_level'] as num?)?.toDouble(),
+      color: json['color'] as String?,
       isLongProject: json['is_long_project'] as bool?,
       projectId: json['project_id'] as int?,
       timestamp:

@@ -25,8 +25,17 @@ class PlaceService with ChangeNotifier {
         _placeList.clear();
         var result = json['result'];
         var placeJsonList = result as List<dynamic>;
+
+        Place home = Place(name: "집", address: "");
+        _placeList.add(home);
+
         for (final placeJson in placeJsonList) {
           Place place = Place.fromJson(placeJson as Map<String, dynamic>);
+          if (place.name == "집") {
+            _placeList.first = place;
+            continue;
+          }
+
           _placeList.add(place);
         }
         notifyListeners();

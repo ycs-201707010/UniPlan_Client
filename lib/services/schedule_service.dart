@@ -156,8 +156,7 @@ class ScheduleService with ChangeNotifier {
         addScheduleToList(newSchedule);
         sortSchedulesByDate();
 
-        // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
-        notifyListeners();
+        getFatigue(userId, scheduleId);
 
         //성공 시 true 반환
         return true;
@@ -205,9 +204,7 @@ class ScheduleService with ChangeNotifier {
 
         modifyScheduleToList(originalSchedule, newSchedule);
 
-        // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
-        notifyListeners();
-
+        getFatigue(userId, scheduleId);
         //성공 시 true 반환
         return true;
       } else {
@@ -248,6 +245,37 @@ class ScheduleService with ChangeNotifier {
       }
     } catch (e) {
       print('일정을 삭제하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      // rethrow;
+      return false;
+    }
+  }
+
+  // 일정을 DB 상에서 변경하고
+  Future<bool> getFatigue(int userId, int scheduleId) async {
+    final Map<String, dynamic> body = {
+      'user_id': userId,
+      'schedule_id': scheduleId,
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/schedule/estimateScheduleFatigue',
+        body: body,
+      );
+
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Estimate Schedule Fatigue Successed") {
+        return true;
+      } else {
+        print('일정의 피로도를 계산하는 과정에서 에러 발생: $message');
+        // throw Exception('Modify Schedule Failed: $message');
+        return false;
+      }
+    } catch (e) {
+      print('일정의 피로도를 계산하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       // rethrow;
       return false;

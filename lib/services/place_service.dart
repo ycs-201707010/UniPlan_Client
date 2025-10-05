@@ -87,7 +87,7 @@ class PlaceService with ChangeNotifier {
       var message = json['message'];
 
       // 입력받은 기간에 존재하는 요일 갯수 만큼 생성하고 currentTimetable에 추가
-      if (message == "delete Place Successed") {
+      if (message == "Delete Place Successed") {
         deletePlaceFromList(name);
         return true;
       } else {

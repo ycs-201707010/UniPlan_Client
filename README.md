@@ -31,6 +31,7 @@ samples, guidance on mobile development, and a full API reference.
 - 일정 생성 시, 색상 지정 및 랜덤 색상 기능 지원.
 - Google Calendar API를 사용하여 공휴일 데이터 불러오기. (Schedule, Project 공통.)
 - 장소로 이동하는 블럭 출력을 켜고 끌 수 있게.
+- (add_schedule.dart) DropDownList에서 장소 선택시 메서드에 place의 name이 들어가도록 변경
 
 ## TroubleShooting
 

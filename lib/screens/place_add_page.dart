@@ -162,7 +162,9 @@ class _PlaceAddPageState extends State<PlaceAddPage> {
           child: ElevatedButton(
             onPressed: () async {
               // TODO : 실제 장소를 DB에 추가하고 장소 관리창으로 이동하도록 해야함
-              if (_isEditing) {}
+              if (_isEditing) {
+                modifyPlace();
+              }
               addPlace();
             },
 

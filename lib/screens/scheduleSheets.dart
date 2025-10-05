@@ -55,11 +55,11 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 
     if (authService.isLoggedIn) {
       try {
-        // await scheduleService.getScheduleByMonth(
-        //   2025,
-        //   10,
-        //   authService.currentUser!.userId,
-        // );
+        await scheduleService.getScheduleByMonth(
+          2025,
+          10,
+          authService.currentUser!.userId,
+        );
       } on Exception catch (e) {
         if (e.toString().contains('404')) {
           print("일정이 비어있습니다.");
@@ -406,6 +406,8 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                       autoCloseDuration: const Duration(seconds: 3),
                       title: Text('제하하하하하!! 일정을 등록했다!!'),
                     );
+
+                    _loadSchedules();
                   }
                 },
               ),

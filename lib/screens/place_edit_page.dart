@@ -1,5 +1,7 @@
 // 사용자 계정에 생성된 '자주 가는 장소'를 관리하는 페이지이다.
 // TODO : ListView.builder를 사용해서 사용자가 저장한 장소 리스트를 불러와 위젯 리스트로 출력하기
+// TODO : toast가 작동을 안함. 해결해보자
+// TODO : 수정/생성/삭제 시 바로 반영되도록 할 것.
 
 import 'package:all_new_uniplan/screens/place_add_page.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
@@ -84,6 +86,7 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
                             motion: const DrawerMotion(),
                             children: [
                               SlidableAction(
+                                // TODO : "집" 장소 수정 시 addPlace로 가게끔 수정
                                 onPressed: (context) async {
                                   print('주소를 수정할겁니다');
 
@@ -169,6 +172,7 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
                                     // 삭제 처리가 성공적으로 완료되었다면 (true가 반환되면) Toast 알림을 띄웁니다.
                                     if (deletedResult == true) {
                                       if (!context.mounted) return;
+
                                       // TODO : 라이트모드, 다크모드 구분하기
                                       toastification.show(
                                         context: context,

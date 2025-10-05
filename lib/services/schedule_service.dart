@@ -146,6 +146,7 @@ class ScheduleService with ChangeNotifier {
           memo: memo,
           isLongProject: isLongProject,
           projectId: projectId,
+          color: color,
         );
 
         addScheduleToList(newSchedule);

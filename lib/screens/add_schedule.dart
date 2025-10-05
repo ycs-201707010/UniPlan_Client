@@ -239,6 +239,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     final end = endTime;
     String? location;
     String? memo;
+    String color = colorToHex(_selectedColor);
 
     if (locationController.text != "") {
       location = locationController.text;
@@ -277,6 +278,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
       location: location,
       memo: memo,
       isLongProject: false,
+      color: color,
     );
 
     if (!context.mounted) return;
@@ -360,6 +362,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     final end = endTime;
     String? location;
     String? memo;
+    String? color = colorToHex(_selectedColor);
 
     if (locationController.text != "") {
       location = locationController.text;
@@ -389,6 +392,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
       location: location,
       memo: memo,
       isLongProject: false,
+      color: color,
     );
 
     // TODO : 여기에서 modifySchedule() 함수 실행

@@ -108,7 +108,7 @@ class PlaceService with ChangeNotifier {
 
       // 입력받은 기간에 존재하는 요일 갯수 만큼 생성하고 currentTimetable에 추가
       if (message == "Modify Place Successed") {
-        var result = json['result'];
+        updatePlaceFromList(name, newName, newAddress);
       } else {
         throw Exception('Modify Place Failed: $message');
       }
@@ -130,7 +130,7 @@ class PlaceService with ChangeNotifier {
   void updatePlaceFromList(String name, String newName, String newAddress) {
     final index = _placeList.indexWhere((place) => place.name == name);
 
-    // 2. 인덱스를 찾았다면 (-1이 아니라면) 해당 요소의 필드를 수정합니다.
+    // 인덱스를 찾았다면 (-1이 아니라면) 해당 요소의 필드를 수정합니다.
     if (index != -1) {
       _placeList[index].name = newName;
       _placeList[index].address = newAddress;

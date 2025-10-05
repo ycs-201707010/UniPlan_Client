@@ -8,6 +8,7 @@ import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 
 class PlaceEditPage extends StatefulWidget {
   const PlaceEditPage({super.key});
@@ -67,6 +68,7 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
                     final place = places[index];
 
                     return Container(
+                      margin: EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
                         border: Border.all(
                           color: Theme.of(context).colorScheme.outline,
@@ -169,13 +171,27 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               print("[System log] 장소 추가/수정 기능의 지도 ON");
 
-              Navigator.push(
+              final result = await Navigator.push<bool>(
                 context,
                 MaterialPageRoute(builder: (context) => const PlaceAddPage()),
               );
+
+              if (result == true) {
+                // 성공했을 때 Toast 알림
+                if (!context.mounted) return; // context 유효성 검사
+
+                // TODO : 라이트모드, 다크모드 구분하기
+                toastification.show(
+                  context: context, // optional if you use ToastificationWrapper
+                  type: ToastificationType.success,
+                  style: ToastificationStyle.flatColored,
+                  autoCloseDuration: const Duration(seconds: 3),
+                  title: Text('제하하하하하!! 장소를 등록했다!!'),
+                );
+              }
             },
 
             child: const Text(

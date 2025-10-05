@@ -3,6 +3,7 @@ import 'package:all_new_uniplan/models/schedule_model.dart';
 import 'package:all_new_uniplan/screens/location_deside_page.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
+import 'package:all_new_uniplan/widgets/basicDialog.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -65,22 +66,22 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   }
 
   // Dialog 출력 함수. 재사용하기 위해 만듦.
-  void showAlert(String message) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("입력 오류"),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("확인"),
-              ),
-            ],
-          ),
-    );
-  }
+  // void showAlert(String message) {
+  //   showDialog(
+  //     context: context,
+  //     builder:
+  //         (context) => AlertDialog(
+  //           title: const Text("입력 오류"),
+  //           content: Text(message),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () => Navigator.pop(context),
+  //               child: const Text("확인"),
+  //             ),
+  //           ],
+  //         ),
+  //   );
+  // }
 
   // 시간 비교를 위한 보조 함수.
   int _timeOfDayToMinutes(TimeOfDay time) => time.hour * 60 + time.minute;
@@ -251,11 +252,11 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 
     // ✅ 통합 유효성 검사
     if (title.isEmpty || date == null || start == null || end == null) {
-      showAlert("장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
+      showAlert(context, "장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
       return;
     }
     if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
-      showAlert("시작 시간은 종료 시간보다 이전이어야 합니다.");
+      showAlert(context, "시작 시간은 종료 시간보다 이전이어야 합니다.");
       return;
     }
 
@@ -374,11 +375,11 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 
     // ✅ 통합 유효성 검사
     if (title.isEmpty || date == null || start == null || end == null) {
-      showAlert("장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
+      showAlert(context, "장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
       return;
     }
     if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
-      showAlert("시작 시간은 종료 시간보다 이전이어야 합니다.");
+      showAlert(context, "시작 시간은 종료 시간보다 이전이어야 합니다.");
       return;
     }
 

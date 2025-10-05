@@ -40,7 +40,7 @@ class PlaceService with ChangeNotifier {
     }
   }
 
-  Future<void> addPlace(int userId, String? name, String? address) async {
+  Future<bool> addPlace(int userId, String? name, String? address) async {
     final Map<String, dynamic> body = {
       "user_id": userId,
       "name": name,
@@ -57,6 +57,8 @@ class PlaceService with ChangeNotifier {
         int placeId = json['place_id'] as int;
         final place = Place(placeId: placeId, name: name!, address: address!);
         addPlaceToList(place);
+
+        return true;
       } else {
         throw Exception('Add Place Failed: $message');
       }

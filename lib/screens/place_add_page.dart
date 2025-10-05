@@ -1,6 +1,9 @@
 // 장소를 생성 및 수정하는 페이지이다.
 
 import 'package:all_new_uniplan/screens/location_deside_page.dart';
+import 'package:all_new_uniplan/services/auth_service.dart';
+import 'package:all_new_uniplan/services/place_service.dart';
+import 'package:all_new_uniplan/widgets/basicDialog.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; // 시간 및 날짜 포맷팅
@@ -52,6 +55,28 @@ class _PlaceAddPageState extends State<PlaceAddPage> {
       titleController.text = widget.initialTitle!;
       locationController.text = widget.initialAddress!;
     }
+  }
+
+  // 일정 추가
+  void addPlace() async {
+    final authService = context.read<AuthService>();
+    final placeService = context.read<PlaceService>();
+
+    final userId = authService.currentUser!.userId;
+    final title = titleController.text.trim();
+    final location = locationController.text;
+
+    // 유효성 검사
+    if (title.isEmpty || location.isEmpty) {
+      showAlert(context, "모든 항목을 입력해야 합니다.");
+      return;
+    }
+
+    final bool isSuccess = await placeService.addPlace(userId, title, location);
+
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop(isSuccess);
   }
 
   @override
@@ -107,8 +132,10 @@ class _PlaceAddPageState extends State<PlaceAddPage> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               // TODO : 실제 장소를 DB에 추가하고 장소 관리창으로 이동하도록 해야함
+
+              addPlace();
             },
 
             child: const Text(

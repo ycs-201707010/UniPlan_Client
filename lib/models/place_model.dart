@@ -5,8 +5,8 @@ import 'package:all_new_uniplan/utils/formatters.dart';
 @immutable
 class Place {
   int? placeId;
-  final String name;
-  final String address;
+  String name;
+  String address;
   DateTime? timestamp;
 
   Place({

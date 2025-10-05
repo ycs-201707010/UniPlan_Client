@@ -34,7 +34,7 @@ class ScheduleService with ChangeNotifier {
 
       if (message == "Get Schedule Successed") {
         var schedulesJson = json["schedule"];
-        print(schedulesJson);
+
         updateScheduleListFromJson(schedulesJson);
         sortSchedulesByDate();
 
@@ -71,10 +71,14 @@ class ScheduleService with ChangeNotifier {
 
       if (message == "Get Schedule By Month Successed") {
         // TODO : 년, 월을 통해 불러온 스케줄 정보를 _currentPageSchedules에 추가하는 로직
+        var schedulesJson = json["schedule"];
+
+        updateScheduleListFromJson(schedulesJson);
+        sortSchedulesByDate();
 
         // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
         notifyListeners();
-      } else if (message == 'Get Schedule By Failed') {
+      } else if (message == 'Get Schedule By Month Failed') {
         return;
       } else {
         throw Exception('Get Schedule Failed: $message');
@@ -146,6 +150,7 @@ class ScheduleService with ChangeNotifier {
           memo: memo,
           isLongProject: isLongProject,
           projectId: projectId,
+          color: color,
         );
 
         addScheduleToList(newSchedule);

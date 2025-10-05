@@ -56,7 +56,11 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 
     if (authService.isLoggedIn) {
       try {
-        await scheduleService.getSchedule(authService.currentUser!.userId);
+        // await scheduleService.getScheduleByMonth(
+        //   2025,
+        //   10,
+        //   authService.currentUser!.userId,
+        // );
       } on Exception catch (e) {
         if (e.toString().contains('404')) {
           print("일정이 비어있습니다.");

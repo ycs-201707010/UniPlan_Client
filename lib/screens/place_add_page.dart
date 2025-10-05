@@ -79,6 +79,34 @@ class _PlaceAddPageState extends State<PlaceAddPage> {
     Navigator.of(context).pop(isSuccess);
   }
 
+  // 일정 수정. _isEditing이 true면 이 메서드가 실행됨.
+  void modifyPlace() async {
+    final authService = context.read<AuthService>();
+    final placeService = context.read<PlaceService>();
+
+    final userId = authService.currentUser!.userId;
+    final name = widget.initialTitle!;
+    final newName = titleController.text.trim();
+    final newAddress = locationController.text;
+
+    // 유효성 검사
+    if (newName.isEmpty || newAddress.isEmpty) {
+      showAlert(context, "모든 항목을 입력해야 합니다.");
+      return;
+    }
+
+    final bool isSuccess = await placeService.modifyPlace(
+      userId,
+      name,
+      newName,
+      newAddress,
+    );
+
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop(isSuccess);
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -134,7 +162,7 @@ class _PlaceAddPageState extends State<PlaceAddPage> {
           child: ElevatedButton(
             onPressed: () async {
               // TODO : 실제 장소를 DB에 추가하고 장소 관리창으로 이동하도록 해야함
-
+              if (_isEditing) {}
               addPlace();
             },
 

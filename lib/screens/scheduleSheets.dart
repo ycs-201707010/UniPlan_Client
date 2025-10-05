@@ -285,7 +285,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: Text('팝업 메시지'),
+                                        title: Text('일정 삭제'),
                                         content: Text('해당 일정을 정말 삭제하시겠습니까?'),
                                         actions: [
                                           TextButton(

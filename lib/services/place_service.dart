@@ -69,7 +69,7 @@ class PlaceService with ChangeNotifier {
     }
   }
 
-  Future<void> deletePlace(int userId, String name) async {
+  Future<bool> deletePlace(int userId, String name) async {
     final Map<String, dynamic> body = {"user_id": userId, "name": name};
 
     try {
@@ -80,6 +80,7 @@ class PlaceService with ChangeNotifier {
       // 입력받은 기간에 존재하는 요일 갯수 만큼 생성하고 currentTimetable에 추가
       if (message == "delete Place Successed") {
         deletePlaceFromList(name);
+        return true;
       } else {
         throw Exception('delete Place Failed: $message');
       }
@@ -90,7 +91,7 @@ class PlaceService with ChangeNotifier {
     }
   }
 
-  Future<void> modifyPlace(
+  Future<bool> modifyPlace(
     int userId,
     String name,
     String newName,
@@ -111,6 +112,7 @@ class PlaceService with ChangeNotifier {
       // 입력받은 기간에 존재하는 요일 갯수 만큼 생성하고 currentTimetable에 추가
       if (message == "Modify Place Successed") {
         updatePlaceFromList(name, newName, newAddress);
+        return true;
       } else {
         throw Exception('Modify Place Failed: $message');
       }

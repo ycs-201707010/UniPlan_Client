@@ -25,12 +25,12 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
   void initState() {
     // TODO: 위젯이 생성되자마자 장소 데이터를 불러오는 함수를 호출함
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final authService = context.read<AuthService>();
+    final userId = authService.currentUser!.userId;
     final placeService = context.watch<PlaceService>();
     final places = placeService.placeList; // 서비스에서 장소 목록 가져오기
 
@@ -84,10 +84,10 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
                             motion: const DrawerMotion(),
                             children: [
                               SlidableAction(
-                                onPressed: (context) {
+                                onPressed: (context) async {
                                   print('주소를 수정할겁니다');
 
-                                  Navigator.push(
+                                  final result = await Navigator.push<bool>(
                                     context,
                                     MaterialPageRoute(
                                       builder:
@@ -98,6 +98,24 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
                                           ),
                                     ),
                                   );
+
+                                  if (result == true) {
+                                    // 성공했을 때 Toast 알림
+                                    if (!context.mounted)
+                                      return; // context 유효성 검사
+
+                                    // TODO : 라이트모드, 다크모드 구분하기
+                                    toastification.show(
+                                      context:
+                                          context, // optional if you use ToastificationWrapper
+                                      type: ToastificationType.success,
+                                      style: ToastificationStyle.flatColored,
+                                      autoCloseDuration: const Duration(
+                                        seconds: 3,
+                                      ),
+                                      title: Text('제하하하하하!! 장소를 수정했다!!'),
+                                    );
+                                  }
                                 },
                                 backgroundColor: const Color(0xFF21B7CA),
                                 foregroundColor: Colors.white,
@@ -105,8 +123,70 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
                                 label: '수정',
                               ),
                               SlidableAction(
-                                onPressed: (context) {
+                                onPressed: (context) async {
                                   print('주소를 삭제합니다');
+
+                                  // TODO : Dialog를 띄워 정말로 장소를 삭제할 것인지 묻고, 확인 버튼이 눌리면 그때 장소를 삭제 후 닫는걸로.
+                                  bool deleteDesided =
+                                      false; // 삭제 여부를 저장하는 bool 변수
+
+                                  await showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('장소 삭제'),
+                                        content: Text('해당 장소를 정말 삭제하시겠습니까?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              deleteDesided = true;
+                                              Navigator.of(
+                                                context,
+                                              ).pop(); // Dialog를 지움
+                                            },
+                                            child: Text('예'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('아니오'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+
+                                  if (deleteDesided == true) {
+                                    print(
+                                      "삭제하기로 한 $userId의 장소는 : ${place.name}",
+                                    );
+
+                                    // 삭제하기를 결정하였다면 여기에서 deleteSchedule() 함수 실행.
+                                    bool deletedResult = await placeService
+                                        .deletePlace(userId, place.name);
+
+                                    // 삭제 처리가 성공적으로 완료되었다면 (true가 반환되면) Toast 알림을 띄웁니다.
+                                    if (deletedResult == true) {
+                                      if (!context.mounted) return;
+                                      // TODO : 라이트모드, 다크모드 구분하기
+                                      toastification.show(
+                                        context: context,
+                                        type: ToastificationType.custom(
+                                          "Schedule Delete",
+                                          Theme.of(context).colorScheme.error,
+                                          Icons.edit_calendar_outlined,
+                                        ),
+                                        style: ToastificationStyle.flatColored,
+                                        autoCloseDuration: const Duration(
+                                          seconds: 3,
+                                        ),
+                                        title: const Text(
+                                          '해당 장소는 성공적으로 삭제되었습니다.',
+                                        ),
+                                      );
+                                    }
+                                  }
                                 },
                                 backgroundColor: const Color(0xFFFE4A49),
                                 foregroundColor: Colors.white,
@@ -172,7 +252,7 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
           height: 55,
           child: ElevatedButton(
             onPressed: () async {
-              print("[System log] 장소 추가/수정 기능의 지도 ON");
+              print("[System log] 장소 추가하기!");
 
               final result = await Navigator.push<bool>(
                 context,

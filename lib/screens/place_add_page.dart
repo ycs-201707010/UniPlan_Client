@@ -6,19 +6,19 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; // 시간 및 날짜 포맷팅
 import 'package:flutter/material.dart';
 
-class AddressAddPage extends StatefulWidget {
+class PlaceAddPage extends StatefulWidget {
   // 수정 모드로 입장시, 생성자에 수정할 데이터를 받을 파라미터 추가
   // TODO : 나중엔 DB에서 데이터를 불러와야 하니까, 그에 맞춰 양식도 수정해야겠다.
   final String? initialTitle;
   final String? initialAddress;
 
-  const AddressAddPage({super.key, this.initialTitle, this.initialAddress});
+  const PlaceAddPage({super.key, this.initialTitle, this.initialAddress});
 
   @override
-  State<AddressAddPage> createState() => _AddressAddPageState();
+  State<PlaceAddPage> createState() => _PlaceAddPageState();
 }
 
-class _AddressAddPageState extends State<AddressAddPage> {
+class _PlaceAddPageState extends State<PlaceAddPage> {
   final TextEditingController titleController =
       TextEditingController(); // 장소 제목을 입력받을 컨트롤러.
 

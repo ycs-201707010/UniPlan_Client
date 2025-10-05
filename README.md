@@ -26,12 +26,11 @@ samples, guidance on mobile development, and a full API reference.
 ## TO-DO List
 
 - 일정 추가 시 저장된 장소/직접 입력 선택하는 기능
-- Elevated, outlined Button 위젯을 사용한 것이 아닌 다른 위젯으로 구현된 버튼의 경우, 이 위젯으로 통일
 - 장기 프로젝트 화면/기능 구현 (table_calendar 라이브러리 사용)
   day가 한자리 수 일 때, select시 원 크기가 작은 디테일 수정하기
-- 다크모드 테마 설정 (ipynb 파일에 위젯별로 색상 코드 정리하기)
 - 일정 생성 시, 색상 지정 및 랜덤 색상 기능 지원.
 - Google Calendar API를 사용하여 공휴일 데이터 불러오기. (Schedule, Project 공통.)
+- 장소로 이동하는 블럭 출력을 켜고 끌 수 있게.
 
 ## TroubleShooting
 

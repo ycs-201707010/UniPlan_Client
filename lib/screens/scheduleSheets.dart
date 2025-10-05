@@ -1,6 +1,5 @@
 // ** 일정이 보여지는 화면 **
 
-import 'package:all_new_uniplan/models/subProject_model.dart';
 import 'package:all_new_uniplan/screens/everytime_link_page.dart';
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';

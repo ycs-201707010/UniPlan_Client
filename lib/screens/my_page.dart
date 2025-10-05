@@ -1,4 +1,4 @@
-import 'package:all_new_uniplan/screens/address_edit_page.dart';
+import 'package:all_new_uniplan/screens/place_edit_page.dart';
 import 'package:all_new_uniplan/screens/setting_page.dart';
 import 'package:flutter/material.dart';
 
@@ -87,7 +87,7 @@ class _MyPageState extends State<MyPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const addressEditPage(),
+                          builder: (context) => const PlaceEditPage(),
                         ),
                       ),
                     },

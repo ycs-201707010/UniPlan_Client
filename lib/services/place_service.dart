@@ -26,7 +26,7 @@ class PlaceService with ChangeNotifier {
         var result = json['result'];
         var placeJsonList = result as List<dynamic>;
 
-        Place home = Place(name: "집", address: "");
+        Place home = Place(placeId: -1, name: "집", address: "");
         _placeList.add(home);
 
         for (final placeJson in placeJsonList) {
@@ -91,7 +91,7 @@ class PlaceService with ChangeNotifier {
         deletePlaceFromList(name);
         return true;
       } else {
-        throw Exception('delete Place Failed: $message');
+        throw Exception('Delete Place Failed: $message');
       }
     } catch (e) {
       print('장소를 삭제하는 과정에서 에러 발생: $e');

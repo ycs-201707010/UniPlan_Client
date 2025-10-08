@@ -51,7 +51,8 @@ class EverytimeService with ChangeNotifier {
         var scheduleJsonList = json['output'] as List<dynamic>;
         // 시간표 정보가 나열된 jsonList을 순회
         for (var scheduleJson in scheduleJsonList) {
-          var subject = Subject.fromJson(scheduleJson);
+          var subject = Subject.fromCrawlJson(scheduleJson);
+
           currentTimetable!.addSubjectToList(subject);
         }
         _currentTimetableList.add(_currentTimetable!);

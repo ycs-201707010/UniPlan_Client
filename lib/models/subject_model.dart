@@ -97,7 +97,7 @@ class Subject {
     }
 
     return Subject(
-      subjectId: json['lecture_id'] as int,
+      subjectId: json['lecture_id'] as int?,
       title: json['title'] as String,
       day: weekdaySIMap[json['day'] as String]!,
       startTime: parseTimeOfDay(json['startTime'] as String),
@@ -105,6 +105,27 @@ class Subject {
 
       // json에 해당 키가 없으면 null로 처리
       classroom: json['classRoom'] as String?,
+      professor: json['professor'] as String?,
+    );
+  }
+
+  // JSON 데이터를 받아 Schedule 객체를 생성하는 factory 생성자
+  factory Subject.fromCrawlJson(Map<String, dynamic> json) {
+    // "HH:mm:ss" 형식의 문자열을 TimeOfDay 객체로 변환하는 헬퍼 함수
+    TimeOfDay parseTimeOfDay(String timeString) {
+      final parts = timeString.split(':');
+      return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    }
+
+    return Subject(
+      subjectId: json['lecture_id'] as int?,
+      title: json['title'] as String,
+      day: weekdaySIMap[json['day'] as String]!,
+      startTime: parseTimeOfDay(json['start_time'] as String),
+      endTime: parseTimeOfDay(json['end_time'] as String),
+
+      // json에 해당 키가 없으면 null로 처리
+      classroom: json['classroom'] as String?,
       professor: json['professor'] as String?,
     );
   }

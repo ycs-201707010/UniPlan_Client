@@ -34,6 +34,7 @@ samples, guidance on mobile development, and a full API reference.
 - (add_schedule.dart) DropDownList에서 장소 선택시 메서드에 place의 name이 들어가도록 변경
 - (everytime_link_page.dart) 시작 날짜를 정하지 않으면 종료 일자를 정할 수 없으며, 시작 날짜 이전으로 정하지 못하게
   유효성 검사 로직을 만들 것.
+- (project_page.dart) 서브 프로젝트의 증감을 사용자가 어떻게 조작하는지 도움말 버튼 부착하기
 
 ## TroubleShooting
 

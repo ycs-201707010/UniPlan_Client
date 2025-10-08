@@ -3,6 +3,8 @@ import 'package:all_new_uniplan/models/subProject_model.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
@@ -25,7 +27,7 @@ class _ProjectPageState extends State<ProjectPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
-  Map<int, List<SubProject>> subProjectList = {};
+  Map<int, List<SubProject>> _subProjectList = {};
 
   @override
   void initState() {
@@ -40,8 +42,11 @@ class _ProjectPageState extends State<ProjectPage> {
     final projectService = context.read<ProjectService>();
     final authService = context.read<AuthService>();
 
-    try {
+    setState(() {
       _isLoading = true;
+    });
+
+    try {
       // 사용자 ID로 모든 프로젝트와 하위 프로젝트 데이터를 불러옵니다.
       await projectService.getProjectByUserId(authService.currentUser!.userId);
     } catch (e) {
@@ -69,15 +74,31 @@ class _ProjectPageState extends State<ProjectPage> {
 
   Future<void> _loadSubProjectByDate() async {
     final projectService = context.read<ProjectService>();
+    if (projectService.projects == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      _isLoading = true;
-      // 사용자 ID로 모든 프로젝트와 하위 프로젝트 데이터를 불러옵니다.
+      final Map<int, List<SubProject>> newSubProjects = {};
 
-      for (Project project in projectService.projects!.values) {
-        subProjectList[project.projectId!] = await projectService
-            .getSubProjectByDate(project.projectId!, _focusedDay);
+      for (final project in projectService.projects!.values) {
+        // 해당 날짜의 하위 프로젝트 목록을 서버에서 가져옴
+        final subProjects = await projectService.getSubProjectByDate(
+          project.projectId!,
+          _focusedDay,
+        );
+        if (subProjects.isNotEmpty) {
+          newSubProjects[project.projectId!] = subProjects;
+        }
       }
+
+      // 모든 요청이 끝나면 상태를 한 번에 업데이트
+      setState(() {
+        _subProjectList = newSubProjects;
+      });
+      print("SubProjectList : $_subProjectList");
     } catch (e) {
       if (mounted) {
         toastification.show(
@@ -294,41 +315,116 @@ class _ProjectPageState extends State<ProjectPage> {
                 //   ),
                 // ),
                 for (final project in projects)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 32.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // --- 프로젝트(카테고리) 제목 ---
-                        Text(
-                          project.title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange,
-                          ), // 색상은 동적으로 변경 가능
-                        ),
-                        Divider(color: Colors.orange.shade300, thickness: 2),
-                        const SizedBox(height: 8),
-
-                        //--- 하위 프로젝트(목표) 목록 ---
-                        if (subProjectList[project.projectId!] != null)
-                          for (final subProject in project.subProjects!)
-                            ProjectProgressCard(
-                              title: subProject.subGoal!,
-                              currentStep: subProject.done ?? 0,
-                              maxStep:
-                                  subProject.maxDone ??
-                                  1, // maxDone이 null이면 1로 처리
-                            )
-                        else
-                          const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text('등록된 하위 목표가 없습니다.'),
+                  if (_subProjectList.containsKey(project.projectId))
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: 32.0,
+                        left: 17,
+                        right: 17,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // --- 프로젝트(카테고리) 제목 ---
+                          Text(
+                            project.title,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ), // 색상은 동적으로 변경 가능
                           ),
-                      ],
+                          Divider(color: Colors.orange.shade300, thickness: 2),
+                          const SizedBox(height: 8),
+
+                          //--- 하위 프로젝트(목표) 목록 ---
+                          if (_subProjectList[project.projectId!] != null)
+                            for (final subProject in project.subProjects!)
+                              ProjectProgressCard(
+                                subProjectId: subProject.subProjectId!,
+                                title: subProject.subGoal!,
+                                currentStep: subProject.done ?? 0,
+                                maxStep:
+                                    subProject.maxDone ??
+                                    1, // maxDone이 null이면 1로 처리
+                                multiPerDay: subProject.multiPerDay!,
+                                // ✅ 1. 진척도 증가 (탭)
+                                onIncrement: () {
+                                  // 현재 진척도가 최대치보다 작을 때만 실행
+                                  if ((subProject.done ?? 0) <
+                                      (subProject.maxDone ?? 1)) {
+                                    projectService.addSubProjectProgress(
+                                      subProject.subProjectId!,
+                                      _focusedDay, // +1 증가
+                                    );
+                                  }
+                                },
+
+                                // ✅ 2. 진척도 감소 (롱프레스)
+                                onDecrement: () {
+                                  // 현재 진척도가 0보다 클 때만 실행
+                                  if ((subProject.done ?? 0) > 0) {
+                                    projectService.cancelSubProjectProgress(
+                                      subProject.subProjectId!,
+                                      _focusedDay, // -1 감소
+                                    );
+                                  }
+                                },
+
+                                // ✅ 3. 삭제 (슬라이드)
+                                onDelete: () {
+                                  // 실수로 삭제하는 것을 방지하기 위해 확인 다이얼로그를 띄웁니다.
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext dialogContext) {
+                                      return AlertDialog(
+                                        title: const Text('목표 삭제'),
+                                        content: Text(
+                                          '\'${subProject.subGoal}\' 목표를 정말 삭제하시겠습니까?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () =>
+                                                    Navigator.of(
+                                                      dialogContext,
+                                                    ).pop(), // 취소
+                                            child: const Text('아니오'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              // ProjectService의 삭제 메서드 호출
+                                              context
+                                                  .read<ProjectService>()
+                                                  .deleteSubProject(
+                                                    project.projectId!,
+                                                    subProject.subProjectId!,
+                                                  );
+                                              Navigator.of(
+                                                dialogContext,
+                                              ).pop(); // 다이얼로그 닫기
+                                            },
+                                            child: const Text(
+                                              '예',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              )
+                          else
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('등록된 하위 목표가 없습니다.'),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
               ],
             ),
           ),
@@ -514,15 +610,26 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class ProjectProgressCard extends StatelessWidget {
+  final int subProjectId;
   final String title;
   final int currentStep;
   final int maxStep;
+  final bool multiPerDay;
+
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+  final VoidCallback onDelete;
 
   const ProjectProgressCard({
     super.key,
+    required this.subProjectId,
+    required this.maxStep,
     required this.title,
     required this.currentStep,
-    required this.maxStep,
+    required this.multiPerDay,
+    required this.onIncrement,
+    required this.onDecrement,
+    required this.onDelete,
   });
 
   @override
@@ -531,67 +638,47 @@ class ProjectProgressCard extends StatelessWidget {
     final double progress = (maxStep == 0) ? 0.0 : currentStep / maxStep;
     final bool isCompleted = currentStep >= maxStep;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.shade300, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+    // ✅ 2. 전체를 Slidable 위젯으로 감쌉니다.
+    return Slidable(
+      key: ValueKey(title), // 각 항목을 구분하기 위한 Key
+      groupTag: 'sub-project-list', // 하나의 항목만 열리도록 그룹 지정
+      // 왼쪽으로 슬라이드했을 때 나타날 '삭제' 버튼
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.25, // 차지할 너비
+        children: [
+          SlidableAction(
+            onPressed: (context) => onDelete(), // ✅ onDelete 콜백 호출
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: '삭제',
+            borderRadius: BorderRadius.circular(12),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          // ✅ 2. 목표 제목과 진행도 바 (대부분의 공간 차지)
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // ✅ 3. 진행도 바
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Colors.orange,
-                  ),
-                  minHeight: 6,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
 
-          // ✅ 4. 진행률 텍스트와 아이콘
-          Column(
-            children: [
-              Text(
-                '$currentStep/$maxStep',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Icon(
-                isCompleted ? Icons.check_circle : Icons.directions_run,
-                color: isCompleted ? Colors.orange : Colors.black,
-                size: 28,
-              ),
-            ],
+      // ✅ 3. 기존 UI를 InkWell로 감싸서 탭, 롱프레스 제스처를 추가합니다.
+      child: InkWell(
+        onTap: onIncrement, // ✅ 짧게 탭 -> onIncrement 콜백 호출
+        onLongPress: () {
+          HapticFeedback.mediumImpact(); // 길게 눌렀을 때 진동 피드백
+          onDecrement(); // ✅ 길게 누르기 -> onDecrement 콜백 호출
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          // ... (기존 Container 코드는 그대로)
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.orange.shade300, width: 1.5),
           ),
-        ],
+          child: Row(
+            // ... (기존 Row와 내부 위젯들은 그대로)
+          ),
+        ),
       ),
     );
   }

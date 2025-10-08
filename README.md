@@ -30,8 +30,10 @@ samples, guidance on mobile development, and a full API reference.
   day가 한자리 수 일 때, select시 원 크기가 작은 디테일 수정하기
 - 일정 생성 시, 색상 지정 및 랜덤 색상 기능 지원.
 - Google Calendar API를 사용하여 공휴일 데이터 불러오기. (Schedule, Project 공통.)
-- 장소로 이동하는 블럭 출력을 켜고 끌 수 있게.
+- 장소로 이동하는 시간을 표시한 블럭의 출력을 켜고 끌 수 있게.
 - (add_schedule.dart) DropDownList에서 장소 선택시 메서드에 place의 name이 들어가도록 변경
+- (everytime_link_page.dart) 시작 날짜를 정하지 않으면 종료 일자를 정할 수 없으며, 시작 날짜 이전으로 정하지 못하게
+  유효성 검사 로직을 만들 것.
 
 ## TroubleShooting
 

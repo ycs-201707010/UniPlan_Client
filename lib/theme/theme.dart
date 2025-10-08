@@ -92,7 +92,7 @@ class MaterialTheme {
       surfaceContainerHigh: Color(
         0xFF424744,
       ), // Surface와 미묘하게 다른 표면 (TextField 배경 등)
-      onSurfaceVariant: Color(0xFF9da5b6), // 전체 배경 위의 텍스트/아이콘
+      onSurfaceVariant: Color(0xFFc9cedc), // 전체 배경 위의 텍스트/아이콘
       // --- 기타 색상 ---
       outline: Color(0xFF4D4D4D), // 테두리선 (OutlinedButton, Divider 등)
       outlineVariant: Color(0xFF424744),

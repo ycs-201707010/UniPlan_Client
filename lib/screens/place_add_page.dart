@@ -121,14 +121,7 @@ class _PlaceAddPageState extends State<PlaceAddPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("장소 제목"),
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
-                ),
-              ),
+              TextField(controller: titleController),
               const SizedBox(height: 16),
               const Text("수행 장소"),
               TextField(
@@ -137,9 +130,6 @@ class _PlaceAddPageState extends State<PlaceAddPage> {
                 decoration: const InputDecoration(
                   suffixIcon: Icon(Icons.place),
                   contentPadding: EdgeInsets.symmetric(vertical: 14),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
                 ),
                 onTap: pickLocation,
               ),

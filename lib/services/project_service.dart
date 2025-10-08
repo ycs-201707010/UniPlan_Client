@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'package:all_new_uniplan/models/subject_model.dart';
 import 'package:all_new_uniplan/utils/formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/api/api_client.dart';
 import 'package:all_new_uniplan/models/project_model.dart';
 import 'package:all_new_uniplan/models/subProject_model.dart';
-import 'package:all_new_uniplan/services/subProject_service.dart';
 
 class ProjectService with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
@@ -560,7 +558,7 @@ class ProjectService with ChangeNotifier {
   // json에 지정된 여러 개의 SubProject 정보들을 추출하여 이를 저장하는 List 타입 필드에 저장하는 메서드
   void updateSubProjectListFromJson(int projectId, dynamic subProjectsJson) {
     // 기존 목록을 비움
-    _projects![projectId]!.subProjects!.clear();
+    _projects[projectId]!.subProjects!.clear();
     final subProjectMap = subProjectsJson as Map;
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
 

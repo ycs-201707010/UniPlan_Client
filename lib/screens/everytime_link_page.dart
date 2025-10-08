@@ -4,6 +4,7 @@ import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -33,7 +34,10 @@ class SubjectListItem extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF505050)),
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -266,7 +270,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.outlineVariant,
+                      color: Theme.of(context).colorScheme.outline,
                       width: 2,
                     ),
 
@@ -285,10 +289,10 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
 
                         // 마지막 항목이 아닐 때만 Divider를 추가
                         if (i < subjects.length - 1)
-                          const Divider(
+                          Divider(
                             height: 1, // Divider의 높이 (상하 여백 포함)
                             thickness: 1, // 선의 두께
-                            color: Color(0xFFE0E0E0),
+                            color: Theme.of(context).colorScheme.outlineVariant,
                           ),
                       ],
                     ],
@@ -301,7 +305,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                   child: Text(
                     '3. 전부 올바르게 불러와졌다면, 시간표의 제목과\n기간 범위를 설정해주세요',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
@@ -312,14 +316,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                 const Text("일정 제목"),
                 TextField(
                   controller: titleController,
-                  decoration: InputDecoration(
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Color(0xFF5CE546),
-                        width: 2,
-                      ),
-                    ),
-                  ),
+                  decoration: InputDecoration(),
                 ),
                 SizedBox(height: 12),
                 Row(
@@ -328,15 +325,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                       child: TextField(
                         controller: startDateController,
                         readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: '시작 일자',
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Color(0xFF5CE546),
-                              width: 2,
-                            ),
-                          ),
-                        ),
+                        decoration: InputDecoration(labelText: '시작 일자'),
                         onTap:
                             () => pickDate(context, true, startDateController),
                       ),
@@ -346,15 +335,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                       child: TextField(
                         controller: endDateController,
                         readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: '종료 일자',
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Color(0xFF5CE546),
-                              width: 2,
-                            ),
-                          ),
-                        ),
+                        decoration: InputDecoration(labelText: '종료 일자'),
                         onTap:
                             () => pickDate(context, false, endDateController),
                       ),
@@ -407,8 +388,11 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
         if (_isLoading)
           Container(
             color: const Color(0x80000000), // 반투명 검은 배경 (암전)
-            child: const Center(
-              child: CircularProgressIndicator(color: Colors.white),
+            child: Center(
+              // TODO : 챗봇에서 사용했던 로딩 연출로 변경
+              child: SpinKitFadingCube(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
       ],

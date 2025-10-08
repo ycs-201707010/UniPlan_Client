@@ -25,7 +25,7 @@ class _SettingPageState extends State<SettingPage> {
 
     return Scaffold(
       appBar: TopBar(title: "환경설정"),
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -442,14 +442,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("일정 제목"),
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
-                ),
-              ),
+              TextField(controller: titleController),
               const SizedBox(height: 16),
               const Text("수행일"),
               TextField(
@@ -459,9 +452,6 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   contentPadding: EdgeInsets.symmetric(
                     vertical: 14,
                   ), // ✅ 세로 정렬 중앙
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
                 ),
                 readOnly: true,
                 onTap: () {
@@ -476,15 +466,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                     child: TextField(
                       controller: startTimeController,
                       readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: '시작 시간',
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0xFF5CE546),
-                            width: 2,
-                          ),
-                        ),
-                      ),
+                      decoration: InputDecoration(labelText: '시작 시간'),
                       onTap: () => pickTime(context, true),
                     ),
                   ),
@@ -493,15 +475,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                     child: TextField(
                       controller: endTimeController,
                       readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: '종료 시간',
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0xFF5CE546),
-                            width: 2,
-                          ),
-                        ),
-                      ),
+                      decoration: InputDecoration(labelText: '종료 시간'),
                       onTap: () => pickTime(context, false),
                     ),
                   ),
@@ -529,9 +503,6 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                 decoration: const InputDecoration(
                   suffixIcon: Icon(Icons.place),
                   contentPadding: EdgeInsets.symmetric(vertical: 14),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
                 ),
                 hint: const Text('장소 선택'), // 아무것도 선택되지 않았을 때 표시될 텍스트
                 // ✅ 3. 아이템 목록 동적 생성
@@ -570,15 +541,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
               ),
               const SizedBox(height: 16),
               const Text("메모"),
-              TextField(
-                maxLines: 5,
-                controller: memoController,
-                decoration: InputDecoration(
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
-                ),
-              ),
+              TextField(maxLines: 5, controller: memoController),
               const SizedBox(height: 24),
 
               Text("색상 선택"),

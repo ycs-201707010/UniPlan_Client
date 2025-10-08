@@ -153,7 +153,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                   child: Text(
                     '등록된 과목을 다수 불러와\n시간표에 저장할 수 있습니다.',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
@@ -166,7 +166,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                   child: Text(
                     '1. 에브리타임 시간표 URL을 입력란에 붙여넣기\n하신 뒤, "시간표 불러오기" 버튼을 눌러주세요',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
@@ -175,16 +175,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                 SizedBox(height: 12),
                 TextField(
                   controller: URLController,
-                  decoration: InputDecoration(
-                    hintText: "여기에 URL 붙여넣기",
-
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Color(0xFF5CE546),
-                        width: 2,
-                      ),
-                    ),
-                  ),
+                  decoration: InputDecoration(hintText: "여기에 URL 붙여넣기"),
                 ),
 
                 SizedBox(height: 12),
@@ -246,6 +237,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                         Text(
                           "에브리타임 시간표 불러오기",
                           style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -261,7 +253,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                   child: Text(
                     '2. 불러온 시간표의 과목 목록을 확인해주세요',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
@@ -273,7 +265,10 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 2),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                      width: 2,
+                    ),
 
                     borderRadius: BorderRadius.circular(12),
                   ),

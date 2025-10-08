@@ -203,7 +203,7 @@ class _ChatPageState extends State<ChatbotPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: chatTopBar(),
       body: Column(
         children: [
@@ -256,6 +256,7 @@ class _ChatPageState extends State<ChatbotPage> {
                             decoration: const InputDecoration(
                               hintText: '여기에 메시지를 입력...',
                               border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
                             ),
                           ),
                         ),

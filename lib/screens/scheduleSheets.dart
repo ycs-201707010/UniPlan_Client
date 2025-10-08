@@ -141,7 +141,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     } else if (today.weekday == DateTime.sunday) {
       return Colors.red; // 일요일이면 빨간색
     } else {
-      return Theme.of(context).colorScheme.onPrimaryContainer; // 평일이면 기존 색상
+      return Theme.of(context).colorScheme.primaryContainer; // 평일이면 기존 색상
     }
   }
 
@@ -188,6 +188,9 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                     ),
                     todayHighlightColor:
                         _getTodayHighlightColor(), //Color(0xEE265A3A),
+                    todayTextStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
                     selectionDecoration: BoxDecoration(
                       color: Colors.transparent,
                       border: Border.all(

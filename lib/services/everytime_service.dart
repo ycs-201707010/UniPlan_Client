@@ -33,7 +33,7 @@ class EverytimeService with ChangeNotifier {
   Timetable? get currentTimetable => _currentTimetable;
 
   // 시간표의 반복 일정을 생성하는 과정에서 충돌/비충돌 일정을 각각 저장하는 필드
-  List<ScheduleConflict>? _conflictingSchedules = [];
+  final List<ScheduleConflict> _conflictingSchedules = [];
   List<ScheduleConflict>? get conflictingSchedules => _conflictingSchedules;
 
   // 에브리타임 시간표 링크를 통해 정보를 크롤링하여 가져오는 메서드
@@ -42,6 +42,7 @@ class EverytimeService with ChangeNotifier {
     _currentTimetable = Timetable();
     try {
       final response = await _apiClient.post('/everytime', body: body);
+      print('서버 응답 본문: ${response.body}');
       var json = jsonDecode(response.body);
       var message = json['message'];
 
@@ -118,7 +119,7 @@ class EverytimeService with ChangeNotifier {
       if (message == "Get Timetable Subject Successed") {
         _currentTimetable!.subjects!.clear();
         var subjectJsonList = json['result'] as List<dynamic>;
-        if (subjectJsonList.length == 0) {
+        if (subjectJsonList.isEmpty) {
           return;
         }
         for (final subjectJson in subjectJsonList) {
@@ -252,15 +253,15 @@ class EverytimeService with ChangeNotifier {
           var result = json['result'];
           print(result);
 
-          var created_count = result["created_count"] as int;
+          var createdCount = result["created_count"] as int;
 
           // 개별 일정이 생성되지 않은 경우
-          if (created_count == 0) {
+          if (createdCount == 0) {
             return;
           } else {
             var scheduleJsonList = result["schedules"] as List<dynamic>;
 
-            if (scheduleJsonList.length != 0) {
+            if (scheduleJsonList.isNotEmpty) {
               for (final scheduleJson in scheduleJsonList) {
                 final schedule = Schedule.fromJson(
                   scheduleJson as Map<String, dynamic>,
@@ -272,7 +273,7 @@ class EverytimeService with ChangeNotifier {
 
             // 반복횟수와 일정 생성 개수가 같지 않은 경우
             // 기존 일정과 충돌이 발생한 것
-            if (created_count != repeatCount) {
+            if (createdCount != repeatCount) {
               var skippedDates = result["skipped_dates"] as List<dynamic>;
 
               // 충돌이 발생한 날짜 목록을 순회하며 충돌 일정 목록을 갱신

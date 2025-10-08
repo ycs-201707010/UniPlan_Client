@@ -105,7 +105,7 @@ class uniPlanApp extends StatelessWidget {
         // 버튼을 생성할 때 따로 Theme.of(context)를 통해 불러오지 않아도 된다.
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF00FFA3), // ElevatedButton의 배경색
+            backgroundColor: Color(0xFF1bb373), // ElevatedButton의 배경색
             disabledBackgroundColor: Colors.grey.shade300,
             disabledForegroundColor: Colors.grey.shade500,
             foregroundColor: Colors.white, // ElevatedButton의 텍스트/아이콘 색상
@@ -123,7 +123,7 @@ class uniPlanApp extends StatelessWidget {
         // 채워지지 않은 버튼(Out)
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: const Color(0xFF6BE347), width: 2),
+            side: BorderSide(color: Color(0xFF1bb373), width: 2),
             foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12), // 버튼 모서리 둥글게
@@ -137,6 +137,9 @@ class uniPlanApp extends StatelessWidget {
         ),
 
         inputDecorationTheme: InputDecorationTheme(
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF1bb373), width: 2),
+          ),
           hintStyle: const TextStyle(
             color: Color.fromARGB(255, 139, 139, 139),
             fontSize: 16,
@@ -198,6 +201,9 @@ class uniPlanApp extends StatelessWidget {
           hintStyle: const TextStyle(
             color: Color.fromARGB(255, 139, 139, 139),
             fontSize: 16,
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF00FFA3), width: 2),
           ),
         ),
       ),

@@ -50,12 +50,12 @@ class _LoginPageState extends State<LoginPage> {
                     controller: idController,
                     decoration: InputDecoration(
                       hintText: '여기에 아이디 입력',
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 2,
-                        ),
-                      ),
+                      // focusedBorder: UnderlineInputBorder(
+                      //   borderSide: BorderSide(
+                      //     color: Theme.of(context).colorScheme.primary,
+                      //     width: 2,
+                      //   ),
+                      // ),
                     ),
                   ),
 

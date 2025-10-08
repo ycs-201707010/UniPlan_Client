@@ -26,7 +26,7 @@ class PlaceService with ChangeNotifier {
         var result = json['result'];
         var placeJsonList = result as List<dynamic>;
 
-        Place home = Place(name: "집", address: "");
+        Place home = Place(placeId: -1, name: "집", address: "");
         _placeList.add(home);
 
         for (final placeJson in placeJsonList) {
@@ -85,10 +85,10 @@ class PlaceService with ChangeNotifier {
       var message = json['message'];
 
       // 입력받은 기간에 존재하는 요일 갯수 만큼 생성하고 currentTimetable에 추가
-      if (message == "delete Place Successed") {
+      if (message == "Delete Place Successed") {
         deletePlaceFromList(name);
       } else {
-        throw Exception('delete Place Failed: $message');
+        throw Exception('Delete Place Failed: $message');
       }
     } catch (e) {
       print('장소를 삭제하는 과정에서 에러 발생: $e');

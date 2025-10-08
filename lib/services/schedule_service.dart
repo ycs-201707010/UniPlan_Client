@@ -78,7 +78,7 @@ class ScheduleService with ChangeNotifier {
 
         // 상태 변경을 앱 전체에 알려 해당 클래스를 구독한 페이지에 영향을 준다
         notifyListeners();
-      } else if (message == 'Get Schedule By Month Failed') {
+      } else if (message == 'Get Schedule By Month Empty') {
         return;
       } else {
         throw Exception('Get Schedule Failed: $message');

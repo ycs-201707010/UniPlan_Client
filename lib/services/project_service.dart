@@ -455,8 +455,9 @@ class ProjectService with ChangeNotifier {
       var message = json['message'];
       if (message == "Add SubProject Progress Successed") {
         var result = json['result'];
-        var count = result['count'] as int;
+        var count = result['count_for_date'] as int;
 
+        notifyListeners();
         return count;
       } else {
         throw Exception('Add SubProject Progress Failed: $message');

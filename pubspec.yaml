@@ -96,6 +96,8 @@ flutter:
     - assets/images/logo_512.png
     - assets/images/bot_profile_pic.png
     - assets/images/logo_everytime.png
+    - assets/images/project_profile_pic.png
+    - assets/images/schedule_profile_pic.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

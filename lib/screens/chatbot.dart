@@ -372,7 +372,7 @@ class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            '유니봇 1.0',
+            '스케줄봇 1.0',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           IconButton(

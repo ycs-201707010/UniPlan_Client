@@ -127,9 +127,6 @@ class _ProjectPageState extends State<ProjectPage> {
     }
   }
 
-  // TODO : 리스트를 그리는 함수.
-  void writeSubProjectList() {}
-
   @override
   Widget build(BuildContext context) {
     // watch를 사용하여 ProjectService의 데이터 변경을 감지
@@ -340,6 +337,7 @@ class _ProjectPageState extends State<ProjectPage> {
                           //--- 하위 프로젝트(목표) 목록 ---
                           if (_subProjectList[project.projectId!] != null)
                             for (final subProject in project.subProjects!)
+                              // 하위 프로젝트를 하나씩 카드로 표시
                               ProjectProgressCard(
                                 subProjectId: subProject.subProjectId!,
                                 title: subProject.subGoal!,
@@ -348,15 +346,13 @@ class _ProjectPageState extends State<ProjectPage> {
                                     subProject.maxDone ??
                                     1, // maxDone이 null이면 1로 처리
                                 multiPerDay: subProject.multiPerDay!,
+
                                 // ✅ 1. 진척도 증가 (탭)
-                                onIncrement: () {
+                                onIncrement: () async {
                                   // 현재 진척도가 최대치보다 작을 때만 실행
                                   if ((subProject.done ?? 0) <
                                       (subProject.maxDone ?? 1)) {
-                                    projectService.addSubProjectProgress(
-                                      subProject.subProjectId!,
-                                      _focusedDay, // +1 증가
-                                    );
+                                    _loadSubProjectByDate();
                                   }
                                 },
 
@@ -609,6 +605,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
+// 하위 프로젝트를 표시할 카드 위젯.
 class ProjectProgressCard extends StatelessWidget {
   final int subProjectId;
   final String title;
@@ -676,7 +673,51 @@ class ProjectProgressCard extends StatelessWidget {
             border: Border.all(color: Colors.orange.shade300, width: 1.5),
           ),
           child: Row(
-            // ... (기존 Row와 내부 위젯들은 그대로)
+            children: [
+              // ✅ 2. 목표 제목과 진행도 바 (대부분의 공간 차지)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // ✅ 3. 진행도 바
+                    LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: Colors.grey[300],
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.orange,
+                      ),
+                      minHeight: 6,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // ✅ 4. 진행률 텍스트와 아이콘
+              Column(
+                children: [
+                  Text(
+                    '$currentStep/$maxStep',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Icon(
+                    isCompleted ? Icons.check_circle : Icons.directions_run,
+                    color: isCompleted ? Colors.orange : Colors.black,
+                    size: 28,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

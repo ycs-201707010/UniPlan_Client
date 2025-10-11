@@ -38,6 +38,8 @@ class _ProjectPageState extends State<ProjectPage> {
     try {
       // 사용자 ID로 모든 프로젝트와 하위 프로젝트 데이터를 불러옵니다.
       await projectService.getProjectByUserId(authService.currentUser!.userId);
+      await projectService.getSubProjectByDate(5, DateTime(2025, 10, 13));
+      await projectService.addSubProjectProgress(15, DateTime(2025, 10, 15));
     } catch (e) {
       if (mounted) {
         // todo : toastification로 변경

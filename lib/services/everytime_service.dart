@@ -176,7 +176,6 @@ class EverytimeService with ChangeNotifier {
   ) async {
     final Map<String, dynamic> body = subject.toJson();
     body.addAll({"user_id": userId, "class_id": classId});
-    print(body);
     try {
       final response = await _apiClient.post(
         '/everytime/addTimetableSubject',

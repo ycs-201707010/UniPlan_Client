@@ -1,6 +1,5 @@
 // ** 일정이 보여지는 화면 **
 
-import 'package:all_new_uniplan/models/subProject_model.dart';
 import 'package:all_new_uniplan/screens/everytime_link_page.dart';
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
@@ -56,11 +55,11 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 
     if (authService.isLoggedIn) {
       try {
-        // await scheduleService.getScheduleByMonth(
-        //   2025,
-        //   10,
-        //   authService.currentUser!.userId,
-        // );
+        await scheduleService.getScheduleByMonth(
+          2025,
+          10,
+          authService.currentUser!.userId,
+        );
       } on Exception catch (e) {
         if (e.toString().contains('404')) {
           print("일정이 비어있습니다.");
@@ -142,7 +141,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     } else if (today.weekday == DateTime.sunday) {
       return Colors.red; // 일요일이면 빨간색
     } else {
-      return Theme.of(context).colorScheme.onPrimaryContainer; // 평일이면 기존 색상
+      return Theme.of(context).colorScheme.primaryContainer; // 평일이면 기존 색상
     }
   }
 
@@ -189,6 +188,9 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                     ),
                     todayHighlightColor:
                         _getTodayHighlightColor(), //Color(0xEE265A3A),
+                    todayTextStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
                     selectionDecoration: BoxDecoration(
                       color: Colors.transparent,
                       border: Border.all(
@@ -286,7 +288,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: Text('팝업 메시지'),
+                                        title: Text('일정 삭제'),
                                         content: Text('해당 일정을 정말 삭제하시겠습니까?'),
                                         actions: [
                                           TextButton(
@@ -407,6 +409,8 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                       autoCloseDuration: const Duration(seconds: 3),
                       title: Text('제하하하하하!! 일정을 등록했다!!'),
                     );
+
+                    _loadSchedules();
                   }
                 },
               ),

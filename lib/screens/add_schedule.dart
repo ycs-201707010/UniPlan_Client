@@ -1,8 +1,11 @@
 // ** 일정을 직접 등록하는 화면 **
+import 'package:all_new_uniplan/models/place_model.dart';
 import 'package:all_new_uniplan/models/schedule_model.dart';
 import 'package:all_new_uniplan/screens/location_deside_page.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
+import 'package:all_new_uniplan/services/place_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
+import 'package:all_new_uniplan/widgets/basicDialog.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -65,22 +68,22 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   }
 
   // Dialog 출력 함수. 재사용하기 위해 만듦.
-  void showAlert(String message) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("입력 오류"),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("확인"),
-              ),
-            ],
-          ),
-    );
-  }
+  // void showAlert(String message) {
+  //   showDialog(
+  //     context: context,
+  //     builder:
+  //         (context) => AlertDialog(
+  //           title: const Text("입력 오류"),
+  //           content: Text(message),
+  //           actions: [
+  //             TextButton(
+  //               onPressed: () => Navigator.pop(context),
+  //               child: const Text("확인"),
+  //             ),
+  //           ],
+  //         ),
+  //   );
+  // }
 
   // 시간 비교를 위한 보조 함수.
   int _timeOfDayToMinutes(TimeOfDay time) => time.hour * 60 + time.minute;
@@ -251,11 +254,11 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 
     // ✅ 통합 유효성 검사
     if (title.isEmpty || date == null || start == null || end == null) {
-      showAlert("장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
+      showAlert(context, "장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
       return;
     }
     if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
-      showAlert("시작 시간은 종료 시간보다 이전이어야 합니다.");
+      showAlert(context, "시작 시간은 종료 시간보다 이전이어야 합니다.");
       return;
     }
 
@@ -374,11 +377,11 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 
     // ✅ 통합 유효성 검사
     if (title.isEmpty || date == null || start == null || end == null) {
-      showAlert("장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
+      showAlert(context, "장소와 메모란을 제외한 모든 항목을 입력해야 합니다.");
       return;
     }
     if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
-      showAlert("시작 시간은 종료 시간보다 이전이어야 합니다.");
+      showAlert(context, "시작 시간은 종료 시간보다 이전이어야 합니다.");
       return;
     }
 
@@ -407,6 +410,9 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
     Navigator.of(context).pop(isSuccess);
   }
 
+  // ✅ 1. 선택된 장소를 저장할 상태 변수 추가
+  Place? _selectedPlace;
+
   @override
   void dispose() {
     // 컨트롤러들을 해제합니다.
@@ -421,6 +427,10 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ PlaceService 인스턴스를 가져옵니다.
+    final placeService = context.watch<PlaceService>();
+    final places = placeService.placeList;
+
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
@@ -432,14 +442,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("일정 제목"),
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
-                ),
-              ),
+              TextField(controller: titleController),
               const SizedBox(height: 16),
               const Text("수행일"),
               TextField(
@@ -449,9 +452,6 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                   contentPadding: EdgeInsets.symmetric(
                     vertical: 14,
                   ), // ✅ 세로 정렬 중앙
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
                 ),
                 readOnly: true,
                 onTap: () {
@@ -466,15 +466,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                     child: TextField(
                       controller: startTimeController,
                       readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: '시작 시간',
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0xFF5CE546),
-                            width: 2,
-                          ),
-                        ),
-                      ),
+                      decoration: InputDecoration(labelText: '시작 시간'),
                       onTap: () => pickTime(context, true),
                     ),
                   ),
@@ -483,15 +475,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
                     child: TextField(
                       controller: endTimeController,
                       readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: '종료 시간',
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0xFF5CE546),
-                            width: 2,
-                          ),
-                        ),
-                      ),
+                      decoration: InputDecoration(labelText: '종료 시간'),
                       onTap: () => pickTime(context, false),
                     ),
                   ),
@@ -499,29 +483,65 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
               ),
               const SizedBox(height: 16),
               const Text("수행 장소"),
-              TextField(
-                controller: locationController,
-                readOnly: true,
+              // TextField(
+              //   controller: locationController,
+              //   readOnly: true,
+              //   decoration: const InputDecoration(
+              //     suffixIcon: Icon(Icons.place),
+              //     contentPadding: EdgeInsets.symmetric(vertical: 14),
+              //     focusedBorder: UnderlineInputBorder(
+              //       borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
+              //     ),
+              //   ),
+              //   onTap: pickLocation,
+              // ),
+              // ✅ 2. 기존 TextField를 DropdownButtonFormField로 교체
+              DropdownButtonFormField<Object>(
+                // 현재 선택된 값을 표시 (UI 업데이트용)
+                value: _selectedPlace,
+                isExpanded: true, // 텍스트가 길 경우를 대비
                 decoration: const InputDecoration(
                   suffixIcon: Icon(Icons.place),
                   contentPadding: EdgeInsets.symmetric(vertical: 14),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
                 ),
-                onTap: pickLocation,
+                hint: const Text('장소 선택'), // 아무것도 선택되지 않았을 때 표시될 텍스트
+                // ✅ 3. 아이템 목록 동적 생성
+                items: [
+                  // '직접 선택' 메뉴 아이템을 맨 위에 추가
+                  const DropdownMenuItem<Object>(
+                    value: 'direct_select', // 특수 값으로 지정
+                    child: Text('📍 직접 선택'),
+                  ),
+                  // PlaceService에서 불러온 장소 목록으로 메뉴 아이템 생성
+                  ...places.map<DropdownMenuItem<Object>>((Place place) {
+                    return DropdownMenuItem<Object>(
+                      value: place, // 값으로 Place 객체 자체를 사용
+                      child: Text(place.name),
+                    );
+                  }),
+                ],
+
+                // ✅ 4. 항목을 선택했을 때 실행될 콜백 함수
+                onChanged: (Object? newValue) {
+                  if (newValue is Place) {
+                    // 저장된 장소를 선택한 경우
+                    setState(() {
+                      _selectedPlace = newValue;
+                      locationController.text = newValue.address;
+                    });
+                  } else if (newValue == 'direct_select') {
+                    // '직접 선택'을 선택한 경우
+                    setState(() {
+                      _selectedPlace = null; // 선택 상태 초기화
+                      locationController.clear(); // 텍스트 필드 비우기
+                    });
+                    pickLocation(); // 기존의 지도 페이지 여는 함수 호출
+                  }
+                },
               ),
               const SizedBox(height: 16),
               const Text("메모"),
-              TextField(
-                maxLines: 5,
-                controller: memoController,
-                decoration: InputDecoration(
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
-                ),
-              ),
+              TextField(maxLines: 5, controller: memoController),
               const SizedBox(height: 24),
 
               Text("색상 선택"),

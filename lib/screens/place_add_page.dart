@@ -1,24 +1,27 @@
 // 장소를 생성 및 수정하는 페이지이다.
 
 import 'package:all_new_uniplan/screens/location_deside_page.dart';
+import 'package:all_new_uniplan/services/auth_service.dart';
+import 'package:all_new_uniplan/services/place_service.dart';
+import 'package:all_new_uniplan/widgets/basicDialog.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; // 시간 및 날짜 포맷팅
 import 'package:flutter/material.dart';
 
-class AddressAddPage extends StatefulWidget {
+class PlaceAddPage extends StatefulWidget {
   // 수정 모드로 입장시, 생성자에 수정할 데이터를 받을 파라미터 추가
   // TODO : 나중엔 DB에서 데이터를 불러와야 하니까, 그에 맞춰 양식도 수정해야겠다.
   final String? initialTitle;
   final String? initialAddress;
 
-  const AddressAddPage({super.key, this.initialTitle, this.initialAddress});
+  const PlaceAddPage({super.key, this.initialTitle, this.initialAddress});
 
   @override
-  State<AddressAddPage> createState() => _AddressAddPageState();
+  State<PlaceAddPage> createState() => _PlaceAddPageState();
 }
 
-class _AddressAddPageState extends State<AddressAddPage> {
+class _PlaceAddPageState extends State<PlaceAddPage> {
   final TextEditingController titleController =
       TextEditingController(); // 장소 제목을 입력받을 컨트롤러.
 
@@ -54,6 +57,56 @@ class _AddressAddPageState extends State<AddressAddPage> {
     }
   }
 
+  // 일정 추가
+  void addPlace() async {
+    final authService = context.read<AuthService>();
+    final placeService = context.read<PlaceService>();
+
+    final userId = authService.currentUser!.userId;
+    final title = titleController.text.trim();
+    final location = locationController.text;
+
+    // 유효성 검사
+    if (title.isEmpty || location.isEmpty) {
+      showAlert(context, "모든 항목을 입력해야 합니다.");
+      return;
+    }
+
+    final bool isSuccess = await placeService.addPlace(userId, title, location);
+
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop(isSuccess);
+  }
+
+  // 일정 수정. _isEditing이 true면 이 메서드가 실행됨.
+  void modifyPlace() async {
+    final authService = context.read<AuthService>();
+    final placeService = context.read<PlaceService>();
+
+    final userId = authService.currentUser!.userId;
+    final name = widget.initialTitle!;
+    final newName = titleController.text.trim();
+    final newAddress = locationController.text;
+
+    // 유효성 검사
+    if (newName.isEmpty || newAddress.isEmpty) {
+      showAlert(context, "모든 항목을 입력해야 합니다.");
+      return;
+    }
+
+    final bool isSuccess = await placeService.modifyPlace(
+      userId,
+      name,
+      newName,
+      newAddress,
+    );
+
+    if (!context.mounted) return;
+
+    Navigator.of(context).pop(isSuccess);
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -68,14 +121,7 @@ class _AddressAddPageState extends State<AddressAddPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("장소 제목"),
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
-                ),
-              ),
+              TextField(controller: titleController),
               const SizedBox(height: 16),
               const Text("수행 장소"),
               TextField(
@@ -84,9 +130,6 @@ class _AddressAddPageState extends State<AddressAddPage> {
                 decoration: const InputDecoration(
                   suffixIcon: Icon(Icons.place),
                   contentPadding: EdgeInsets.symmetric(vertical: 14),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-                  ),
                 ),
                 onTap: pickLocation,
               ),
@@ -107,8 +150,12 @@ class _AddressAddPageState extends State<AddressAddPage> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               // TODO : 실제 장소를 DB에 추가하고 장소 관리창으로 이동하도록 해야함
+              if (_isEditing) {
+                modifyPlace();
+              }
+              addPlace();
             },
 
             child: const Text(

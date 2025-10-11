@@ -203,7 +203,7 @@ class _ChatPageState extends State<ChatbotPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: chatTopBar(),
       body: Column(
         children: [
@@ -256,6 +256,7 @@ class _ChatPageState extends State<ChatbotPage> {
                             decoration: const InputDecoration(
                               hintText: '여기에 메시지를 입력...',
                               border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
                             ),
                           ),
                         ),
@@ -371,7 +372,7 @@ class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            '유니봇 1.0',
+            '스케줄봇 1.0',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           IconButton(

@@ -49,8 +49,6 @@ class _ProjectPageState extends State<ProjectPage> {
     try {
       // 사용자 ID로 모든 프로젝트와 하위 프로젝트 데이터를 불러옵니다.
       await projectService.getProjectByUserId(authService.currentUser!.userId);
-      await projectService.getSubProjectByDate(5, DateTime(2025, 10, 13));
-      await projectService.addSubProjectProgress(15, DateTime(2025, 10, 15));
     } catch (e) {
       if (mounted) {
         // todo : toastification로 변경
@@ -91,6 +89,11 @@ class _ProjectPageState extends State<ProjectPage> {
           project.projectId!,
           _focusedDay,
         );
+
+        for (final subProject in subProjects) {
+          print(subProject.subGoal);
+          print(subProject.done);
+        }
         if (subProjects.isNotEmpty) {
           newSubProjects[project.projectId!] = subProjects;
         }
@@ -338,7 +341,8 @@ class _ProjectPageState extends State<ProjectPage> {
 
                           //--- 하위 프로젝트(목표) 목록 ---
                           if (_subProjectList[project.projectId!] != null)
-                            for (final subProject in project.subProjects!)
+                            for (final subProject
+                                in _subProjectList[project.projectId!]!)
                               // 하위 프로젝트를 하나씩 카드로 표시
                               ProjectProgressCard(
                                 subProjectId: subProject.subProjectId!,

@@ -295,7 +295,7 @@ class ProjectService with ChangeNotifier {
       if (message == "Get SubProject By Date Successed") {
         var subProjectsJson = json['subProjects'];
         final subProjectList = jsonToSubProjectTist(subProjectsJson);
-        print(subProjectList.length);
+        print("subProjectList.length : ${subProjectList.length}");
         return subProjectList;
       } else {
         throw Exception('Get SubProject By Date Failed: $message');
@@ -439,7 +439,7 @@ class ProjectService with ChangeNotifier {
   }
 
   // 하위 프로젝트 진행도 증가
-  Future<int> addSubProjectProgress(int subprojectId, DateTime date) async {
+  Future<bool> addSubProjectProgress(int subprojectId, DateTime date) async {
     final Map<String, dynamic> body = {
       "subproject_id": subprojectId,
       "date": formatDate(date),
@@ -455,17 +455,46 @@ class ProjectService with ChangeNotifier {
       var message = json['message'];
       if (message == "Add SubProject Progress Successed") {
         var result = json['result'];
-        var count = result['count_for_date'] as int;
+        var newCount = result['count_for_date'] as int;
 
-        notifyListeners();
-        return count;
+        // ✅ 1. 로컬 데이터에서 해당 하위 프로젝트 찾기
+        SubProject? targetSubProject;
+        int? targetProjectId;
+        _projects.forEach((projectId, project) {
+          project.subProjects?.forEach((subProject) {
+            if (subProject.subProjectId == subprojectId) {
+              targetSubProject = subProject;
+              targetProjectId = projectId;
+            }
+          });
+        });
+
+        // ✅ 2. 찾았다면 로컬 데이터의 'done' 값을 서버가 보내준 새 값으로 수정
+        if (targetSubProject != null && targetProjectId != null) {
+          final project = _projects[targetProjectId]!;
+          final index = project.subProjects!.indexWhere(
+            (sp) => sp.subProjectId == subprojectId,
+          );
+
+          if (index != -1) {
+            // copyWith를 사용하여 새로운 객체로 교체
+            project.subProjects![index] = targetSubProject!.copyWith(
+              done: newCount,
+            );
+
+            // ✅ 3. UI에 변경사항 알림
+            notifyListeners();
+            return true; // 성공 반환
+          }
+        }
+        return false; // 로컬에서 못 찾았으면 실패
       } else {
         throw Exception('Add SubProject Progress Failed: $message');
       }
     } catch (e) {
       print('하위 프로젝트 진척도를 증가하는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
-      rethrow;
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();

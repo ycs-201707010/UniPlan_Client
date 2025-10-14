@@ -336,7 +336,8 @@ class _ProjectPageState extends State<ProjectPage> {
 
                           //--- 하위 프로젝트(목표) 목록 ---
                           if (_subProjectList[project.projectId!] != null)
-                            for (final subProject in project.subProjects!)
+                            for (final subProject
+                                in _subProjectList[project.projectId!]!)
                               // 하위 프로젝트를 하나씩 카드로 표시
                               ProjectProgressCard(
                                 subProjectId: subProject.subProjectId!,
@@ -352,7 +353,13 @@ class _ProjectPageState extends State<ProjectPage> {
                                   // 현재 진척도가 최대치보다 작을 때만 실행
                                   if ((subProject.done ?? 0) <
                                       (subProject.maxDone ?? 1)) {
-                                    _loadSubProjectByDate();
+                                    final result = await projectService
+                                        .addSubProjectProgress(
+                                          subProject.subProjectId!,
+                                          _focusedDay,
+                                        );
+
+                                    if (result) _loadSubProjectByDate();
                                   }
                                 },
 

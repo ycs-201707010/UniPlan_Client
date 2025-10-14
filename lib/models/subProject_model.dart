@@ -24,10 +24,11 @@ Map<String, String> weekdayESMap = {
 };
 
 @immutable
+// ignore: must_be_immutable
 class SubProject {
   final int? subProjectId;
   final String? subGoal;
-  int? done = 0;
+  int? done;
   final int? maxDone;
   final String? weekDay;
   bool? multiPerDay = false;

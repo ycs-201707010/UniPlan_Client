@@ -33,7 +33,7 @@ class EverytimeService with ChangeNotifier {
   Timetable? get currentTimetable => _currentTimetable;
 
   // 시간표의 반복 일정을 생성하는 과정에서 충돌/비충돌 일정을 각각 저장하는 필드
-  final List<ScheduleConflict> _conflictingSchedules = [];
+  List<ScheduleConflict>? _conflictingSchedules = [];
   List<ScheduleConflict>? get conflictingSchedules => _conflictingSchedules;
 
   // 에브리타임 시간표 링크를 통해 정보를 크롤링하여 가져오는 메서드
@@ -42,7 +42,6 @@ class EverytimeService with ChangeNotifier {
     _currentTimetable = Timetable();
     try {
       final response = await _apiClient.post('/everytime', body: body);
-      print('서버 응답 본문: ${response.body}');
       var json = jsonDecode(response.body);
       var message = json['message'];
 
@@ -120,7 +119,7 @@ class EverytimeService with ChangeNotifier {
       if (message == "Get Timetable Subject Successed") {
         _currentTimetable!.subjects!.clear();
         var subjectJsonList = json['result'] as List<dynamic>;
-        if (subjectJsonList.isEmpty) {
+        if (subjectJsonList.length == 0) {
           return;
         }
         for (final subjectJson in subjectJsonList) {
@@ -177,6 +176,7 @@ class EverytimeService with ChangeNotifier {
   ) async {
     final Map<String, dynamic> body = subject.toJson();
     body.addAll({"user_id": userId, "class_id": classId});
+    print(body);
     try {
       final response = await _apiClient.post(
         '/everytime/addTimetableSubject',

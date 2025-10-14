@@ -27,7 +27,7 @@ Map<String, String> weekdayESMap = {
 class SubProject {
   final int? subProjectId;
   final String? subGoal;
-  int? done = 0;
+  int? done;
   final int? maxDone;
   final String? weekDay;
   bool? multiPerDay = false;
@@ -73,7 +73,7 @@ class SubProject {
       // 값이 null이 아닐 경우에만 JSON에 포함
       if (subProjectId != null) 'subproject_id': subProjectId,
       if (subGoal != null) 'subgoal': subGoal,
-      if (done != null) 'done': maxDone,
+      if (done != null) 'done': done,
       if (maxDone != null) 'max_done': maxDone,
       if (weekDay != null) 'week_day': weekDay,
       if (multiPerDay != null) 'multi_per_day': multiPerDay,

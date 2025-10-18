@@ -124,7 +124,7 @@ class _ChatPageState extends State<ChatbotPage> {
                   const CircleAvatar(
                     radius: 16,
                     backgroundImage: AssetImage(
-                      'assets/images/bot_profile_pic.png',
+                      'assets/images/schedule_profile_pic.png',
                     ),
                   ),
                 if (chatMessage.speaker == ChatMessageType.bot)

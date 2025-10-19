@@ -1,5 +1,6 @@
 import 'package:all_new_uniplan/models/project_model.dart';
 import 'package:all_new_uniplan/models/subProject_model.dart';
+import 'package:all_new_uniplan/screens/project_chatbot.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:flutter/material.dart';
@@ -440,6 +441,19 @@ class _ProjectPageState extends State<ProjectPage> {
                 Theme.of(context).colorScheme.onPrimary, // 버튼 내부의 아이콘 색
 
             children: [
+              SpeedDialChild(
+                child: Icon(Icons.android),
+                label: "프로젝트 챗봇",
+                onTap: () async {
+                  await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (pageContext) => ProjectChatbot(),
+                    ),
+                  );
+                },
+              ),
+
               SpeedDialChild(
                 child: Icon(Icons.calendar_today),
                 label: '세부 목표 짜기',

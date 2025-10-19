@@ -37,7 +37,12 @@ class _ChatPageState extends State<ProjectChatbot> {
           chatMessage.message,
 
           // 채팅 내용은 전부 검은색으로 지정.
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: // 메시지 화자에 따라 배경색을 다르게 지정
+                chatMessage.speaker != ProjectChatMessageType.user
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Theme.of(context).colorScheme.onPrimary,
+          ),
         ),
       );
     }
@@ -120,7 +125,7 @@ class _ChatPageState extends State<ProjectChatbot> {
                   const CircleAvatar(
                     radius: 16,
                     backgroundImage: AssetImage(
-                      'assets/images/bot_profile_pic.png',
+                      'assets/images/project_profile_pic.png',
                     ),
                   ),
                 if (chatMessage.speaker == ProjectChatMessageType.bot)
@@ -128,7 +133,13 @@ class _ChatPageState extends State<ProjectChatbot> {
                   SizedBox(width: 6),
 
                 if (chatMessage.speaker == ProjectChatMessageType.bot)
-                  Text('UniBot', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    'UniBot',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
               ],
             ),
             SizedBox(height: 8),
@@ -144,12 +155,12 @@ class _ChatPageState extends State<ProjectChatbot> {
                   color:
                       // 메시지 화자에 따라 배경색을 다르게 지정
                       chatMessage.speaker != ProjectChatMessageType.user
-                          ? Colors.white
-                          : Color(0xEE8CFF1A),
+                          ? Theme.of(context).colorScheme.surfaceContainer
+                          : Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Color.fromRGBO(0, 0, 0, 0.25),
+                      color: Theme.of(context).colorScheme.shadow,
                       blurRadius: 4,
                       offset: const Offset(0, 1),
                     ),
@@ -193,7 +204,7 @@ class _ChatPageState extends State<ProjectChatbot> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
-      backgroundColor: Color(0xEEEBF2E8),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       appBar: chatTopBar(),
       body: Column(
         children: [
@@ -242,6 +253,7 @@ class _ChatPageState extends State<ProjectChatbot> {
                         Expanded(
                           child: TextField(
                             controller: _controller,
+                            style: TextStyle(color: Color(0xFF0e0f10)),
                             decoration: const InputDecoration(
                               hintText: '여기에 메시지를 입력...',
                               border: InputBorder.none,
@@ -249,7 +261,10 @@ class _ChatPageState extends State<ProjectChatbot> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.mic_none),
+                          icon: const Icon(
+                            Icons.mic_none,
+                            color: Color(0xFF0E0F10),
+                          ),
                           onPressed: () async {
                             final initResult = await recordService.initialize();
 
@@ -321,11 +336,14 @@ class _ChatPageState extends State<ProjectChatbot> {
                   child: Container(
                     width: 46,
                     height: 46,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFF22553D), // 초록색 배경
+                      color: Theme.of(context).colorScheme.primary, // 초록색 배경
                     ),
-                    child: const Icon(Icons.send, color: Colors.white),
+                    child: Icon(
+                      Icons.send,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
                   ),
                 ),
               ],
@@ -356,7 +374,7 @@ class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            '유니봇 1.0',
+            '프로젝트봇 1.0',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           IconButton(

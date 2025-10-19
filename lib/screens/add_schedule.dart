@@ -413,6 +413,7 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   // ✅ 1. 선택된 장소를 저장할 상태 변수 추가
   Place? _selectedPlace;
 
+  // TODO : 다른 컨트롤러를 사용하는 페이지에서도 이 함수를 응용하자.
   @override
   void dispose() {
     // 컨트롤러들을 해제합니다.
@@ -483,62 +484,112 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
               ),
               const SizedBox(height: 16),
               const Text("수행 장소"),
-              // TextField(
-              //   controller: locationController,
-              //   readOnly: true,
-              //   decoration: const InputDecoration(
-              //     suffixIcon: Icon(Icons.place),
-              //     contentPadding: EdgeInsets.symmetric(vertical: 14),
-              //     focusedBorder: UnderlineInputBorder(
-              //       borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
-              //     ),
-              //   ),
-              //   onTap: pickLocation,
-              // ),
-              // ✅ 2. 기존 TextField를 DropdownButtonFormField로 교체
-              DropdownButtonFormField<Object>(
-                // 현재 선택된 값을 표시 (UI 업데이트용)
-                value: _selectedPlace,
-                isExpanded: true, // 텍스트가 길 경우를 대비
+              TextField(
+                controller: locationController,
+                readOnly: true,
                 decoration: const InputDecoration(
                   suffixIcon: Icon(Icons.place),
                   contentPadding: EdgeInsets.symmetric(vertical: 14),
-                ),
-                hint: const Text('장소 선택'), // 아무것도 선택되지 않았을 때 표시될 텍스트
-                // ✅ 3. 아이템 목록 동적 생성
-                items: [
-                  // '직접 선택' 메뉴 아이템을 맨 위에 추가
-                  const DropdownMenuItem<Object>(
-                    value: 'direct_select', // 특수 값으로 지정
-                    child: Text('📍 직접 선택'),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
                   ),
-                  // PlaceService에서 불러온 장소 목록으로 메뉴 아이템 생성
-                  ...places.map<DropdownMenuItem<Object>>((Place place) {
-                    return DropdownMenuItem<Object>(
-                      value: place, // 값으로 Place 객체 자체를 사용
-                      child: Text(place.name),
-                    );
-                  }),
-                ],
-
-                // ✅ 4. 항목을 선택했을 때 실행될 콜백 함수
-                onChanged: (Object? newValue) {
-                  if (newValue is Place) {
-                    // 저장된 장소를 선택한 경우
-                    setState(() {
-                      _selectedPlace = newValue;
-                      locationController.text = newValue.address;
-                    });
-                  } else if (newValue == 'direct_select') {
-                    // '직접 선택'을 선택한 경우
-                    setState(() {
-                      _selectedPlace = null; // 선택 상태 초기화
-                      locationController.clear(); // 텍스트 필드 비우기
-                    });
-                    pickLocation(); // 기존의 지도 페이지 여는 함수 호출
-                  }
-                },
+                ),
+                onTap: pickLocation,
               ),
+              TextField(
+                controller: locationController,
+                readOnly: true, // 사용자가 직접 타이핑하는 것을 막음
+                decoration: InputDecoration(
+                  hintText: '장소를 선택하세요',
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF5CE546), width: 2),
+                  ),
+                  // ✅ 3. suffixIcon에 PopupMenuButton을 사용하여 드롭다운 메뉴 구현
+                  suffixIcon: PopupMenuButton<Object>(
+                    icon: const Icon(Icons.arrow_drop_down), // 드롭다운 화살표 아이콘
+                    tooltip: "저장된 장소 목록",
+                    // 사용자가 메뉴 항목을 선택했을 때 호출
+                    onSelected: (Object? newValue) {
+                      if (newValue is Place) {
+                        // 저장된 장소를 선택한 경우
+                        setState(() {
+                          locationController.text =
+                              newValue.name; // TextField의 텍스트를 장소 이름으로 변경
+                        });
+                      } else if (newValue == 'direct_select') {
+                        // '직접 선택'을 선택한 경우
+                        pickLocation(); // 지도 페이지 열기
+                      }
+                    },
+                    // 메뉴에 표시될 아이템 목록
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        // '직접 선택' 메뉴 아이템
+                        const PopupMenuItem<Object>(
+                          value: 'direct_select',
+                          child: Text('📍 직접 선택'),
+                        ),
+                        // 구분선
+                        const PopupMenuDivider(),
+                        // 저장된 장소 목록
+                        ...places.map<PopupMenuEntry<Object>>((Place place) {
+                          return PopupMenuItem<Object>(
+                            value: place,
+                            child: Text(place.name),
+                          );
+                        }),
+                      ];
+                    },
+                  ),
+                ),
+                // ✅ 4. TextField 자체를 탭하면 지도가 열리도록 설정
+                onTap: pickLocation,
+              ),
+              // ✅ 2. 기존 TextField를 DropdownButtonFormField로 교체
+              // DropdownButtonFormField<Object>(
+              //   // 현재 선택된 값을 표시 (UI 업데이트용)
+              //   value: _selectedPlace,
+              //   isExpanded: true, // 텍스트가 길 경우를 대비
+              //   decoration: const InputDecoration(
+              //     suffixIcon: Icon(Icons.place),
+              //     contentPadding: EdgeInsets.symmetric(vertical: 14),
+              //   ),
+              //   hint: const Text('장소 선택'), // 아무것도 선택되지 않았을 때 표시될 텍스트
+              //   // ✅ 3. 아이템 목록 동적 생성
+              //   items: [
+              //     // '직접 선택' 메뉴 아이템을 맨 위에 추가
+              //     const DropdownMenuItem<Object>(
+              //       value: 'direct_select', // 특수 값으로 지정
+              //       child: Text('📍 직접 선택'),
+              //     ),
+              //     // PlaceService에서 불러온 장소 목록으로 메뉴 아이템 생성
+              //     ...places.map<DropdownMenuItem<Object>>((Place place) {
+              //       return DropdownMenuItem<Object>(
+              //         value: place, // 값으로 Place 객체 자체를 사용
+              //         child: Text(place.name),
+              //       );
+              //     }),
+              //   ],
+
+              //   // ✅ 4. 항목을 선택했을 때 실행될 콜백 함수
+              //   onChanged: (Object? newValue) {
+              //     if (newValue is Place) {
+              //       // 저장된 장소를 선택한 경우
+              //       setState(() {
+              //         _selectedPlace = newValue;
+              //         locationController.text = newValue.name;
+              //       });
+              //     } else if (newValue == 'direct_select') {
+              //       // '직접 선택'을 선택한 경우
+              //       setState(() {
+              //         _selectedPlace = null; // 선택 상태 초기화
+              //         locationController.clear(); // 텍스트 필드 비우기
+              //       });
+              //       pickLocation(); // 기존의 지도 페이지 여는 함수 호출
+              //     }
+              //   },
+              // ),
               const SizedBox(height: 16),
               const Text("메모"),
               TextField(maxLines: 5, controller: memoController),

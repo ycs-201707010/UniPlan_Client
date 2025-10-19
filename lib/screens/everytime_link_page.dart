@@ -77,6 +77,14 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
     bool isStarted,
     TextEditingController dateController,
   ) async {
+    // 종료일을 먼저 선택하려는 경우 예외 처리
+    if (!isStarted && selectedStartDate == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('시작 기간을 먼저 선택해주세요.')));
+      return;
+    }
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day); // 과거 제거용
 

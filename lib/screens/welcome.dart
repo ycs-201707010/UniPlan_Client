@@ -1,5 +1,6 @@
 // 어플리케이션 실행 시 나타날 화면 (비로그인 시)
 
+import 'package:all_new_uniplan/screens/find_login_id.dart';
 import 'package:all_new_uniplan/screens/login.dart';
 import 'package:all_new_uniplan/screens/signup.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +61,31 @@ class welcomePage extends StatelessWidget {
 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [Text('아이디 찾기'), SizedBox(width: 80), Text("비밀번호 찾기")],
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FindLoginId(),
+                      ),
+                    );
+                  },
+                  child: Text('아이디 찾기'),
+                ),
+                SizedBox(width: 80),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FindLoginId(),
+                      ),
+                    );
+                  },
+                  child: Text('비밀번호 찾기'),
+                ),
+              ],
             ),
           ], // children
         ),

@@ -13,7 +13,7 @@ class _AddProjectState extends State<AddProject> {
   // ** 프로젝트 종류 : 세 가지 그룹 중 하나만 선택한다. **
   List<bool> isSelected = [false, false, false];
   List<Color> typeColor = [Colors.orange, Colors.blueAccent, Color(0xFF1bb373)];
-  final List<Widget> buttons = const [Text('운동'), Text('학업'), Text('미선택')];
+  final List<Widget> buttons = const [Text('운동'), Text('공부'), Text('미선택')];
 
   @override
   Widget build(BuildContext context) {

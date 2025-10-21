@@ -1,5 +1,6 @@
 // ** 프로그램 진입점 **
 
+import 'package:all_new_uniplan/screens/add_project.dart';
 import 'package:all_new_uniplan/screens/home.dart';
 import 'package:all_new_uniplan/screens/welcome.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';

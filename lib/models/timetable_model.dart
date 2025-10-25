@@ -12,8 +12,8 @@ class Timetable {
   String? location;
 
   // 1. 각 수업 정보를 담은 클래스를 저장하는 필드
-  List<Subject>? _subjects = [];
-  List<Subject>? get subjects => _subjects;
+  List<Subject>? subjects = [];
+  List<Subject>? get getSubjects => subjects;
 
   // 2. 시간표를 startDate ~ endDate 까지 매 주의 일정을 생성해서 저장하는 필드
   // 기간에 맞춰 생성된 전체 반복 일정 목록
@@ -24,10 +24,27 @@ class Timetable {
   Map<int, List<Subject>>? _dayWithSchedule = {};
   Map<int, List<Subject>>? get dayWithSchedule => _dayWithSchedule;
 
-  Timetable({this.title, this.startDate, this.endDate, this.tableId});
+  Timetable({
+    this.title,
+    this.startDate,
+    this.endDate,
+    this.tableId,
+    this.subjects,
+  });
+
+  Timetable copyWith({List<Subject>? subjects}) {
+    return Timetable(
+      tableId: this.tableId,
+      title: this.title,
+      subjects: subjects ?? this.subjects,
+    );
+  }
 
   void addSubjectToList(Subject subject) {
-    _subjects!.add(subject);
+    // 👇 subjects가 null이면 빈 리스트를 할당
+    subjects ??= [];
+    // 이제 subjects는 null이 아님W이 보장됨
+    subjects!.add(subject);
     addSubjectToDayMap(subject);
   }
 

@@ -40,7 +40,6 @@ class _TimetablePageState extends State<TimetablePage> {
   Widget build(BuildContext context) {
     final authService = context.watch<AuthService>();
     final everytimeService = context.watch<EverytimeService>();
-    final laneEvents = everytimeService.buildLaneCurrentTimetableEventsList();
 
     // 현재 선택된 ID 가져오기 (null일 수 있음)
     final int? currentTableId = everytimeService.currentTimetable?.tableId;
@@ -93,7 +92,8 @@ class _TimetablePageState extends State<TimetablePage> {
               ? const Center(child: CircularProgressIndicator()) // 로딩 중 UI
               : TimetableView(
                 // 시간표에 들어갈 요일별 강의 데이터 생성
-                laneEventsList: laneEvents,
+                laneEventsList:
+                    everytimeService.buildLaneCurrentTimetableEventsList(),
                 // 시간표 레이아웃 설정
                 timetableStyle: TimetableStyle(
                   startHour: 9,

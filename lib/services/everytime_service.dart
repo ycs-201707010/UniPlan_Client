@@ -26,7 +26,7 @@ class EverytimeService with ChangeNotifier {
   final ScheduleService _scheduleService;
   EverytimeService(this._scheduleService);
 
-  final List<Timetable> _currentTimetableList = [];
+  List<Timetable>? _currentTimetableList = [];
   List<Timetable>? get currentTimetableList => _currentTimetableList;
 
   // UI에 표시되는 시간표를 currentTimetable로 지정
@@ -42,11 +42,11 @@ class EverytimeService with ChangeNotifier {
 
   // 에브리타임 시간표 링크를 통해 정보를 크롤링하여 가져오는 메서드
   Future<void> getEverytimeSchedule(String everytimeUrl) async {
+    _isLoading = true;
     final Map<String, dynamic> body = {"url": everytimeUrl};
     _currentTimetable = Timetable();
     try {
       final response = await _apiClient.post('/everytime', body: body);
-      print('서버 응답 본문: ${response.body}');
       var json = jsonDecode(response.body);
       var message = json['message'];
 
@@ -56,10 +56,9 @@ class EverytimeService with ChangeNotifier {
         // 시간표 정보가 나열된 jsonList을 순회
         for (var scheduleJson in scheduleJsonList) {
           var subject = Subject.fromCrawlJson(scheduleJson);
-
           _currentTimetable!.addSubjectToList(subject);
         }
-        _currentTimetableList.add(_currentTimetable!);
+        _currentTimetableList!.add(_currentTimetable!);
       } else {
         throw Exception('Get Timetable Failed: $message');
       }
@@ -67,6 +66,8 @@ class EverytimeService with ChangeNotifier {
       print('에브리타임 시간표 정보를 가져오는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       rethrow;
+    } finally {
+      _isLoading = false;
     }
   }
 
@@ -79,6 +80,7 @@ class EverytimeService with ChangeNotifier {
     _isLoading = true; // 로딩 시작
     notifyListeners();
     final Map<String, dynamic> body = {"user_id": userId};
+    List<Timetable> newTimetableList = [];
 
     try {
       final response = await _apiClient.post(
@@ -89,34 +91,57 @@ class EverytimeService with ChangeNotifier {
       var message = json['message'];
 
       if (message == "Get Timetable Successed") {
-        _currentTimetable = null;
-        _currentTimetableList.clear();
+        List<Future<Timetable>> timetableFutures = [];
 
         var timetableJsonList = json['result'] as List<dynamic>;
 
         for (final timetableJson in timetableJsonList) {
-          _currentTimetable = Timetable.fromJson(
+          final baseTimetable = Timetable.fromJson(
             timetableJson as Map<String, dynamic>,
           );
 
-          await getTimetableSubject(_currentTimetable!.tableId!);
+          final future = Future(() async {
+            if (baseTimetable.tableId != null) {
+              // ✅ getTimetableSubject 호출하고 결과를 받음
+              final subjects = await getTimetableSubject(
+                baseTimetable.tableId!,
+              );
+              // ✅ copyWith를 사용해 subjects가 추가된 '새로운' Timetable 객체 반환
+              return baseTimetable.copyWith(subjects: subjects);
+            } else {
+              return baseTimetable; // ID 없으면 그대로 반환
+            }
+          });
+          timetableFutures.add(future);
         }
+
+        // ✅ 모든 시간표+수업 정보 가져오기 작업을 동시에 실행하고 기다림
+        newTimetableList = await Future.wait(timetableFutures);
+
+        // ✅ 모든 작업이 완료된 후, 상태 변수를 '한 번에' 교체
+        _currentTimetableList = newTimetableList;
+        _currentTimetable =
+            _currentTimetableList!.isNotEmpty
+                ? _currentTimetableList!.first
+                : null;
       } else {
-        throw Exception('Get Timetable Faield: $message');
+        throw Exception('Get Timetable Failed: $message');
       }
     } catch (e) {
       print('시간표 정보를 가져오는 과정에서 에러 발생: $e');
-      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      _currentTimetableList = []; // 에러 시 초기화
+      _currentTimetable = null;
       rethrow;
     } finally {
-      _isLoading = false; // 로딩 종료
-      notifyListeners(); // 최종 데이터 변경 및 로딩 종료 알림
+      _isLoading = false;
+      notifyListeners(); // 최종 상태 알림
     }
   }
 
   // 시간표에 존재하는 수업 정보들을 가져오는 메서드
-  Future<void> getTimetableSubject(int classId) async {
+  Future<List<Subject>> getTimetableSubject(int classId) async {
     final Map<String, dynamic> body = {"class_id": classId};
+    List<Subject> subjects = [];
 
     try {
       final response = await _apiClient.post(
@@ -127,16 +152,14 @@ class EverytimeService with ChangeNotifier {
       var message = json['message'];
 
       if (message == "Get Timetable Subject Successed") {
-        _currentTimetable!.subjects!.clear();
         var subjectJsonList = json['result'] as List<dynamic>;
         if (subjectJsonList.isEmpty) {
-          return;
+          return [];
         }
         for (final subjectJson in subjectJsonList) {
-          final subject = Subject.fromJson(subjectJson as Map<String, dynamic>);
-          _currentTimetable!.addSubjectToList(subject);
+          subjects.add(Subject.fromJson(subjectJson as Map<String, dynamic>));
         }
-        _currentTimetableList.add(_currentTimetable!);
+        return subjects;
       } else {
         throw Exception('Get Timetable Subject Failed: $message');
       }
@@ -367,11 +390,12 @@ class EverytimeService with ChangeNotifier {
   Timetable findTimetable(int tableId) {
     // _currentTimetableList에서 각 Timetable 인스턴스(s)의 tableId가
     // 메서드로 전달된 tableId와 일치하는 첫 번째 요소를 찾습니다.
-    return _currentTimetableList.firstWhere((s) => s.tableId == tableId);
+    return _currentTimetableList!.firstWhere((s) => s.tableId == tableId);
   }
 
   void updateTimetableTitle(int tableId, String title) {
-    _currentTimetableList.firstWhere((s) => s.tableId == tableId).title = title;
+    _currentTimetableList!.firstWhere((s) => s.tableId == tableId).title =
+        title;
     notifyListeners();
   }
 
@@ -457,5 +481,9 @@ class EverytimeService with ChangeNotifier {
 
       notifyListeners(); // UI에 변경 알림
     }
+  }
+
+  void callNotifyListeners() {
+    notifyListeners(); // UI에 변경 알림
   }
 }

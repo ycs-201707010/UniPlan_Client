@@ -1,4 +1,5 @@
 // 메인화면
+import 'package:all_new_uniplan/l10n/l10n.dart';
 import 'package:all_new_uniplan/screens/chatbot.dart';
 import 'package:all_new_uniplan/screens/chatbot_list_page.dart';
 import 'package:all_new_uniplan/screens/my_page.dart';
@@ -55,22 +56,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // ✅ 2. 비활성화된 아이템의 색상을 명확하게 지정 (선택 사항이지만 권장)
         unselectedItemColor: Colors.grey,
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today_outlined),
-            label: '캘린더',
+            // ✅ 2. 하드코딩된 문자열 대신 AppLocalizations 사용
+            label: context.l10n.navCalendar,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            label: '프로젝트',
+            icon: Icon(Icons.assessment_outlined), // 프로젝트에 어울리는 아이콘으로 변경
+            label: context.l10n.navProject,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.smart_toy_outlined),
-            label: '챗봇',
+            label: context.l10n.navChatbot,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
-            label: '마이페이지',
+            label: context.l10n.navMyPage,
           ),
         ],
         currentIndex: _selectedIndex,

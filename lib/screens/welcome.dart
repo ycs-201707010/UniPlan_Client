@@ -1,5 +1,6 @@
 // 어플리케이션 실행 시 나타날 화면 (비로그인 시)
 
+import 'package:all_new_uniplan/l10n/l10n.dart';
 import 'package:all_new_uniplan/screens/find_login_id.dart';
 import 'package:all_new_uniplan/screens/login.dart';
 import 'package:all_new_uniplan/screens/signup.dart';
@@ -36,7 +37,7 @@ class welcomePage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => const LoginPage()),
                   );
                 },
-                child: const Text("로그인"),
+                child: Text(context.l10n.login),
               ),
             ),
 
@@ -53,7 +54,7 @@ class welcomePage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => const SignupPage()),
                   );
                 },
-                child: const Text("회원가입"),
+                child: Text(context.l10n.signup),
               ),
             ),
 
@@ -71,7 +72,7 @@ class welcomePage extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Text('아이디 찾기'),
+                  child: Text(context.l10n.findId),
                 ),
                 SizedBox(width: 80),
                 TextButton(
@@ -83,7 +84,7 @@ class welcomePage extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Text('비밀번호 찾기'),
+                  child: Text(context.l10n.findPw),
                 ),
               ],
             ),

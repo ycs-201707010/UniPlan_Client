@@ -1,6 +1,8 @@
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+// ✅ 1. 국제화 파일 import
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddProject extends StatefulWidget {
   const AddProject({super.key});
@@ -10,183 +12,167 @@ class AddProject extends StatefulWidget {
 }
 
 class _AddProjectState extends State<AddProject> {
-  // ** 프로젝트 종류 : 세 가지 그룹 중 하나만 선택한다. **
-  List<bool> isSelected = [false, false, false];
-  List<Color> typeColor = [Colors.orange, Colors.blueAccent, Color(0xFF1bb373)];
-  final List<Widget> buttons = const [Text('운동'), Text('공부'), Text('미선택')];
+  // ✅ 2. 상태 변수와 컨트롤러를 State 클래스의 멤버로 이동
+  List<bool> isSelected = [true, false, false]; // 기본 선택
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _goalController = TextEditingController();
+  final TextEditingController _startDateController = TextEditingController();
+  final TextEditingController _endDateController = TextEditingController();
+
+  DateTime? _selectedStartDate;
+  DateTime? _selectedEndDate;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _goalController.dispose();
+    _startDateController.dispose();
+    _endDateController.dispose();
+    super.dispose();
+  }
+
+  // 날짜 선택을 위한 공통 함수
+  Future<void> _pickDate({required bool isStartDate}) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (!isStartDate && _selectedStartDate == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.selectStartDateFirst)));
+      return;
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate:
+          (isStartDate ? _selectedStartDate : _selectedEndDate) ?? today,
+      firstDate: isStartDate ? today : _selectedStartDate!,
+      lastDate: DateTime(now.year + 5),
+      locale: Locale(l10n.localeName),
+    );
+
+    if (pickedDate == null) return;
+
+    setState(() {
+      if (isStartDate) {
+        _selectedStartDate = pickedDate;
+        _startDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+        if (_selectedEndDate != null && pickedDate.isAfter(_selectedEndDate!)) {
+          _selectedEndDate = null;
+          _endDateController.clear();
+        }
+      } else {
+        _selectedEndDate = pickedDate;
+        _endDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    String barTitle = '프로젝트 추가';
-    String buttonTitle = '프로젝트 추가하기';
+    final l10n = AppLocalizations.of(context)!;
+
+    // ✅ 3. 버튼 텍스트 리스트도 build 메서드 안으로 이동
+    final List<Widget> buttons = [
+      Text(l10n.projectTypeExercise),
+      Text(l10n.projectTypeStudy),
+      Text(l10n.projectTypeNone),
+    ];
 
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    // 날짜 선택
-    DateTime? selectedStartDate;
-    DateTime? selectedEndDate;
-
-    final TextEditingController startDateController = TextEditingController();
-    final TextEditingController endDateController = TextEditingController();
-
-    // 2. 날짜 선택을 위한 공통 함수
-    Future<void> pickDate(
-      BuildContext context, {
-      required bool isStartDate,
-    }) async {
-      // 종료일을 먼저 선택하려는 경우 예외 처리
-      if (!isStartDate && selectedStartDate == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('시작 기간을 먼저 선택해주세요.')));
-        return;
-      }
-
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-
-      final pickedDate = await showDatePicker(
-        context: context,
-        initialDate:
-            (isStartDate ? selectedStartDate : selectedEndDate) ?? today,
-        // 시작일 선택 시: 오늘부터 선택 가능
-        // 종료일 선택 시: 시작일(selectedStartDate)부터 선택 가능
-        firstDate: isStartDate ? today : selectedStartDate!,
-        lastDate: DateTime(now.year + 5),
-        locale: const Locale('ko'),
-      );
-
-      if (pickedDate == null) return; // 사용자가 취소한 경우
-
-      setState(() {
-        if (isStartDate) {
-          selectedStartDate = pickedDate;
-          startDateController.text = DateFormat(
-            'yyyy-MM-dd',
-          ).format(pickedDate);
-          // 시작일 변경 시, 기존 종료일이 시작일보다 앞서게 되면 종료일을 초기화
-          if (selectedEndDate != null && pickedDate.isAfter(selectedEndDate!)) {
-            selectedEndDate = null;
-            endDateController.clear();
-          }
-        } else {
-          selectedEndDate = pickedDate;
-          endDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
-        }
-      });
-    }
-
-    @override
-    void dispose() {
-      startDateController.dispose();
-      endDateController.dispose();
-      super.dispose();
-    }
-
     return Scaffold(
-      appBar: TopBar(title: barTitle),
+      appBar: TopBar(title: l10n.projectAdd),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
-              const Text("프로젝트 종류"),
-              SizedBox(height: 7),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  // ✅ 2. 각 버튼이 차지할 너비를 계산합니다.
-                  //    (전체 너비 / 버튼 개수)
-                  final buttonWidth =
-                      (constraints.maxWidth - 10) / buttons.length;
+              Text(l10n.projectType),
+              const SizedBox(height: 10),
+              Center(
+                child: ToggleButtons(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  selectedBorderColor: Theme.of(context).colorScheme.primary,
+                  selectedColor: Theme.of(context).colorScheme.onPrimary,
+                  fillColor: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.primary,
+                  constraints: const BoxConstraints(
+                    minWidth: 110.0,
+                    minHeight: 36.0,
+                  ),
+                  isSelected: isSelected,
+                  onPressed: (index) {
+                    setState(() {
+                      for (int i = 0; i < isSelected.length; i++) {
+                        isSelected[i] = (i == index);
+                      }
+                    });
+                  },
 
-                  return ToggleButtons(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    selectedColor:
-                        Theme.of(context).colorScheme.primaryContainer,
-                    selectedBorderColor: Theme.of(context).colorScheme.primary,
-                    splashColor: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(4.0),
-                    constraints: BoxConstraints(minHeight: 36.0),
-                    isSelected: isSelected,
-
-                    onPressed: (index) {
-                      setState(() {
-                        for (int i = 0; i < isSelected.length; i++) {
-                          isSelected[i] = (i == index);
-                        }
-                      });
-                    },
-                    // ✅ 3. 각 자식 위젯을 고정된 너비의 SizedBox로 감쌉니다.
-                    children:
-                        buttons.map((widget) {
-                          return SizedBox(
-                            width: buttonWidth, // 계산된 너비 적용
-                            child: Center(child: widget), // 텍스트를 중앙에 배치
-                          );
-                        }).toList(),
-                    // ... (borderRadius 등 다른 스타일 속성)
-                  );
-                },
+                  children:
+                      buttons.map((widget) {
+                        return SizedBox(child: Center(child: widget));
+                      }).toList(),
+                ),
               ),
-              SizedBox(height: 16),
 
-              const Text("프로젝트 제목"),
-              TextField(),
-
-              SizedBox(height: 16),
-
-              const Text("수행 기간"),
+              const SizedBox(height: 16),
+              Text(l10n.projectTitle),
+              TextField(controller: _titleController),
+              const SizedBox(height: 16),
+              Text(l10n.projectDuration),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: startDateController,
+                      controller: _startDateController,
                       readOnly: true,
-                      decoration: InputDecoration(labelText: '시작 기간'),
-                      onTap: () => pickDate(context, isStartDate: true),
+                      decoration: InputDecoration(
+                        labelText: l10n.projectStartDate,
+                      ),
+                      onTap: () => _pickDate(isStartDate: true),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
-                      controller: endDateController,
+                      controller: _endDateController,
                       readOnly: true,
-                      decoration: InputDecoration(labelText: '종료 기간'),
-                      onTap: () => pickDate(context, isStartDate: false),
+                      decoration: InputDecoration(
+                        labelText: l10n.projectEndDate,
+                      ),
+                      onTap: () => _pickDate(isStartDate: false),
                     ),
                   ),
                 ],
               ),
-
-              SizedBox(height: 16),
-
-              const Text("목표"),
-              TextField(),
+              const SizedBox(height: 16),
+              Text(l10n.projectGoal),
+              TextField(controller: _goalController),
             ],
           ),
         ),
       ),
-
-      // ✅ 하단 버튼 (키보드에 따라 위로 밀려 올라감)
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(
           top: 10,
           left: 20,
           right: 20,
-          bottom: bottomInset > 0 ? bottomInset + 20 : 20, // 키보드가 올라올 때 +10 여유
+          bottom: bottomInset > 0 ? bottomInset + 20 : 20,
         ),
         child: SizedBox(
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            // ** 눌렀을 때 이벤트 **
             onPressed: () {},
-
             child: Text(
-              buttonTitle,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              l10n.projectAddButton,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ),

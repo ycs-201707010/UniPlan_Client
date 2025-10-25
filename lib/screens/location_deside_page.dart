@@ -1,6 +1,7 @@
 // ** 사용자 일정 수행 장소 설정 페이지 **
 
 import 'dart:convert';
+import 'package:all_new_uniplan/l10n/l10n.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -122,7 +123,7 @@ class _LocationDesidePageState extends State<LocationDesidePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TopBar(title: '장소 선택'),
+      appBar: TopBar(title: context.l10n.selectLocationHint),
       body: Stack(
         children: [
           GoogleMap(
@@ -151,7 +152,7 @@ class _LocationDesidePageState extends State<LocationDesidePage> {
                       (fetchPlaceSuggestions(value));
                     }, // ✅ 엔터로도 검색되게
                     decoration: InputDecoration(
-                      hintText: "여기에 주소 및 장소명 입력",
+                      hintText: context.l10n.locationSearchHint,
                       prefixIcon: Icon(Icons.search),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.all(12),
@@ -184,8 +185,8 @@ class _LocationDesidePageState extends State<LocationDesidePage> {
                                   }).toList(),
                             )
                             : ListTile(
-                              title: Text("검색 결과가 없습니다"),
-                              subtitle: Text("다른 이름으로 다시 시도해주세요."),
+                              title: Text(context.l10n.searchNoResults),
+                              subtitle: Text(context.l10n.searchTryAgain),
                             ),
                   ),
               ],
@@ -207,7 +208,7 @@ class _LocationDesidePageState extends State<LocationDesidePage> {
                   });
                 },
                 icon: Icon(Icons.check),
-                label: Text("이 장소로 결정하기"),
+                label: Text(context.l10n.desideLocation),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,

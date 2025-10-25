@@ -1,5 +1,6 @@
 // ** 일정이 보여지는 화면 **
 
+import 'package:all_new_uniplan/l10n/l10n.dart';
 import 'package:all_new_uniplan/screens/everytime_link_page.dart';
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
@@ -165,7 +166,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 
                     backgroundColor: Theme.of(context).colorScheme.surface,
 
-                    headerDateFormat: 'yyyy년 MMMM', // 헤더에 표시되는 날짜 형식을 지정
+                    headerDateFormat: 'yyyy MMMM', // 헤더에 표시되는 날짜 형식을 지정
                     headerHeight: 40, // 헤더의 높이를 지정. 이 속성을 0으로 설정하여 헤더 영역을 숨김
                     headerStyle: CalendarHeaderStyle(
                       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -367,7 +368,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
             children: [
               SpeedDialChild(
                 child: Icon(Icons.calendar_today),
-                label: 'Link Everytime',
+                label: context.l10n.linkEverytime,
                 onTap: () async {
                   // 에브리타임 연동 창으로 이동, 일정 추가 결과에 따른 결과를 반환받음.
                   final result = await Navigator.push<bool>(
@@ -383,7 +384,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 
               SpeedDialChild(
                 child: Icon(Icons.calendar_today),
-                label: 'Add Schedule',
+                label: context.l10n.addSchedule,
                 onTap: () async {
                   // 일정 추가 창으로 이동, 일정 추가 결과에 따른 결과를 반환받음.
                   final result = await Navigator.push<bool>(

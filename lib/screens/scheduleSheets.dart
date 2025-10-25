@@ -202,8 +202,6 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 
                     backgroundColor: Theme.of(context).colorScheme.surface,
 
-                    headerDateFormat:
-                        context.l10n.dateHeader, // 헤더에 표시되는 날짜 형식을 지정
                     headerHeight: 40, // 헤더의 높이를 지정. 이 속성을 0으로 설정하여 헤더 영역을 숨김
                     headerStyle: CalendarHeaderStyle(
                       backgroundColor: Theme.of(context).colorScheme.surface,

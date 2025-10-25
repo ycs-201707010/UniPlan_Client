@@ -135,6 +135,72 @@ class AuthService with ChangeNotifier {
     }
   }
 
+  Future<bool> findId(String email) async {
+    final Map<String, dynamic> body = {"email": email};
+
+    try {
+      final response = await _apiClient.post('/login/findPassword', body: body);
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Find Id Successed") {
+        // 아이디 찾기에 성공하면 자동으로 입력한 이메일 주소로 아이디가 적힌 메일을 발송함
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('아이디를 찾는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
+  Future<bool> findPassword(String username, String email) async {
+    final Map<String, dynamic> body = {"username": username, "email": email};
+
+    try {
+      final response = await _apiClient.post('/login/findPassword', body: body);
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Find Password Successed") {
+        // 비밀번호 찾기에 성공하면 자동으로 입력한 이메일 주소로 인증번호가 적힌 메일을 발송함
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('비밀번호를 찾는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
+  Future<bool> verifyCode(String email, String code) async {
+    final Map<String, dynamic> body = {
+      "email": email,
+      "verification_code": code,
+    };
+
+    try {
+      final response = await _apiClient.post('/login/verifyCode', body: body);
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Verify Code Successed") {
+        // 비밀번호 찾기에 성공하면 자동으로 입력한 이메일 주소로 인증번호가 적힌 메일을 발송함
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('인증 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    }
+  }
+
   // 로그아웃 시 호출되는 메서드
   void logout() {
     _currentUser = null;

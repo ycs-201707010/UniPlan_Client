@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:timetable_view/timetable_view.dart';
 import 'package:intl/intl.dart';
 
 import 'package:all_new_uniplan/models/schedule_model.dart';
@@ -33,8 +34,11 @@ class EverytimeService with ChangeNotifier {
   Timetable? get currentTimetable => _currentTimetable;
 
   // 시간표의 반복 일정을 생성하는 과정에서 충돌/비충돌 일정을 각각 저장하는 필드
-  List<ScheduleConflict>? _conflictingSchedules = [];
+  final List<ScheduleConflict> _conflictingSchedules = [];
   List<ScheduleConflict>? get conflictingSchedules => _conflictingSchedules;
+
+  bool _isLoading = false; // 로딩 상태 추가
+  bool get isLoading => _isLoading;
 
   // 에브리타임 시간표 링크를 통해 정보를 크롤링하여 가져오는 메서드
   Future<void> getEverytimeSchedule(String everytimeUrl) async {
@@ -42,6 +46,7 @@ class EverytimeService with ChangeNotifier {
     _currentTimetable = Timetable();
     try {
       final response = await _apiClient.post('/everytime', body: body);
+      print('서버 응답 본문: ${response.body}');
       var json = jsonDecode(response.body);
       var message = json['message'];
 
@@ -52,7 +57,7 @@ class EverytimeService with ChangeNotifier {
         for (var scheduleJson in scheduleJsonList) {
           var subject = Subject.fromCrawlJson(scheduleJson);
 
-          currentTimetable!.addSubjectToList(subject);
+          _currentTimetable!.addSubjectToList(subject);
         }
         _currentTimetableList.add(_currentTimetable!);
       } else {
@@ -71,6 +76,8 @@ class EverytimeService with ChangeNotifier {
 
   // 시간표 정보들을 가져오는 메서드
   Future<void> getTimetable(int userId) async {
+    _isLoading = true; // 로딩 시작
+    notifyListeners();
     final Map<String, dynamic> body = {"user_id": userId};
 
     try {
@@ -91,8 +98,8 @@ class EverytimeService with ChangeNotifier {
           _currentTimetable = Timetable.fromJson(
             timetableJson as Map<String, dynamic>,
           );
-          _currentTimetableList.add(_currentTimetable!);
-          getTimetableSubject(_currentTimetable!.tableId!);
+
+          await getTimetableSubject(_currentTimetable!.tableId!);
         }
       } else {
         throw Exception('Get Timetable Faield: $message');
@@ -101,6 +108,9 @@ class EverytimeService with ChangeNotifier {
       print('시간표 정보를 가져오는 과정에서 에러 발생: $e');
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       rethrow;
+    } finally {
+      _isLoading = false; // 로딩 종료
+      notifyListeners(); // 최종 데이터 변경 및 로딩 종료 알림
     }
   }
 
@@ -119,13 +129,14 @@ class EverytimeService with ChangeNotifier {
       if (message == "Get Timetable Subject Successed") {
         _currentTimetable!.subjects!.clear();
         var subjectJsonList = json['result'] as List<dynamic>;
-        if (subjectJsonList.length == 0) {
+        if (subjectJsonList.isEmpty) {
           return;
         }
         for (final subjectJson in subjectJsonList) {
           final subject = Subject.fromJson(subjectJson as Map<String, dynamic>);
           _currentTimetable!.addSubjectToList(subject);
         }
+        _currentTimetableList.add(_currentTimetable!);
       } else {
         throw Exception('Get Timetable Subject Failed: $message');
       }
@@ -176,7 +187,6 @@ class EverytimeService with ChangeNotifier {
   ) async {
     final Map<String, dynamic> body = subject.toJson();
     body.addAll({"user_id": userId, "class_id": classId});
-    print(body);
     try {
       final response = await _apiClient.post(
         '/everytime/addTimetableSubject',
@@ -201,10 +211,11 @@ class EverytimeService with ChangeNotifier {
   // 현재 시간표를 각 주마다의 개별 일정으로 DB에 추가하는 메서드
   Future<void> addTimetableSchedule(
     int userId,
-    String title,
+    String title, // Timetable 제목
     DateTime startDate,
     DateTime endDate,
   ) async {
+    conflictingSchedules!.clear();
     setTimetableDate(startDate, endDate);
     await addTimetable(userId, title);
     for (final subject in _currentTimetable!.subjects!) {
@@ -235,6 +246,7 @@ class EverytimeService with ChangeNotifier {
         'date': formattedDate,
         'start_time': formattedStartTime,
         'end_time': formattedEndTime,
+        'fatigue_level': 1.8,
         if (_currentTimetable!.location != null)
           'location': _currentTimetable!.location,
         if (memo.isNotEmpty) 'memo': memo,
@@ -256,38 +268,36 @@ class EverytimeService with ChangeNotifier {
           var createdCount = result["created_count"] as int;
 
           // 개별 일정이 생성되지 않은 경우
-          if (createdCount == 0) {
-            return;
-          } else {
-            var scheduleJsonList = result["schedules"] as List<dynamic>;
 
-            if (scheduleJsonList.isNotEmpty) {
-              for (final scheduleJson in scheduleJsonList) {
-                final schedule = Schedule.fromJson(
-                  scheduleJson as Map<String, dynamic>,
-                );
-                _scheduleService.addScheduleToList(schedule);
-                _currentTimetable!.generatedSchedules!.add(schedule);
-              }
+          var scheduleJsonList = result["schedules"] as List<dynamic>;
+
+          if (scheduleJsonList.isNotEmpty) {
+            for (final scheduleJson in scheduleJsonList) {
+              final schedule = Schedule.fromJson(
+                scheduleJson as Map<String, dynamic>,
+              );
+              _scheduleService.addScheduleToList(schedule);
+              _currentTimetable!.generatedSchedules!.add(schedule);
             }
+          }
 
-            // 반복횟수와 일정 생성 개수가 같지 않은 경우
-            // 기존 일정과 충돌이 발생한 것
-            if (createdCount != repeatCount) {
-              var skippedDates = result["skipped_dates"] as List<dynamic>;
+          // 반복횟수와 일정 생성 개수가 같지 않은 경우
+          // 기존 일정과 충돌이 발생한 것
+          if (createdCount != repeatCount) {
+            print("test1");
+            var skippedDates = result["skipped_dates"] as List<dynamic>;
 
-              // 충돌이 발생한 날짜 목록을 순회하며 충돌 일정 목록을 갱신
-              for (final date in skippedDates) {
-                final conflictDate = DateTime.parse(date as String);
-                Schedule timetableSchedule = Schedule(
-                  title: subject.title,
-                  date: conflictDate,
-                  startTime: subject.startTime,
-                  endTime: subject.endTime,
-                  location: _currentTimetable!.location,
-                );
-                findConflict(timetableSchedule);
-              }
+            // 충돌이 발생한 날짜 목록을 순회하며 충돌 일정 목록을 갱신
+            for (final date in skippedDates) {
+              final conflictDate = DateTime.parse(date as String);
+              Schedule timetableSchedule = Schedule(
+                title: subject.title,
+                date: conflictDate,
+                startTime: subject.startTime,
+                endTime: subject.endTime,
+                location: _currentTimetable!.location,
+              );
+              findConflict(timetableSchedule);
             }
           }
         } else {
@@ -335,6 +345,7 @@ class EverytimeService with ChangeNotifier {
 
   // 추가하려는 시간표의 개별 일정과 충돌이 발생하는 캘린더에 등록된 기존 일정을 찾는 메서드
   void findConflict(Schedule timetableSchedule) {
+    print("test2");
     // 충돌이 일어난 일정들을 찾음
     List<Schedule> schedules = _scheduleService.findSchedulesAtDateAndTime(
       timetableSchedule.date,
@@ -343,10 +354,12 @@ class EverytimeService with ChangeNotifier {
     );
 
     for (final schedule in schedules) {
-      ScheduleConflict(
+      print("test3");
+      final conflict = ScheduleConflict(
         existingSchedule: schedule,
         timetableSchedule: timetableSchedule,
       );
+      _conflictingSchedules.add(conflict);
     }
   }
 
@@ -360,5 +373,89 @@ class EverytimeService with ChangeNotifier {
   void updateTimetableTitle(int tableId, String title) {
     _currentTimetableList.firstWhere((s) => s.tableId == tableId).title = title;
     notifyListeners();
+  }
+
+  List<LaneEvents> buildLaneCurrentTimetableEventsList() {
+    if (_currentTimetable == null ||
+        _currentTimetable!.subjects == null ||
+        _currentTimetable!.subjects!.isEmpty) {
+      return [];
+    }
+
+    final Map<int, List<TableEvent>> eventsByDay = {};
+
+    for (final subject in _currentTimetable!.subjects!) {
+      final startTime = TableEventTime(
+        hour: subject.startTime.hour,
+        minute: subject.startTime.minute,
+      );
+      final endTime = TableEventTime(
+        hour: subject.endTime.hour,
+        minute: subject.endTime.minute,
+      );
+
+      // The 'day' field in Subject directly corresponds to the laneIndex (0=Mon, 1=Tue, ...)
+      final dayIndex = subject.day;
+
+      final tableEvent = TableEvent(
+        title: subject.title,
+        eventId: subject.subjectId!, // Use ID or hashCode
+        startTime: startTime,
+        endTime: endTime,
+        laneIndex: dayIndex,
+        backgroundColor: _getColorForSubject(
+          subject.title,
+        ), // Optional: assign color
+        textStyle: const TextStyle(fontSize: 10, color: Colors.white),
+      );
+
+      // Add the event to the map, grouped by its day index
+      (eventsByDay[dayIndex] ??= []).add(tableEvent);
+    }
+
+    // Create the final List<LaneEvents>
+    final List<LaneEvents> laneEventsList = [];
+    // Use weekdayISMap to get day names based on DateTime constants (1=Mon, ..., 7=Sun)
+    // Assuming your subject.day matches the 0-6 index, not DateTime constants directly
+    const List<String> dayNames = ['월', '화', '수', '목', '금', '토', '일'];
+    for (int i = 0; i < 7; i++) {
+      // Typically Mon-Fri (0-4) or Mon-Sun (0-6)
+      laneEventsList.add(
+        LaneEvents(
+          lane: Lane(name: dayNames[i], laneIndex: i),
+          events:
+              eventsByDay[i + 1] ??
+              [], // Get events for this day, or empty list if none
+        ),
+      );
+    }
+
+    // Return only lanes that typically appear in a timetable (e.g., Mon-Fri)
+    return laneEventsList.sublist(0, 5); // Adjust if you need Sat/Sun
+  }
+
+  // Helper function to assign colors (optional)
+  Color _getColorForSubject(String title) {
+    final hash = title.hashCode;
+    final index = hash % Colors.primaries.length;
+    return Colors.primaries[index].shade300;
+  }
+
+  void deleteConflitFromList(ScheduleConflict conflict) {
+    final bool removed = conflictingSchedules!.remove(conflict);
+
+    // 2. 만약 제거되었다면 UI 갱신 알림
+    if (removed) {
+      notifyListeners();
+    }
+  }
+
+  // 사용자가 드롭다운에서 다른 시간표를 선택했을 때 호출될 메서드
+  void selectTimetable(Timetable timetable) {
+    if (_currentTimetable != timetable) {
+      _currentTimetable = timetable;
+
+      notifyListeners(); // UI에 변경 알림
+    }
   }
 }

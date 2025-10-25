@@ -66,6 +66,21 @@ class ChatMessage {
     return scheduleInfoText;
   }
 
+  String scheduleDeleteMessage(Schedule addSchedule) {
+    final formattedDate = DateFormat('yyyy년 MM월 dd일').format(addSchedule.date);
+    final formattedStartTime = formatTime(addSchedule.startTime);
+    final formattedEndTime = formatTime(addSchedule.endTime);
+
+    String scheduleInfoText =
+        '다음 일정 삭제를 확인해주세요:\n\n'
+        '제목: ${addSchedule.title}\n'
+        '날짜: $formattedDate\n'
+        '시간: $formattedStartTime - $formattedEndTime\n'
+        '장소: ${addSchedule.location!.isNotEmpty ? addSchedule.location : '미정'}\n';
+
+    return scheduleInfoText;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'message': message,

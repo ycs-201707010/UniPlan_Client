@@ -27,7 +27,7 @@ Map<String, String> weekdayESMap = {
 class SubProject {
   final int? subProjectId;
   final String? subGoal;
-  int? done;
+  int? done = 0;
   final int? maxDone;
   final String? weekDay;
   bool? multiPerDay = false;

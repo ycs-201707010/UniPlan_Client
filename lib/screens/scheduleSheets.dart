@@ -75,6 +75,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
       }
       try {
         await everytimeService.getTimetable(authService.currentUser!.userId);
+        print(everytimeService.currentTimetableList!.length);
       } on Exception catch (e) {
         if (e.toString().contains('404')) {
           print("시간표가 비어있습니다.");

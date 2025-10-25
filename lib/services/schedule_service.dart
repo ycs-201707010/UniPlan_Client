@@ -206,6 +206,7 @@ class ScheduleService with ChangeNotifier {
 
         getFatigue(userId, scheduleId);
         //성공 시 true 반환
+        notifyListeners();
         return true;
       } else {
         print('일정을 수정하는 과정에서 에러 발생: $message');

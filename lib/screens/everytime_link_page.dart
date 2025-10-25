@@ -1,5 +1,6 @@
 // ** 에브리타임과 연결하여 시간표를 불러오는 페이지 **
 
+import 'package:all_new_uniplan/screens/conflict_resolution_page.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
@@ -357,12 +358,46 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                               final startDate = selectedStartDate;
                               final endDate = selectedEndDate;
 
-                              await everytimeService.addTimetableSchedule(
-                                userId,
+                              await everytimeService.addTimetable(
+                                authService.currentUser!.userId,
                                 title,
-                                startDate!,
-                                endDate!,
                               );
+
+                              final result = await showYesNoAlertDialog(
+                                context,
+                              );
+
+                              if (result == true) {
+                                await everytimeService.addTimetableSchedule(
+                                  userId,
+                                  title,
+                                  startDate!,
+                                  endDate!,
+                                );
+                                print(
+                                  everytimeService.conflictingSchedules!.length,
+                                );
+                                if (everytimeService
+                                        .conflictingSchedules!
+                                        .length !=
+                                    0) {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (pageContext) =>
+                                              ConflictResolutionPage(),
+                                    ),
+                                  );
+                                }
+                              }
+
+                              // await everytimeService.addTimetableSchedule(
+                              //   userId,
+                              //   title,
+                              //   startDate!,
+                              //   endDate!,
+                              // );
 
                               if (!context.mounted) return;
 
@@ -396,6 +431,35 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
             ),
           ),
       ],
+    );
+  }
+
+  Future<bool?> showYesNoAlertDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // 사용자가 다이얼로그 바깥을 터치해도 닫히지 않게 설정
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('시간표 일정 추가'), // 다이얼로그 제목
+          content: Text('시간표 데이터를 지정한 기간 동안 \n캘린더에 일정으로 추가하시겠습니까?'), // 다이얼로그 내용
+          actions: <Widget>[
+            // "아니오" 버튼
+            TextButton(
+              child: Text('아니오'),
+              onPressed: () {
+                Navigator.pop(context, false); // false를 반환하며 다이얼로그 닫기
+              },
+            ),
+            // "예" 버튼
+            TextButton(
+              child: Text('예'),
+              onPressed: () {
+                Navigator.pop(context, true); // true를 반환하며 다이얼로그 닫기
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

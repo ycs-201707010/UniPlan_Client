@@ -1,5 +1,6 @@
 // ** 등록된 일정 상세 정보 **
 
+import 'package:all_new_uniplan/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -46,17 +47,17 @@ class ScheduleDetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           if (appointment.location != null && appointment.location!.isNotEmpty)
-            Text("장소: ${appointment.location}"),
+            Text("${context.l10n.detailLocation}: ${appointment.location}"),
           const SizedBox(height: 4),
           Text(
-            "시작: ${DateFormat('yyyy년 MM월 dd일 a h시 mm분', 'ko').format(appointment.startTime)}",
+            "${context.l10n.detailStart}: ${DateFormat(context.l10n.fullDateTimeFormat, 'ko').format(appointment.startTime)}",
           ),
           Text(
-            "종료: ${DateFormat('yyyy년 MM월 dd일 a h시 mm분', 'ko').format(appointment.endTime)}",
+            "${context.l10n.detailEnd}: ${DateFormat(context.l10n.fullDateTimeFormat, 'ko').format(appointment.endTime)}",
           ),
           const SizedBox(height: 4),
           if (appointment.notes != null && appointment.notes!.isNotEmpty)
-            Text("메모: ${appointment.notes}"),
+            Text("${context.l10n.detailNotes}: ${appointment.notes}"),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -66,7 +67,7 @@ class ScheduleDetailSheet extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit),
-                  label: const Text("수정"),
+                  label: Text(context.l10n.edit),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.indigo,
                     foregroundColor: Colors.white,
@@ -79,7 +80,7 @@ class ScheduleDetailSheet extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete),
-                  label: const Text("삭제"),
+                  label: Text(context.l10n.delete),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.redAccent,
                     foregroundColor: Colors.white,

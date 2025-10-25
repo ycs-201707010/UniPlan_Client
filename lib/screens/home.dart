@@ -1,5 +1,7 @@
 // 메인화면
+import 'package:all_new_uniplan/l10n/l10n.dart';
 import 'package:all_new_uniplan/screens/chatbot.dart';
+import 'package:all_new_uniplan/screens/chatbot_list_page.dart';
 import 'package:all_new_uniplan/screens/my_page.dart';
 import 'package:all_new_uniplan/screens/project_page.dart';
 import 'package:all_new_uniplan/screens/timeTable.dart';
@@ -40,8 +42,8 @@ class _HomeScreenState extends State<HomeScreen> {
       const scheduleSheetsPage(), // 0번 탭: 캘린더 화면 (이제 Scaffold 포함)
       const TimetablePage(),
       const ProjectPage(), //TimetablePage(), // 1번 탭 : 대학 시간표 화면
+      const ChatbotPage(), //ChatbotPage(), // 임시 위젯 (추후 ChatBotPage()로 변경)
       const MyPage(), // 임시 위젯 (추후 Scaffold로 변경)
-      const ChatbotPage(), // 임시 위젯 (추후 ChatBotPage()로 변경)
     ];
 
     return Scaffold(
@@ -56,23 +58,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // ✅ 2. 비활성화된 아이템의 색상을 명확하게 지정 (선택 사항이지만 권장)
         unselectedItemColor: Colors.grey,
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today_outlined),
-            label: '캘린더',
+            // ✅ 2. 하드코딩된 문자열 대신 AppLocalizations 사용
+            label: context.l10n.navCalendar,
           ),
           BottomNavigationBarItem(icon: Icon(Icons.table_chart), label: '시간표'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            label: '프로젝트',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: '마이페이지',
+            icon: Icon(Icons.assessment_outlined), // 프로젝트에 어울리는 아이콘으로 변경
+            label: context.l10n.navProject,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.smart_toy_outlined),
-            label: '챗봇',
+            label: context.l10n.navChatbot,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: context.l10n.navMyPage,
           ),
         ],
         currentIndex: _selectedIndex,

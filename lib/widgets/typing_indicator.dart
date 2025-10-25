@@ -34,7 +34,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
       ),
       child: AnimatedBuilder(
@@ -69,8 +69,8 @@ class _TypingIndicatorState extends State<TypingIndicator>
       margin: const EdgeInsets.symmetric(horizontal: 3),
       width: 10,
       height: 10,
-      decoration: const BoxDecoration(
-        color: Color(0xEE8CFF1A),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
         shape: BoxShape.circle,
       ),
     );

@@ -1,7 +1,7 @@
 // ** 프로그램 진입점 **
 
-import 'package:all_new_uniplan/screens/add_schedule.dart';
-import 'package:all_new_uniplan/screens/place_edit_page.dart';
+import 'package:all_new_uniplan/screens/add_project.dart';
+import 'package:all_new_uniplan/screens/add_sub_Project.dart';
 import 'package:all_new_uniplan/screens/home.dart';
 import 'package:all_new_uniplan/screens/welcome.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
@@ -12,14 +12,28 @@ import 'package:all_new_uniplan/theme/theme.dart';
 import 'package:all_new_uniplan/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:all_new_uniplan/services/project_chatbot_service.dart';
 import 'package:all_new_uniplan/services/place_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
+  // Flutter 엔진 초기화 보장
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 앱을 실행하기 전에 저장된 테마 설정을 불러옵니다.
+  final prefs = await SharedPreferences.getInstance();
+  // 저장된 값이 없으면 'system'을 기본값으로 사용
+  final String themeName = prefs.getString('themeMode') ?? 'system';
+
+  // 문자열을 다시 ThemeMode enum으로 변환
+  final ThemeMode initialThemeMode = ThemeMode.values.firstWhere(
+    (e) => e.name == themeName,
+    orElse: () => ThemeMode.system,
+  );
 
   runApp(
     // 👇 여러 Provider를 관리하기 위한 MultiProvider
@@ -31,7 +45,9 @@ void main() async {
         ChangeNotifierProvider(create: (context) => RecordService()),
         ChangeNotifierProvider(create: (context) => ProjectService()),
         ChangeNotifierProvider(create: (context) => PlaceService()),
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(
+          create: (context) => ThemeProvider(initialThemeMode),
+        ),
         ChangeNotifierProxyProvider<ScheduleService, ChatbotService>(
           // create는 다른 Provider를 참조할 수 없으므로,
           // update에서 모든 것을 처리하는 것이 일반적입니다.
@@ -210,16 +226,9 @@ class uniPlanApp extends StatelessWidget {
 
       themeMode: themeProvider.themeMode,
 
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      locale: const Locale('ko'), // ✅ 기본 언어를 한국어로 지정
-      supportedLocales: const [
-        Locale('ko'), // 한국어
-        Locale('en'), // 영어 등 추가 가능
-      ],
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ko'), // ✅ 기본 언어를 영어로 지정
       home: Builder(
         builder: (context) {
           // 이 builder 내부의 context는 MultiProvider 아래에 있음이 보장됩니다.

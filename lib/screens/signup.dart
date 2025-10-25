@@ -81,11 +81,7 @@ class _SignupPageState extends State<SignupPage> {
               Container(
                 child: Text(
                   '회원가입',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 24,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 24),
                 ),
               ),
 

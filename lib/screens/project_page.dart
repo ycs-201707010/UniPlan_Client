@@ -1026,13 +1026,25 @@ class _ProjectPageState extends State<ProjectPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            project.title,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                project.title,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  // TODO : 프로젝트 타입(공부, 운동 등)에 따라 색상 변경하기
+                                  color: Colors.orange,
+                                ),
+                              ),
+
+                              // TODO : 수정하기 버튼으로 구현
+                              IconButton(
+                                onPressed: () {},
+                                icon: Icon(Icons.edit),
+                              ),
+                            ],
                           ),
                           Divider(color: Colors.orange.shade300, thickness: 2),
                           const SizedBox(height: 8),
@@ -1192,6 +1204,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ 1. 현재 테마의 밝기를 확인합니다.
+    final brightness = Theme.of(context).brightness;
+
+    // ✅ 2. 밝기에 따라 사용할 로고 이미지 경로를 결정합니다.
+    final String logoPath =
+        (brightness == Brightness.dark)
+            ? 'assets/images/logo_dark.png' // 다크 모드일 때 (배경이 어두울 때)
+            : 'assets/images/logo.png'; // 라이트 모드일 때 (배경이 밝을 때) // 로고 이미지를 가져올 디렉터리 주소
+
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -1200,7 +1221,56 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset('assets/images/logo.png', height: 45),
+          Row(
+            children: [
+              Image.asset(logoPath, height: 45),
+              IconButton(
+                icon: const Icon(Icons.help_outline),
+                tooltip: '도움말',
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      // 상단 모서리를 둥글게
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                    ),
+                    builder: (BuildContext context) {
+                      return Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min, // ✅ 내용의 높이만큼만 차지
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              '프로젝트 도움말',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            Text('프로젝트의 하위 목표까지 생성하셨나요? 이제 진척도를 올려볼 차례입니다.'),
+                            SizedBox(height: 10),
+                            Text('터치하면 진척도가 올라갑니다.'),
+                            Text('길게 누르면 진척도가 내려갑니다.'),
+                            SizedBox(height: 10),
+                            Text(
+                              '오른쪽에서 왼쪽으로 목표를 잡고 슬라이드하면, 수정과 삭제 버튼을 보실 수 있습니다.',
+                            ),
+                            SizedBox(height: 20),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+                padding: EdgeInsets.zero, // 버튼 내부 간격 최소화
+                constraints: const BoxConstraints(), // 아이콘 크기 줄이기
+              ),
+            ],
+          ),
           Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainer,
@@ -1292,83 +1362,98 @@ class ProjectProgressCard extends StatelessWidget {
     final double progress = (maxStep == 0) ? 0.0 : currentStep / maxStep;
     final bool isCompleted = currentStep >= maxStep;
 
-    return Slidable(
-      key: ValueKey(subProjectId),
-      groupTag: 'sub-project-list',
-      endActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        extentRatio: 0.25,
-        children: [
-          SlidableAction(
-            onPressed: (context) => onDelete(),
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            icon: Icons.delete,
-            label: context.l10n.deleteAction,
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: onIncrement,
-        onLongPress: () {
-          HapticFeedback.mediumImpact();
-          onDecrement();
-        },
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(12),
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.shade300, width: 1.5),
-          ),
-          child: Row(
+        border: Border.all(color: Colors.orange.shade300, width: 1.5),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Slidable(
+          key: ValueKey(subProjectId),
+          groupTag: 'sub-project-list',
+          endActionPane: ActionPane(
+            motion: const DrawerMotion(),
+            extentRatio: 0.4,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: Colors.grey[300],
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Colors.orange,
-                      ),
-                      minHeight: 6,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ],
+              SlidableAction(
+                onPressed: (context) => {},
+                backgroundColor: const Color(0xFF21B7CA),
+                foregroundColor: Colors.white,
+                label: '수정',
+              ),
+              SlidableAction(
+                onPressed: (context) => onDelete(),
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                icon: Icons.delete,
+                label: context.l10n.deleteAction,
+                borderRadius: const BorderRadius.only(
+                  bottomRight: Radius.circular(10),
+                  topRight: Radius.circular(10),
                 ),
               ),
-              const SizedBox(width: 16),
-              Column(
+            ],
+          ),
+          child: InkWell(
+            onTap: onIncrement,
+            onLongPress: () {
+              HapticFeedback.mediumImpact();
+              onDecrement();
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+
+              child: Row(
                 children: [
-                  Text(
-                    '$currentStep/$maxStep',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor: Colors.grey[300],
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.orange,
+                          ),
+                          minHeight: 6,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Icon(
-                    isCompleted ? Icons.check_circle : Icons.directions_run,
-                    color:
-                        isCompleted
-                            ? Colors.orange
-                            : Theme.of(context).colorScheme.onSurface,
-                    size: 28,
+                  const SizedBox(width: 16),
+                  Column(
+                    children: [
+                      Text(
+                        '$currentStep/$maxStep',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Icon(
+                        isCompleted ? Icons.check_circle : Icons.directions_run,
+                        color:
+                            isCompleted
+                                ? Colors.orange
+                                : Theme.of(context).colorScheme.onSurface,
+                        size: 28,
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),

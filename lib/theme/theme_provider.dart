@@ -9,8 +9,6 @@ class ThemeProvider extends ChangeNotifier {
 
   ThemeMode get themeMode => _themeMode;
 
-  final String _logoImgUrl = "assets/images/logo.png";
-
   void setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
     notifyListeners();

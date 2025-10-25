@@ -32,11 +32,7 @@ class _LoginPageState extends State<LoginPage> {
               Container(
                 child: Text(
                   '회원가입 시 입력하신 아이디로\n로그인해 주세요',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 22,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22),
                 ),
               ),
 

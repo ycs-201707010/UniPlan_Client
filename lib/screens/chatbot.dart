@@ -376,7 +376,40 @@ class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
           IconButton(
             icon: const Icon(Icons.help_outline),
             tooltip: '도움말',
-            onPressed: _showHelpDialog,
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  // 상단 모서리를 둥글게
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (BuildContext context) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min, // ✅ 내용의 높이만큼만 차지
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          '스케줄봇 도움말',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        Text('스케줄봇은 자연어 처리를 통해 여러분의 일정을 관리해주는 AI 챗봇입니다.'),
+                        SizedBox(height: 10),
+                        Text('예시 명령어:'),
+                        Text('- "내일 3시에 헬스장 예약해줘"'),
+                        Text('- "금요일 저녁 약속 취소해줘"'),
+                        SizedBox(height: 20),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
             padding: EdgeInsets.zero, // 버튼 내부 간격 최소화
             constraints: const BoxConstraints(), // 아이콘 크기 줄이기
           ),

@@ -96,7 +96,9 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/images/logo.png
+    - assets/images/logo_dark.png
     - assets/images/logo_512.png
+    - assets/images/logo_512_dark.png
     - assets/images/bot_profile_pic.png
     - assets/images/logo_everytime.png
     - assets/images/project_profile_pic.png

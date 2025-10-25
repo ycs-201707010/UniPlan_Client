@@ -54,9 +54,12 @@ class _BirthdayPickerState extends State<BirthdayPicker> {
             onTap: _showDatePicker,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 0),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFF5CE546), width: 2),
+                  bottom: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
                 ),
               ),
               child: Text(displayText, style: const TextStyle(fontSize: 16)),

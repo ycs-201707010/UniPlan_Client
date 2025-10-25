@@ -27,9 +27,6 @@ samples, guidance on mobile development, and a full API reference.
 
 - 장기 프로젝트 화면/기능 구현 (table_calendar 라이브러리 사용)
 - Google Calendar API를 사용하여 공휴일 데이터 불러오기. (Schedule, Project 공통.)
-- 장소로 이동하는 시간을 표시한 블럭의 출력을 켜고 끌 수 있게.
-- (add_schedule.dart) DropDownList에서 장소 선택시 메서드에 place의 name이 들어가도록 변경
 - (everytime_link_page.dart) 시작 날짜를 정하지 않으면 종료 일자를 정할 수 없으며, 시작 날짜 이전으로 정하지 못하게
 - (everytime_link_page.dart) 오늘 날짜 이전으로 정하지 못하게 되어있는데, 이거 해결하기 (일정간 충돌도 보완)
   유효성 검사 로직을 만들 것.
-- (project_page.dart) 서브 프로젝트의 증감을 사용자가 어떻게 조작하는지 도움말 버튼 부착하기

@@ -35,6 +35,9 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
   // 로딩 상태를 관리할 변수 추가함 (초기값 true. 처음엔 로딩으로 시작해야 하니까)
   bool _isLoading = true;
 
+  // 이동시간 표시 여부를 관리할 변수
+  bool _showTravelTime = true; // 기본값은 '켜기'
+
   @override
   void initState() {
     // TODO: 위젯이 생성되자마자 일정 데이터를 불러오는 함수를 호출함
@@ -155,14 +158,38 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 
+  void _onStateChange(bool showState) {
+    if (_showTravelTime != showState) {
+      setState(() {
+        _showTravelTime = showState;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheduleService = context.watch<ScheduleService>();
+    final l10n = AppLocalizations.of(context);
+
+    // _showTravelTime 상태에 따라 scheduleService.schedules를 필터링
+    final List<Schedule> allSchedules = scheduleService.schedules;
+    final List<Schedule> filteredSchedules;
+
+    if (_showTravelTime) {
+      filteredSchedules = allSchedules; // 스위치가 켜져 있으면 모든 일정 표시
+    } else {
+      // 스위치가 꺼져 있으면 scheduleId가 -1이 아닌 일정만 필터링
+      filteredSchedules =
+          allSchedules.where((s) => s.scheduleId != -1).toList();
+    }
 
     return Stack(
       children: [
         Scaffold(
-          appBar: CustomAppBar(),
+          appBar: CustomAppBar(
+            currentState: _showTravelTime,
+            onStateChanged: _onStateChange,
+          ),
 
           body: SafeArea(
             child: Column(
@@ -171,7 +198,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                   child: SfCalendar(
                     view: CalendarView.week,
                     controller: _calendarController,
-                    dataSource: ScheduleDataSource(scheduleService.schedules),
+                    dataSource: ScheduleDataSource(filteredSchedules),
 
                     backgroundColor: Theme.of(context).colorScheme.surface,
 
@@ -194,13 +221,14 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                       BuildContext context,
                       CalendarAppointmentDetails details,
                     ) {
-                      // 3. dataSource에서 전달된 원본 Schedule 객체를 가져옵니다.
-                      // (DataSource의 appointments 리스트에 Schedule 객체가 그대로 들어있다고 가정)
-                      final Schedule schedule =
-                          details.appointments.first as Schedule;
+                      final appointment = details.appointments.first;
+
+                      // ScheduleService에서 appointment와 일치하는 원본 Schedule 객체를 찾는다.
+                      final Schedule? schedule = scheduleService
+                          .findScheduleByAppointment(appointment);
 
                       // ✅ 4. '이동 시간' (scheduleId == -1)인지 확인
-                      if (schedule.scheduleId == -1) {
+                      if (schedule?.scheduleId == -1) {
                         // --- '이동 시간'일 경우 특별한 UI 반환 ---
                         return Container(
                           width: double.infinity,
@@ -222,20 +250,20 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                               Icon(
                                 Icons.directions_walk,
                                 color: Colors.white,
-                                size: 12,
+                                size: 24,
                               ), // 이동 아이콘
                               const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  schedule.title, // "이동 시간" 또는 "A -> B"
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
+                              // Expanded(
+                              //   child: Text(
+                              //     schedule!.title, // "이동 시간" 또는 "A -> B"
+                              //     style: const TextStyle(
+                              //       color: Colors.white,
+                              //       fontSize: 10,
+                              //       fontStyle: FontStyle.italic,
+                              //     ),
+                              //     overflow: TextOverflow.ellipsis,
+                              //   ),
+                              // ),
                             ],
                           ),
                         );
@@ -247,7 +275,7 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                           height: double.infinity,
                           padding: const EdgeInsets.all(4),
                           color: hexToColor(
-                            schedule.color ?? '#3366FF',
+                            schedule!.color ?? '#3366FF',
                           ), // 일정 고유 색상
                           child: Text(
                             schedule.title,
@@ -517,23 +545,65 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 }
 
 // 상단의 AppBar
-class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final bool currentState; // 현재 TravelTime의 표시 여부
+  final Function(bool) onStateChanged;
+
+  const CustomAppBar({
+    super.key,
+    required this.currentState,
+    required this.onStateChanged,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
-  @override
-  State<CustomAppBar> createState() => _CustomAppBarState();
-}
+  Widget _buildFormatButton(
+    BuildContext context,
+    bool State,
+    String text,
+    bool isSelected,
+  ) {
+    return GestureDetector(
+      onTap: () => onStateChanged(State),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color:
+              isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color:
+                isSelected
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
 
-class _CustomAppBarState extends State<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
+    // ✅ 1. 현재 테마의 밝기를 확인합니다.
+    final brightness = Theme.of(context).brightness;
+
+    // ✅ 2. 밝기에 따라 사용할 로고 이미지 경로를 결정합니다.
+    final String logoPath =
+        (brightness == Brightness.dark)
+            ? 'assets/images/logo_dark.png' // 다크 모드일 때 (배경이 어두울 때)
+            : 'assets/images/logo.png'; // 라이트 모드일 때 (배경이 밝을 때)
+
     // final String yearMonthText = DateFormat(
     //   'yyyy년 MM월',
     // ).format(widget.currentDate);
-
     return AppBar(
       automaticallyImplyLeading: false, // 강제로 뒤로가기 버튼 제거
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -543,8 +613,38 @@ class _CustomAppBarState extends State<CustomAppBar> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // 왼쪽 : 앱 로고
-          Image.asset('assets/images/logo.png', height: 45),
+          Image.asset(logoPath, height: 45),
+
           // 오른쪽 : 도움말 아이콘
+          Row(
+            children: [
+              Text("이동거리", style: TextStyle(fontSize: 14)),
+              SizedBox(width: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildFormatButton(
+                      context,
+                      true,
+                      "ON",
+                      currentState == true,
+                    ),
+                    _buildFormatButton(
+                      context,
+                      false,
+                      "OFF",
+                      currentState == false,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

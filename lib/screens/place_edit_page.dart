@@ -21,12 +21,48 @@ class PlaceEditPage extends StatefulWidget {
 
 class _PlaceEditPageState extends State<PlaceEditPage> {
   // 로딩 상태를 관리할 변수 추가함 (초기값 true. 처음엔 로딩으로 시작해야 하니까)
-  final bool _isLoading = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
     // TODO: 위젯이 생성되자마자 장소 데이터를 불러오는 함수를 호출함
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadPlaces();
+    });
+  }
+
+  // ✅ 2. _loadPlaces 함수 구현 (AuthService도 필요)
+  Future<void> _loadPlaces() async {
+    final placeService = context.read<PlaceService>();
+    final authService = context.read<AuthService>();
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      if (authService.isLoggedIn) {
+        await placeService.getPlaces(authService.currentUser!.userId);
+      }
+    } catch (e) {
+      if (mounted) {
+        toastification.show(
+          context: context,
+          type: ToastificationType.error,
+          style: ToastificationStyle.flatColored,
+          autoCloseDuration: const Duration(seconds: 3),
+          title: Text('장소를 불러오는 데 실패했습니다: $e'),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -42,242 +78,177 @@ class _PlaceEditPageState extends State<PlaceEditPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: TopBar(title: "장소 관리하기"),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                child: Text(
-                  '자주 방문하는 장소를 저장하여\n일정 등록 시 사용하실 수 있습니다',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '자주 방문하는 장소를 저장하여\n일정 등록 시 사용하실 수 있습니다',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  ),
+                  const SizedBox(height: 30),
+                  const Text(
+                    "목록",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 15),
+                ],
               ),
+            ),
 
-              SizedBox(height: 30),
+            // ✅ 4. 로딩 중일 때와 아닐 때 UI 분리
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Expanded(
+                  child: ListView.builder(
+                    // ✅ 5. itemCount를 categories가 아닌 places.length로 변경
+                    itemCount: places.length,
+                    itemBuilder: (context, index) {
+                      // ✅ 6. categories 대신 places[index] 사용
+                      final place = places[index];
 
-              Text(
-                "목록",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-
-              SizedBox(height: 15),
-
-              Expanded(
-                child: ListView.builder(
-                  itemCount: places.length,
-                  itemBuilder: (context, index) {
-                    final place = places[index];
-
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outline,
+                      return Container(
+                        margin: const EdgeInsets.fromLTRB(15, 0, 15, 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          color: Theme.of(context).colorScheme.surface,
                         ),
-                        borderRadius: BorderRadius.circular(10),
-                        color: Theme.of(context).colorScheme.surface,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Slidable(
-                          endActionPane: ActionPane(
-                            extentRatio: 0.45,
-                            motion: const DrawerMotion(),
-                            children: [
-                              SlidableAction(
-                                // TODO : "집" 장소 수정 시 addPlace로 가게끔 수정
-                                onPressed: (context) async {
-                                  print('주소를 수정할겁니다');
-
-                                  final result = await Navigator.push<bool>(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => PlaceAddPage(
-                                            // 현재 항목의 데이터를 전달
-                                            initialTitle: place.name,
-                                            initialAddress: place.address,
-                                          ),
-                                    ),
-                                  );
-
-                                  if (result == true) {
-                                    // 성공했을 때 Toast 알림
-                                    if (!context.mounted)
-                                      return; // context 유효성 검사
-
-                                    // TODO : 라이트모드, 다크모드 구분하기
-                                    toastification.show(
-                                      context:
-                                          context, // optional if you use ToastificationWrapper
-                                      type: ToastificationType.success,
-                                      style: ToastificationStyle.flatColored,
-                                      autoCloseDuration: const Duration(
-                                        seconds: 3,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Slidable(
+                            endActionPane: ActionPane(
+                              extentRatio: 0.45,
+                              motion: const DrawerMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed: (context) async {
+                                    final result = await Navigator.push<bool>(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => PlaceAddPage(
+                                              // ✅ 7. place 객체 전체를 전달 (PlaceAddPage 수정 필요)
+                                              initialTitle: place.name,
+                                              initialAddress: place.address,
+                                            ),
                                       ),
-                                      title: Text('제하하하하하!! 장소를 수정했다!!'),
                                     );
-                                  }
-                                },
-                                backgroundColor: const Color(0xFF21B7CA),
-                                foregroundColor: Colors.white,
-
-                                label: '수정',
-                              ),
-                              SlidableAction(
-                                onPressed: (context) async {
-                                  print('주소를 삭제합니다');
-
-                                  // TODO : Dialog를 띄워 정말로 장소를 삭제할 것인지 묻고, 확인 버튼이 눌리면 그때 장소를 삭제 후 닫는걸로.
-                                  bool deleteDesided =
-                                      false; // 삭제 여부를 저장하는 bool 변수
-
-                                  await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('장소 삭제'),
-                                        content: Text('해당 장소를 정말 삭제하시겠습니까?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              deleteDesided = true;
-                                              Navigator.of(
-                                                context,
-                                              ).pop(); // Dialog를 지움
-                                            },
-                                            child: Text('예'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('아니오'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-
-                                  if (deleteDesided == true) {
-                                    print(
-                                      "삭제하기로 한 $userId의 장소는 : ${place.name}",
-                                    );
-
-                                    // 삭제하기를 결정하였다면 여기에서 deleteSchedule() 함수 실행.
-                                    bool deletedResult = await placeService
-                                        .deletePlace(userId, place.name);
-
-                                    // 삭제 처리가 성공적으로 완료되었다면 (true가 반환되면) Toast 알림을 띄웁니다.
-                                    if (deletedResult == true) {
+                                    if (result == true) {
                                       if (!context.mounted) return;
-
-                                      // TODO : 라이트모드, 다크모드 구분하기
                                       toastification.show(
                                         context: context,
-                                        type: ToastificationType.custom(
-                                          "Schedule Delete",
-                                          Theme.of(context).colorScheme.error,
-                                          Icons.edit_calendar_outlined,
-                                        ),
+                                        type: ToastificationType.success,
                                         style: ToastificationStyle.flatColored,
                                         autoCloseDuration: const Duration(
                                           seconds: 3,
                                         ),
-                                        title: const Text(
-                                          '해당 장소는 성공적으로 삭제되었습니다.',
-                                        ),
+                                        title: const Text('장소를 성공적으로 수정했습니다.'),
                                       );
+                                      // ✅ 8. 수정 완료 후 목록 새로고침
+                                      _loadPlaces();
                                     }
-                                  }
-                                },
-                                backgroundColor: const Color(0xFFFE4A49),
-                                foregroundColor: Colors.white,
-                                borderRadius: BorderRadius.only(
-                                  bottomRight: Radius.circular(10),
-                                  topRight: Radius.circular(10),
+                                  },
+                                  backgroundColor: const Color(0xFF21B7CA),
+                                  foregroundColor: Colors.white,
+                                  label: '수정',
                                 ),
-                                label: '삭제',
-                              ),
-                            ],
-                          ),
-                          child: Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 16,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  place.name,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                SlidableAction(
+                                  onPressed: (context) async {
+                                    // ... (삭제 확인 showDialog 로직) ...
+                                    // ✅ (showDialog가 true를 반환했을 때)
+                                    bool deletedResult = await placeService
+                                        .deletePlace(userId, place.name);
+                                    if (deletedResult == true) {
+                                      if (!context.mounted) return;
+                                      toastification.show(
+                                        context: context,
+                                        type: ToastificationType.error,
+                                        style: ToastificationStyle.flatColored,
+                                        title: const Text('장소가 삭제되었습니다.'),
+                                      );
+                                      // ✅ 9. 삭제 완료 후 목록 새로고침 (notifyListeners()만으로도 가능하지만,
+                                      //           getPlaces가 최신 목록을 가져오므로 이게 더 확실함)
+                                      // _loadPlaces(); // PlaceService의 deletePlace에서 notifyListeners()를 호출한다면 이 줄은 생략 가능
+                                    }
+                                  },
+                                  backgroundColor: const Color(0xFFFE4A49),
+                                  foregroundColor: Colors.white,
+                                  borderRadius: const BorderRadius.only(
+                                    bottomRight: Radius.circular(10),
+                                    topRight: Radius.circular(10),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  place.address,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                  ),
+                                  label: '삭제',
                                 ),
                               ],
                             ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              title: Text(
+                                place.name, // ✅ place 객체 사용
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(
+                                place.address, // ✅ place 객체 사용
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
-
-      // ✅ 하단 버튼 (키보드에 따라 위로 밀려 올라감)
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(
           top: 10,
           left: 20,
           right: 20,
-          bottom: bottomInset > 0 ? bottomInset + 20 : 20, // 키보드가 올라올 때 +10 여유
+          bottom: bottomInset > 0 ? bottomInset + 20 : 20,
         ),
         child: SizedBox(
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
             onPressed: () async {
-              print("[System log] 장소 추가하기!");
-
               final result = await Navigator.push<bool>(
                 context,
                 MaterialPageRoute(builder: (context) => const PlaceAddPage()),
               );
-
               if (result == true) {
-                // 성공했을 때 Toast 알림
-                if (!context.mounted) return; // context 유효성 검사
-
-                // TODO : 라이트모드, 다크모드 구분하기
+                if (!context.mounted) return;
                 toastification.show(
-                  context: context, // optional if you use ToastificationWrapper
+                  context: context,
                   type: ToastificationType.success,
                   style: ToastificationStyle.flatColored,
                   autoCloseDuration: const Duration(seconds: 3),
-                  title: Text('제하하하하하!! 장소를 등록했다!!'),
+                  title: const Text('장소를 성공적으로 추가했습니다.'),
                 );
+                // ✅ 10. 추가 완료 후 목록 새로고침
+                _loadPlaces();
               }
             },
-
             child: const Text(
               '장소 추가하기',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

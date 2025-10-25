@@ -155,6 +155,7 @@ class _LocationDesidePageState extends State<LocationDesidePage> {
                       hintText: context.l10n.locationSearchHint,
                       prefixIcon: Icon(Icons.search),
                       border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                       contentPadding: EdgeInsets.all(12),
                     ),
                     keyboardType: TextInputType.text,
@@ -163,7 +164,7 @@ class _LocationDesidePageState extends State<LocationDesidePage> {
                 ),
                 if (showSuggestions)
                   Container(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surfaceContainer,
                     constraints: BoxConstraints(maxHeight: 300),
                     child:
                         suggestions.isNotEmpty

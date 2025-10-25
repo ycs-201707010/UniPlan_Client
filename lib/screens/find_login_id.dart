@@ -74,11 +74,7 @@ class _FindLoginIdState extends State<FindLoginId> {
               Container(
                 child: Text(
                   '회원가입 시 입력하신 이메일을 입력해주세요',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 22,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22),
                 ),
               ),
 
@@ -127,7 +123,6 @@ class _FindLoginIdState extends State<FindLoginId> {
                       Text(
                         '메일로 발송된 인증번호를 입력해주세요',
                         style: TextStyle(
-                          color: Colors.black,
                           fontWeight: FontWeight.w600,
                           fontSize: 20,
                         ),

@@ -7,12 +7,19 @@ import 'package:all_new_uniplan/screens/signup.dart';
 import 'package:flutter/material.dart';
 
 class welcomePage extends StatelessWidget {
-  final String logoImg = 'assets/images/logo.png'; // 로고 이미지를 가져올 디렉터리 주소
-
   const welcomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // ✅ 1. 현재 테마의 밝기를 확인합니다.
+    final brightness = Theme.of(context).brightness;
+
+    // ✅ 2. 밝기에 따라 사용할 로고 이미지 경로를 결정합니다.
+    final String logoPath =
+        (brightness == Brightness.dark)
+            ? 'assets/images/logo_dark.png' // 다크 모드일 때 (배경이 어두울 때)
+            : 'assets/images/logo.png'; // 라이트 모드일 때 (배경이 밝을 때) // 로고 이미지를 가져올 디렉터리 주소
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -21,7 +28,7 @@ class welcomePage extends StatelessWidget {
           children: [
             Transform.scale(
               scale: 0.8,
-              child: Container(child: Image.asset(logoImg)),
+              child: Container(child: Image.asset(logoPath)),
             ),
 
             SizedBox(height: 60),

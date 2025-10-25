@@ -23,6 +23,10 @@ class _SettingPageState extends State<SettingPage> {
   Widget build(BuildContext context) {
     final themeProvider = context.read<ThemeProvider>();
 
+    final brightness = Theme.of(context).brightness;
+
+    _isDarkModeEnabled = (brightness == Brightness.dark) ? true : false;
+
     return Scaffold(
       appBar: TopBar(title: "환경설정"),
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,

@@ -392,12 +392,7 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                                 }
                               }
 
-                              // await everytimeService.addTimetableSchedule(
-                              //   userId,
-                              //   title,
-                              //   startDate!,
-                              //   endDate!,
-                              // );
+                              everytimeService.callNotifyListeners();
 
                               if (!context.mounted) return;
 

@@ -29,7 +29,7 @@ class _MyPageState extends State<MyPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "쟁반짜장",
+                        "Devv",
                         style: TextStyle(
                           fontSize: 21,
                           fontWeight: FontWeight.bold,

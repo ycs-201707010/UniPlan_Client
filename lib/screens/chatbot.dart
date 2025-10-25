@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/models/chat_message_model.dart';
 import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
-import 'package:all_new_uniplan/services/project_chatbot_service.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -37,7 +36,6 @@ class _ChatPageState extends State<ChatbotPage> {
         Text(
           chatMessage.message,
 
-          // 채팅 내용은 전부 검은색으로 지정.
           style: TextStyle(
             color: // 메시지 화자에 따라 배경색을 다르게 지정
                 chatMessage.speaker != ChatMessageType.user
@@ -124,7 +122,7 @@ class _ChatPageState extends State<ChatbotPage> {
                   const CircleAvatar(
                     radius: 16,
                     backgroundImage: AssetImage(
-                      'assets/images/bot_profile_pic.png',
+                      'assets/images/schedule_profile_pic.png',
                     ),
                   ),
                 if (chatMessage.speaker == ChatMessageType.bot)

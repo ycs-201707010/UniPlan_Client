@@ -106,7 +106,7 @@ class _SignupPageState extends State<SignupPage> {
                             hintText: '여기에 아이디 입력',
                             focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
-                                color: Color(0xFF5CE546),
+                                color: Theme.of(context).colorScheme.primary,
                                 width: 2,
                               ),
                             ),
@@ -139,7 +139,7 @@ class _SignupPageState extends State<SignupPage> {
                       hintText: '여기에 비밀번호 입력',
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
-                          color: Color(0xFF5CE546),
+                          color: Theme.of(context).colorScheme.primary,
                           width: 2,
                         ),
                       ),
@@ -159,7 +159,7 @@ class _SignupPageState extends State<SignupPage> {
                       hintText: '비밀번호 재입력',
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
-                          color: Color(0xFF5CE546),
+                          color: Theme.of(context).colorScheme.primary,
                           width: 2,
                         ),
                       ),
@@ -176,7 +176,7 @@ class _SignupPageState extends State<SignupPage> {
                       hintText: '여기에 닉네임 입력',
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
-                          color: Color(0xFF5CE546),
+                          color: Theme.of(context).colorScheme.primary,
                           width: 2,
                         ),
                       ),
@@ -198,7 +198,7 @@ class _SignupPageState extends State<SignupPage> {
                             hintText: '',
                             focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(
-                                color: Color(0xFF5CE546),
+                                color: Theme.of(context).colorScheme.primary,
                                 width: 2,
                               ),
                             ),
@@ -240,10 +240,13 @@ class _SignupPageState extends State<SignupPage> {
                                       });
                                     }
                                   },
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     focusedBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Color(0xFF5CE546),
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
                                         width: 2,
                                       ),
                                     ),
@@ -255,11 +258,14 @@ class _SignupPageState extends State<SignupPage> {
                                       child: TextField(
                                         controller:
                                             _emailDomainController, // 직접 입력시엔 컨트롤러에 있는 내용을 이메일로 사용.
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           hintText: '직접 입력',
                                           focusedBorder: UnderlineInputBorder(
                                             borderSide: BorderSide(
-                                              color: Color(0xFF5CE546),
+                                              color:
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
                                               width: 2,
                                             ),
                                           ),
@@ -396,7 +402,8 @@ class _SignupPageState extends State<SignupPage> {
                                   _selectedGender = value;
                                 });
                               },
-                              activeColor: const Color(0xFF5CE546),
+                              activeColor:
+                                  Theme.of(context).colorScheme.primary,
                             ),
                             const Text('남자'),
                           ],
@@ -413,7 +420,8 @@ class _SignupPageState extends State<SignupPage> {
                                   _selectedGender = value;
                                 });
                               },
-                              activeColor: const Color(0xFF5CE546),
+                              activeColor:
+                                  Theme.of(context).colorScheme.primary,
                             ),
                             const Text('여자'),
                           ],
@@ -430,7 +438,8 @@ class _SignupPageState extends State<SignupPage> {
                                   _selectedGender = value;
                                 });
                               },
-                              activeColor: const Color(0xFF5CE546),
+                              activeColor:
+                                  Theme.of(context).colorScheme.primary,
                             ),
                             const Text('미공개'),
                           ],

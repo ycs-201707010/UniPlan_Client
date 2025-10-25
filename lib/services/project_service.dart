@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:all_new_uniplan/models/subject_model.dart';
 import 'package:all_new_uniplan/utils/formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/api/api_client.dart';
 import 'package:all_new_uniplan/models/project_model.dart';
 import 'package:all_new_uniplan/models/subProject_model.dart';
+import 'package:all_new_uniplan/services/subProject_service.dart';
 
 class ProjectService with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
@@ -294,8 +296,8 @@ class ProjectService with ChangeNotifier {
       var message = json['message'];
       if (message == "Get SubProject By Date Successed") {
         var subProjectsJson = json['subProjects'];
-        final subProjectList = jsonToSubProjectTist(subProjectsJson);
-        print("subProjectList.length : ${subProjectList.length}");
+        final subProjectList = jsonToSubProjectToList(subProjectsJson);
+        print(subProjectList.length);
         return subProjectList;
       } else {
         throw Exception('Get SubProject By Date Failed: $message');
@@ -632,7 +634,7 @@ class ProjectService with ChangeNotifier {
     }
   }
 
-  List<SubProject> jsonToSubProjectTist(dynamic subProjectListJson) {
+  List<SubProject> jsonToSubProjectToList(dynamic subProjectListJson) {
     List<SubProject> subProjectList = [];
 
     subProjectListJson = subProjectListJson as List<dynamic>;

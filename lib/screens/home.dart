@@ -9,6 +9,7 @@ import 'package:all_new_uniplan/services/chatbot_service.dart';
 import 'package:all_new_uniplan/services/schedule_service.dart';
 import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/screens/scheduleSheets.dart';
+import 'package:all_new_uniplan/screens/timeTable.dart';
 // import 'package:all_new_uniplan/screens/project_chatbot.dart';
 import 'package:provider/provider.dart';
 
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
       const scheduleSheetsPage(), // 0번 탭: 캘린더 화면 (이제 Scaffold 포함)
+      const TimetablePage(),
       const ProjectPage(), //TimetablePage(), // 1번 탭 : 대학 시간표 화면
       const ChatbotPage(), //ChatbotPage(), // 임시 위젯 (추후 ChatBotPage()로 변경)
       const MyPage(), // 임시 위젯 (추후 Scaffold로 변경)
@@ -62,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // ✅ 2. 하드코딩된 문자열 대신 AppLocalizations 사용
             label: context.l10n.navCalendar,
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.table_chart), label: '시간표'),
           BottomNavigationBarItem(
             icon: Icon(Icons.assessment_outlined), // 프로젝트에 어울리는 아이콘으로 변경
             label: context.l10n.navProject,

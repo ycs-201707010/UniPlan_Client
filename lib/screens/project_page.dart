@@ -839,6 +839,11 @@ class _ProjectPageState extends State<ProjectPage> {
           project.projectId!,
           _focusedDay,
         );
+
+        for (final subProject in subProjects) {
+          print(subProject.subGoal);
+          print(subProject.done);
+        }
         if (subProjects.isNotEmpty) {
           newSubProjects[project.projectId!] = subProjects;
         }
@@ -1034,6 +1039,7 @@ class _ProjectPageState extends State<ProjectPage> {
                           if (_subProjectList[project.projectId!] != null)
                             for (final subProject
                                 in _subProjectList[project.projectId!]!)
+                              // 하위 프로젝트를 하나씩 카드로 표시
                               ProjectProgressCard(
                                 subProjectId: subProject.subProjectId!,
                                 title: subProject.subGoal!,

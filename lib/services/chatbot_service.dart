@@ -149,6 +149,21 @@ class ChatbotService with ChangeNotifier {
               timestamp: DateTime.now(),
               showButtons: true,
             );
+          } else if (intent == "일정 삭제 요청") {
+            _pendingScheduleDelete = Schedule.fromJson(output["delete"]);
+
+            final scheduleInfoText = _currentMessage.scheduleDeleteMessage(
+              _pendingScheduleDelete!,
+            );
+
+            // 이때 showButtons을 true로 지정하여 말풍선 생성 시
+            // 예, 아니오 버튼을 통해 사용자의 입력을 받을 수 있도록 한다.
+            _currentMessage = ChatMessage(
+              message: scheduleInfoText,
+              speaker: ChatMessageType.bot,
+              timestamp: DateTime.now(),
+              showButtons: true,
+            );
           } else {
             print('오류: 처리하려는 스케줄 객체가 null입니다.');
             throw Exception('Response Failed: $message');
@@ -173,14 +188,14 @@ class ChatbotService with ChangeNotifier {
   // 구분하여 상황에 맞는 함수를 호출한다.
   // 이후 상황에 맞는 메시지를 생성하여 마지막 채팅과 채팅 내역을 저장하는 필드를 갱신하고
   // 각 임시 변수를 초기화한다.
-  void confirmScheduleAddition(int userId) {
+  void confirmScheduleAddition(int userId) async {
     // 가장 마지막 채팅의 클래스에서 showButtons 필드를 false로 변경하여
     // 예 버튼을 클릭했을 때 예, 아니오 버튼이 사라지도록 지정
     _messages.last.showButtons = false;
 
     if (_pendingScheduleAdd != null) {
       try {
-        _scheduleService.addSchedule(
+        await _scheduleService.addSchedule(
           userId,
           _pendingScheduleAdd!.title,
           _pendingScheduleAdd!.date,
@@ -204,14 +219,27 @@ class ChatbotService with ChangeNotifier {
         _pendingScheduleAdd = null;
       }
     } else if (_pendingScheduleDelete != null) {
-      try {} catch (e) {
+      try {
+        await _scheduleService.deleteSchedule(
+          userId,
+          _pendingScheduleDelete!.scheduleId!,
+        );
+
+        _currentMessage = ChatMessage(
+          message: "일정이 정상적으로 삭제되었습니다.",
+          speaker: ChatMessageType.bot,
+          timestamp: DateTime.now(),
+          showButtons: false,
+        );
+        addMessage(_currentMessage);
+      } catch (e) {
         rethrow;
       } finally {
         _pendingScheduleDelete = null;
       }
     } else if (_pendingScheduleOriginal != null) {
       try {
-        _scheduleService.modifySchedule(
+        await _scheduleService.modifySchedule(
           userId,
           _pendingScheduleOriginal!,
           _pendingScheduleNew!,
@@ -265,9 +293,7 @@ class ChatbotService with ChangeNotifier {
           // speaker(enum)를 role(String)으로 변환
           // 챗봇 API는 보통 'bot' 대신 'assistant' 역할을 사용합니다.
           final role =
-              chatMessage.speaker == ChatMessageType.user
-                  ? 'user'
-                  : 'assistant';
+              chatMessage.speaker == ChatMessageType.user ? 'user' : 'system';
 
           // 3. API가 요구하는 형식의 Map을 생성하여 반환
           return {'role': role, 'content': chatMessage.message};

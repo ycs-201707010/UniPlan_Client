@@ -18,6 +18,7 @@ import 'package:all_new_uniplan/models/schedule_model.dart';
 import 'package:all_new_uniplan/classes/schedule_data_source.dart';
 import 'package:toastification/toastification.dart';
 import 'package:all_new_uniplan/services/place_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class scheduleSheetsPage extends StatefulWidget {
   const scheduleSheetsPage({super.key});
@@ -147,6 +148,13 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     }
   }
 
+  Color hexToColor(String hexString) {
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+    buffer.write(hexString.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheduleService = context.watch<ScheduleService>();
@@ -167,7 +175,8 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 
                     backgroundColor: Theme.of(context).colorScheme.surface,
 
-                    headerDateFormat: 'yyyy MMMM', // 헤더에 표시되는 날짜 형식을 지정
+                    headerDateFormat:
+                        context.l10n.dateHeader, // 헤더에 표시되는 날짜 형식을 지정
                     headerHeight: 40, // 헤더의 높이를 지정. 이 속성을 0으로 설정하여 헤더 영역을 숨김
                     headerStyle: CalendarHeaderStyle(
                       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -180,6 +189,77 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                         letterSpacing: 1,
                       ),
                     ),
+
+                    appointmentBuilder: (
+                      BuildContext context,
+                      CalendarAppointmentDetails details,
+                    ) {
+                      // 3. dataSource에서 전달된 원본 Schedule 객체를 가져옵니다.
+                      // (DataSource의 appointments 리스트에 Schedule 객체가 그대로 들어있다고 가정)
+                      final Schedule schedule =
+                          details.appointments.first as Schedule;
+
+                      // ✅ 4. '이동 시간' (scheduleId == -1)인지 확인
+                      if (schedule.scheduleId == -1) {
+                        // --- '이동 시간'일 경우 특별한 UI 반환 ---
+                        return Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            // 반투명한 회색 배경
+                            color: Colors.grey.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(4),
+                            // 점선 테두리 (시각적 구분)
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.8),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.directions_walk,
+                                color: Colors.white,
+                                size: 12,
+                              ), // 이동 아이콘
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  schedule.title, // "이동 시간" 또는 "A -> B"
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      // ✅ 6. '일반 일정'일 경우의 UI
+                      else {
+                        return Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          padding: const EdgeInsets.all(4),
+                          color: hexToColor(
+                            schedule.color ?? '#3366FF',
+                          ), // 일정 고유 색상
+                          child: Text(
+                            schedule.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }
+                    },
 
                     showDatePickerButton: true,
                     firstDayOfWeek: 1,

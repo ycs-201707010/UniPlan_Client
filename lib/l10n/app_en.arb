@@ -100,5 +100,6 @@
 "dowWedShort": "Wed",
 "dowThuShort": "Thu",
 "dowFriShort": "Fri",
-"dowSatShort": "Sat"
+"dowSatShort": "Sat",
+"dateHeader": "yyyy-MM"
 }

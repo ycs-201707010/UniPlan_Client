@@ -99,5 +99,6 @@
 "dowWedShort": "수",
 "dowThuShort": "목",
 "dowFriShort": "금",
-"dowSatShort": "토"
+"dowSatShort": "토",
+"dateHeader": "yyyy년 MM월"
 }

@@ -346,6 +346,11 @@ class ScheduleService with ChangeNotifier {
     // 맵을 반복하며 모델의 fromJson 생성자를 사용
     scheduleMap.forEach((key, value) {
       final schedule = Schedule.fromJson(value as Map<String, dynamic>);
+
+      print("--- [ScheduleService] 일정을 불러왔습니다. ---");
+      print(schedule.toString()); // 위에서 만든 toString() 메서드가 호출됩니다.
+      print("----------------------------------------------------");
+
       _schedules.add(schedule);
     });
 

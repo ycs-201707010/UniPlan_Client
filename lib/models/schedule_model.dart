@@ -31,6 +31,24 @@ class Schedule {
     this.timestamp,
   });
 
+  @override
+  String toString() {
+    return '''
+    --- Schedule Object ---
+      scheduleId: $scheduleId
+      title: '$title'
+      date: $date
+      startTime: $startTime
+      endTime: $endTime
+      location: $location
+      memo: $memo
+      color: $color
+      isLongProject: $isLongProject
+      projectId: $projectId
+    -----------------------
+    ''';
+  }
+
   Schedule copyWith({
     int? scheduleId,
     String? title,

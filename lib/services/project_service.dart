@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/api/api_client.dart';
 import 'package:all_new_uniplan/models/project_model.dart';
 import 'package:all_new_uniplan/models/subProject_model.dart';
+import 'package:all_new_uniplan/models/project_stat_model.dart';
 import 'package:all_new_uniplan/services/subProject_service.dart';
 
 class ProjectService with ChangeNotifier {
@@ -236,6 +237,43 @@ class ProjectService with ChangeNotifier {
         var result = json["result"];
         Project updateProject = Project.fromJson(result);
         updateProjectToList(project.projectId!, updateProject);
+      } else {
+        throw Exception('Update SubProject Failed: $message');
+      }
+    } catch (e) {
+      print('프로젝트 정보를 수정하는 과정에서 에러 발생: $e');
+      // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 특정 프로젝트의 지정 기간 동안의 진행도 통계를 가져오는 메서드
+  Future<Stat> getProjectStats(
+    int projectId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final Map<String, dynamic> body = {
+      "project_id": projectId,
+      "start_date": formatDate(startDate),
+      "end_date": formatDate(endDate),
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/project/getProjectStats',
+        body: body,
+      );
+
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+      if (message == "Get Project Stats Successed") {
+        var stats = json["stats"];
+        final stat = Stat.fromJson(stats);
+        return stat;
       } else {
         throw Exception('Update SubProject Failed: $message');
       }

@@ -23,7 +23,7 @@ class _LocationDesidePageState extends State<LocationDesidePage> {
   LatLng currentPosition = LatLng(37.5665, 126.9780); // 기본: 서울
   Marker? selectedMarker;
 
-  final String apiKey = 'AIzaSyCj47z5fjQ5s7gNZzwVK9dnrktS516IgRs'; // 여기에 키 입력
+  final String apiKey = ''; // 여기에 키 입력
 
   bool showSuggestions = false; // 검색 중인지 여부를 판단하는 상태 변수
 

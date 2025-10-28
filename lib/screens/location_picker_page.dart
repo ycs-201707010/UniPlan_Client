@@ -17,7 +17,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
   final String _pickedAddress = '';
   GoogleMapController? _mapController;
 
-  final String apiKey = 'AIzaSyCj47z5fjQ5s7gNZzwVK9dnrktS516IgRs'; // 실 사용 API 키
+  // final String apiKey = // 실 사용 API 키
 
   bool showSuggestions = false; // 검색 중인지 여부를 판단하는 상태 변수
 

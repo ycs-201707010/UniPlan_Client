@@ -232,7 +232,7 @@ class uniPlanApp extends StatelessWidget {
 
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('ko'), // ✅ 기본 언어를 영어로 지정
+      locale: const Locale('en'), // ✅ 기본 언어를 영어로 지정
       home: Builder(
         builder: (context) {
           // 이 builder 내부의 context는 MultiProvider 아래에 있음이 보장됩니다.

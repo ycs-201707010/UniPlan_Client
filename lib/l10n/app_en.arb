@@ -101,5 +101,6 @@
 "dowThuShort": "Thu",
 "dowFriShort": "Fri",
 "dowSatShort": "Sat",
-"dateHeader": "yyyy-MM"
+"dateHeader": "yyyy-MM",
+"distance": "distance"
 }

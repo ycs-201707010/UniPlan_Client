@@ -288,7 +288,7 @@ class _ChatPageState extends State<ProjectChatbot> {
 
                                 await projectChatbotService.sendMessage(
                                   resultText,
-                                  "운동",
+                                  projectChatbotService.sendType,
                                   authService.currentUser!.userId,
                                 );
 
@@ -321,7 +321,7 @@ class _ChatPageState extends State<ProjectChatbot> {
 
                     await projectChatbotService.sendMessage(
                       _controller.text,
-                      "공부",
+                      projectChatbotService.sendType,
                       authService.currentUser!.userId,
                     );
 
@@ -361,8 +361,6 @@ class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
 
   void _showHelpDialog() {}
 
-  void _showSearchDialog() {}
-
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -372,27 +370,27 @@ class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            '프로젝트봇 1.0',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            tooltip: '도움말',
-            onPressed: _showHelpDialog,
-            padding: EdgeInsets.zero, // 버튼 내부 간격 최소화
-            constraints: const BoxConstraints(), // 아이콘 크기 줄이기
+          Expanded(
+            child: Row(
+              children: [
+                const Text(
+                  '프로젝트봇 1.0',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.help_outline),
+                  tooltip: '도움말',
+                  onPressed: _showHelpDialog,
+                  padding: EdgeInsets.zero, // 버튼 내부 간격 최소화
+                  constraints: const BoxConstraints(), // 아이콘 크기 줄이기
+                ),
+              ],
+            ),
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search),
-          tooltip: '검색',
-          onPressed: _showSearchDialog,
-        ),
-      ],
     );
   }
 

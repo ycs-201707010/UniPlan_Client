@@ -13,6 +13,10 @@ class ProjectChatbotService with ChangeNotifier {
 
   ProjectChatbotService(this._projectService);
 
+  // sendType 변수 ("운동", "공부")
+  String _sendType = "운동"; // 기본값
+  String get sendType => _sendType;
+
   // 채팅 내역을 담는 List 변수
   final List<ProjectChatMessage> _messages = [];
   List<ProjectChatMessage> get messages => _messages;
@@ -31,6 +35,16 @@ class ProjectChatbotService with ChangeNotifier {
   // LLM 모델이 응답을 생성 중인지 나타내는 상태 변수
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  // 'sendType'을 변경하고, 변경 사항을 구독자(widget)에게 알리는 메서드
+  void setSendType(String newType) {
+    if (_sendType != newType) {
+      //
+      _sendType = newType;
+      print("Service sendType updated to: $_sendType");
+      notifyListeners(); // 👈 이것이 핵심! UI를 갱신하라고 알립니다.
+    }
+  }
 
   // 매개변수로 전달받은 채팅 클래스를 채팅 내역을 저장하는 List 필드에 추가
   void addMessage(ProjectChatMessage message) {

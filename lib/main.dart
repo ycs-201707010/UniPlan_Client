@@ -11,6 +11,7 @@ import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:all_new_uniplan/theme/theme.dart';
 import 'package:all_new_uniplan/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // 한국어/영어 UI 출력을 위한 패키지
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   // Flutter 엔진 초기화 보장
   WidgetsFlutterBinding.ensureInitialized();
+
+  // .env 파일 로드
+  await dotenv.load(fileName: ".env");
 
   // 앱을 실행하기 전에 저장된 테마 설정을 불러옵니다.
   final prefs = await SharedPreferences.getInstance();

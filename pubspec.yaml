@@ -42,6 +42,8 @@ dependencies:
   permission_handler: ^12.0.1
   provider: ^6.1.2
 
+  flutter_dotenv: ^5.1.0
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -95,6 +97,7 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
+    - .env
     - assets/images/logo.png
     - assets/images/logo_dark.png
     - assets/images/logo_512.png

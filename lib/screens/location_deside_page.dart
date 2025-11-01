@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LocationDesidePage extends StatefulWidget {
   const LocationDesidePage({super.key});
@@ -23,7 +24,7 @@ class _LocationDesidePageState extends State<LocationDesidePage> {
   LatLng currentPosition = LatLng(37.5665, 126.9780); // 기본: 서울
   Marker? selectedMarker;
 
-  final String apiKey = ''; // 여기에 키 입력
+  final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY']!; // 여기에 키 입력
 
   bool showSuggestions = false; // 검색 중인지 여부를 판단하는 상태 변수
 

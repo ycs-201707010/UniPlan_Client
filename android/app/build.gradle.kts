@@ -1,3 +1,12 @@
+// .env 파일을 읽기 위한 Properties 객체 생성
+Properties properties = new Properties()
+// 프로젝트 루트(최상위)에 있는 .env 파일 경로 설정
+File envFile = new File(project.rootDir.path + '/.env')
+// .env 파일이 존재하면 파일 내용을 읽어들임
+if (envFile.exists()) {
+    properties.load(new FileInputStream(envFile))
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")

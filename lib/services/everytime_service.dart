@@ -367,17 +367,16 @@ class EverytimeService with ChangeNotifier {
   }
 
   // 추가하려는 시간표의 개별 일정과 충돌이 발생하는 캘린더에 등록된 기존 일정을 찾는 메서드
-  void findConflict(Schedule timetableSchedule) {
-    print("test2");
+  void findConflict(Schedule timetableSchedule) async {
     // 충돌이 일어난 일정들을 찾음
-    List<Schedule> schedules = _scheduleService.findSchedulesAtDateAndTime(
-      timetableSchedule.date,
-      timetableSchedule.startTime,
-      timetableSchedule.endTime,
-    );
+    List<Schedule> schedules = await _scheduleService
+        .findSchedulesAtDateAndTime(
+          timetableSchedule.date,
+          timetableSchedule.startTime,
+          timetableSchedule.endTime,
+        );
 
     for (final schedule in schedules) {
-      print("test3");
       final conflict = ScheduleConflict(
         existingSchedule: schedule,
         timetableSchedule: timetableSchedule,

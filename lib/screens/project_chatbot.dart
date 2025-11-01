@@ -286,7 +286,7 @@ class _ChatPageState extends State<ProjectChatbot> {
                               if (resultText != null) {
                                 // _controller.text = resultText;
 
-                                projectChatbotService.sendMessage(
+                                await projectChatbotService.sendMessage(
                                   resultText,
                                   "운동",
                                   authService.currentUser!.userId,
@@ -316,12 +316,12 @@ class _ChatPageState extends State<ProjectChatbot> {
                 const SizedBox(width: 12),
                 // 전송 버튼
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     if (_controller.text.isEmpty) return; // 빈 메시지 전송 방지
 
-                    projectChatbotService.sendMessage(
+                    await projectChatbotService.sendMessage(
                       _controller.text,
-                      "운동",
+                      "공부",
                       authService.currentUser!.userId,
                     );
 

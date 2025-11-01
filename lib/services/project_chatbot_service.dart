@@ -23,10 +23,10 @@ class ProjectChatbotService with ChangeNotifier {
 
   // 사용자의 의사(예/아니오)에 따른 처리를 기다리는 일정
   // 프로젝트 추천 요청 시의 챗봇이 답변한 일정 정보를 임시로 저장하는 변수
-  Project? _pendingProjectAdd;
+  List<Project>? _pendingProjectAdd = [];
 
   // 외부에서 읽기 전용으로 접근할 getter
-  Project? get pendingProjectAdd => _pendingProjectAdd;
+  List<Project>? get pendingProjectAdd => _pendingProjectAdd;
 
   // LLM 모델이 응답을 생성 중인지 나타내는 상태 변수
   bool _isLoading = false;
@@ -89,50 +89,68 @@ class ProjectChatbotService with ChangeNotifier {
               timestamp: DateTime.now(),
               showButtons: false,
             );
-          } else if (intent == "프로젝트 생성") {
-            final projectJson = Map<String, dynamic>.from(output["project"]);
-            _pendingProjectAdd = Project.fromJson(projectJson);
+            addMessage(_currentMessage);
+          } else if (intent == "프로젝트 생성" ||
+              intent == "프로젝트 생성(장기)" ||
+              intent == "프로젝트 생성(시험)") {
+            final projectListJson = output as List<dynamic>;
+            int count = projectListJson.length;
 
-            final subProjectJsonList = output["sub_projects"] as List<dynamic>;
+            for (final projectJson in projectListJson) {
+              final projectMap = projectJson as Map<String, dynamic>;
 
-            for (var subProjectJson in subProjectJsonList) {
-              subProjectJson = subProjectJson as Map<String, dynamic>;
-              final weekDays = subProjectJson['weekdays'] as List<dynamic>;
+              // 3. Project.fromJson을 호출합니다.
+              // (Project.fromJson이 "sub_projects" 키를 내부적으로 파싱하지 않는다고 가정)
+              final project = Project.fromJson(projectMap);
+              _pendingProjectAdd!.add(project); // 생성된 프로젝트를 리스트에 추가
 
-              for (final weekDay in weekDays) {
-                final subProject = SubProject(
-                  subProjectId: subProjectJson['subproject_id'] as int?,
-                  subGoal: subProjectJson['goal'] as String?,
-                  done: subProjectJson['done'] as int?,
-                  maxDone: subProjectJson['max_done'] as int?,
-                  weekDay: weekdaySEMap[(weekDay as String).trim()],
-                  multiPerDay: false,
-                  color: subProjectJson['color'] as String?,
-                );
-                _pendingProjectAdd!.addSubProjectToList(subProject);
+              // 4. sub_projects는 'output'이 아닌, 'projectMap' 내부에 있습니다.
+              if (projectMap.containsKey('sub_projects')) {
+                final subProjectJsonList =
+                    projectMap["sub_projects"] as List<dynamic>;
+
+                for (var subProjectJson in subProjectJsonList) {
+                  subProjectJson = subProjectJson as Map<String, dynamic>;
+                  final weekDays = subProjectJson['weekdays'] as List<dynamic>;
+
+                  for (final weekDay in weekDays) {
+                    final subProject = SubProject(
+                      // subProjectId는 json에 없을 수 있으므로 ? 처리
+                      subProjectId: subProjectJson['subproject_id'] as int?,
+                      subGoal: subProjectJson['goal'] as String?,
+                      done: subProjectJson['done'] as int?,
+                      maxDone: subProjectJson['max_done'] as int?,
+                      weekDay: weekdaySEMap[(weekDay as String).trim()],
+                      multiPerDay: false,
+                      color: subProjectJson['color'] as String?,
+                    );
+                    _pendingProjectAdd!.last.addSubProjectToList(subProject);
+                  }
+                }
               }
             }
-
-            final projectInfoText = _currentMessage.projectAddMessage(
-              _pendingProjectAdd!,
-            );
-            // 이때 showButtons을 true로 지정하여 말풍선 생성 시
-            // 예, 아니오 버튼을 통해 사용자의 입력을 받을 수 있도록 한다.
             _currentMessage = ProjectChatMessage(
-              message: projectInfoText,
+              message: "총 ${count}개의 장기 프로젝트 추가를 확인해주세요.",
               speaker: ProjectChatMessageType.bot,
               timestamp: DateTime.now(),
-              showButtons: true,
+              showButtons: false,
             );
+            addMessage(_currentMessage);
+
+            getProjectChatFromList();
           } else {
             print('챗봇이 응답을 생성하는 과정에서 에러 발생');
-            throw Exception('Response Failed: $message');
+            _currentMessage = ProjectChatMessage(
+              message: "챗봇이 응답을 생성하는 과정에서 에러 발생",
+              speaker: ProjectChatMessageType.bot,
+              timestamp: DateTime.now(),
+              showButtons: false,
+            );
             // return;
             // null일 때의 처리
           }
 
           // 위의 if문을 통해 갱신된 마지막 채팅을 채팅 내역에 저장한다.
-          addMessage(_currentMessage);
         }
       } catch (e) {
         print("챗봇이 응답을 생성하는 과정에서 에러 발생");
@@ -158,7 +176,7 @@ class ProjectChatbotService with ChangeNotifier {
     if (_pendingProjectAdd != null) {
       try {
         _projectService.addProjectAndSubProjectByLLM(
-          _pendingProjectAdd!,
+          _pendingProjectAdd!.last,
           userId,
         );
 
@@ -168,6 +186,7 @@ class ProjectChatbotService with ChangeNotifier {
           timestamp: DateTime.now(),
           showButtons: false,
         );
+        addMessage(_currentMessage);
       } catch (e) {
         _currentMessage = ProjectChatMessage(
           message: "프로젝트를 추가하는데 실패했습니다.",
@@ -175,10 +194,13 @@ class ProjectChatbotService with ChangeNotifier {
           timestamp: DateTime.now(),
           showButtons: false,
         );
+        addMessage(_currentMessage);
         rethrow;
       } finally {
-        addMessage(_currentMessage);
-        _pendingProjectAdd = null;
+        if (_pendingProjectAdd!.length != 0) {
+          _pendingProjectAdd!.removeLast();
+          getProjectChatFromList();
+        }
       }
     }
     // 상태 변화를 알려 해당 클래스를 구독 중인 부분을 build한다.
@@ -200,6 +222,8 @@ class ProjectChatbotService with ChangeNotifier {
     );
     addMessage(_currentMessage);
 
+    _pendingProjectAdd!.removeLast();
+    getProjectChatFromList();
     notifyListeners();
   }
 
@@ -224,5 +248,24 @@ class ProjectChatbotService with ChangeNotifier {
 
   void clearMessages() {
     _messages.clear();
+  }
+
+  void getProjectChatFromList() {
+    if (_pendingProjectAdd!.length != 0) {
+      final projectInfoText = _currentMessage.projectAddMessage(
+        _pendingProjectAdd!.last,
+      );
+      // 이때 showButtons을 true로 지정하여 말풍선 생성 시
+      // 예, 아니오 버튼을 통해 사용자의 입력을 받을 수 있도록 한다.
+      _currentMessage = ProjectChatMessage(
+        message: projectInfoText,
+        speaker: ProjectChatMessageType.bot,
+        timestamp: DateTime.now(),
+        showButtons: true,
+      );
+      addMessage(_currentMessage);
+    } else {
+      _pendingProjectAdd = [];
+    }
   }
 }

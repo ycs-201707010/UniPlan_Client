@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:all_new_uniplan/utils/formatters.dart';
 import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/api/api_client.dart';
 import 'package:all_new_uniplan/models/schedule_model.dart'; // 사용자의 일정을 받아오는 클래스
@@ -16,6 +17,8 @@ class ScheduleService with ChangeNotifier {
   // 메서드가 실행되고 있음을 나타내는 필드
   final bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  int currentMonth = 0;
 
   int RecentScheudleIndex = 0;
 
@@ -55,6 +58,7 @@ class ScheduleService with ChangeNotifier {
   // 서버에 user_id를 통해 DB를 검색하여 일정 정보를 가져와 ScheduleService의 List 타입 필드에 추가하고
   // 상태 변화를 알리는 메서드
   Future<void> getScheduleByMonth(int year, int month, int userId) async {
+    currentMonth = month;
     final Map<String, dynamic> body = {
       "user_id": userId,
       "year": year,
@@ -252,7 +256,7 @@ class ScheduleService with ChangeNotifier {
     }
   }
 
-  // 일정을 DB 상에서 변경하고
+  // 해당 일정의 피로도를 계산하는 메서드
   Future<bool> getFatigue(int userId, int scheduleId) async {
     final Map<String, dynamic> body = {
       'user_id': userId,
@@ -280,6 +284,53 @@ class ScheduleService with ChangeNotifier {
       // 잡았던 에러를 다시 밖으로 던져서, 이 함수를 호출한 곳에 알림
       // rethrow;
       return false;
+    }
+  }
+
+  /// 특정 날짜(targetDate)와 정확히 일치하는 모든 Schedule 객체를 리스트로 반환합니다.
+  // List<Schedule> findSchedulesAtDate(DateTime targetDate) {
+  //   return _schedules.where((schedule) {
+  //     // schedule.date와 targetDate의 년, 월, 일이 모두 같은지 확인합니다.
+  //     return schedule.date.year == targetDate.year &&
+  //         schedule.date.month == targetDate.month &&
+  //         schedule.date.day == targetDate.day;
+  //   }).toList(); // where의 결과(Iterable)를 최종적으로 List로 변환합니다.
+  // }
+
+  /// 특정 날짜(targetDate)와 시간대가 겹치는 모든 Schedule 객체를 리스트로 반환합니다.
+  Future<List<Schedule>> findSchedulesAtDateAndTime(
+    DateTime targetDate,
+    TimeOfDay startTime,
+    TimeOfDay endTime,
+  ) async {
+    final Map<String, dynamic> body = {
+      'date': formatDate(targetDate),
+      'start_time': formatTime(startTime),
+      'end_time': formatTime(endTime),
+    };
+
+    try {
+      final response = await _apiClient.post(
+        '/schedule/findSchedulesAtDateAndTime',
+        body: body,
+      );
+
+      var json = jsonDecode(response.body);
+      var message = json['message'];
+
+      if (message == "Find Schedule Successed") {
+        var schedulesJson = json["schedules"];
+
+        // 1. 먼저 해당 날짜의 모든 일정을 찾습니다.
+        final schedules = getScheduleListFromJson(schedulesJson);
+        return schedules;
+      } else {
+        print('해당 일자 및 시간에 일정이 존재하지 않습니다.: $message');
+        return [];
+      }
+    } catch (e) {
+      print('일정의 피로도를 계산하는 과정에서 에러 발생: $e');
+      rethrow;
     }
   }
 
@@ -358,9 +409,28 @@ class ScheduleService with ChangeNotifier {
     notifyListeners();
   }
 
+  List<Schedule> getScheduleListFromJson(dynamic schedulesJson) {
+    // 기존 목록을 비움
+    List<Schedule> schedules = [];
+    final scheduleList = schedulesJson as List<dynamic>;
+    for (final scheduleTemp in scheduleList) {
+      final schedule = Schedule.fromJson(scheduleTemp as Map<String, dynamic>);
+
+      print("--- [ScheduleService] 일정을 불러왔습니다. ---");
+      print(schedule.toString()); // 위에서 만든 toString() 메서드가 호출됩니다.
+      print("----------------------------------------------------");
+
+      schedules.add(schedule);
+    }
+
+    return schedules;
+  }
+
   void addScheduleToList(Schedule schedule) {
-    _schedules.add(schedule);
-    notifyListeners();
+    if (schedule.date.month == currentMonth) {
+      _schedules.add(schedule);
+      notifyListeners();
+    }
 
     print('[Client log] : 챗봇을 통해 스케줄 입력');
   }
@@ -369,11 +439,20 @@ class ScheduleService with ChangeNotifier {
     Schedule originalSchedule,
     Schedule modifySchedule,
   ) {
-    final index = _schedules.indexWhere(
-      (s) => s.scheduleId == originalSchedule.scheduleId,
-    );
-    if (index != -1) {
-      _schedules[index] = modifySchedule;
+    if (originalSchedule.date.month == currentMonth &&
+        modifySchedule.date.month == currentMonth) {
+      final index = _schedules.indexWhere(
+        (s) => s.scheduleId == originalSchedule.scheduleId,
+      );
+      if (index != -1) {
+        _schedules[index] = modifySchedule;
+      }
+    } else if (originalSchedule.date.month == currentMonth &&
+        modifySchedule.date.month != currentMonth) {
+      deleteScheduleFromList(originalSchedule.scheduleId!);
+    } else if (originalSchedule.date.month != currentMonth &&
+        modifySchedule.date.month == currentMonth) {
+      addScheduleToList(modifySchedule);
     }
     notifyListeners();
 
@@ -426,42 +505,22 @@ class ScheduleService with ChangeNotifier {
     notifyListeners();
   }
 
-  /// 특정 날짜(targetDate)와 정확히 일치하는 모든 Schedule 객체를 리스트로 반환합니다.
-  List<Schedule> findSchedulesAtDate(DateTime targetDate) {
-    return _schedules.where((schedule) {
-      // schedule.date와 targetDate의 년, 월, 일이 모두 같은지 확인합니다.
-      return schedule.date.year == targetDate.year &&
-          schedule.date.month == targetDate.month &&
-          schedule.date.day == targetDate.day;
-    }).toList(); // where의 결과(Iterable)를 최종적으로 List로 변환합니다.
-  }
+  // // 2. 그 결과 중에서 시간이 겹치는 일정만 필터링합니다.
+  // return schedulesOnDate.where((schedule) {
+  //   // A.startTime < B.endTime AND A.endTime > B.startTime
+  //   // isBefore, isAfter는 TimeOfDay에서는 직접 사용할 수 없으므로,
+  //   // 비교를 위해 분(minute) 단위로 변환합니다.
+  //   final scheduleStartMinutes =
+  //       schedule.startTime.hour * 60 + schedule.startTime.minute;
+  //   final scheduleEndMinutes =
+  //       schedule.endTime.hour * 60 + schedule.endTime.minute;
+  //   final targetStartMinutes = startTime.hour * 60 + startTime.minute;
+  //   final targetEndMinutes = endTime.hour * 60 + endTime.minute;
 
-  /// 특정 날짜(targetDate)와 시간대가 겹치는 모든 Schedule 객체를 리스트로 반환합니다.
-  List<Schedule> findSchedulesAtDateAndTime(
-    DateTime targetDate,
-    TimeOfDay startTime,
-    TimeOfDay endTime,
-  ) {
-    // 1. 먼저 해당 날짜의 모든 일정을 찾습니다.
-    final schedulesOnDate = findSchedulesAtDate(targetDate);
-
-    // 2. 그 결과 중에서 시간이 겹치는 일정만 필터링합니다.
-    return schedulesOnDate.where((schedule) {
-      // A.startTime < B.endTime AND A.endTime > B.startTime
-      // isBefore, isAfter는 TimeOfDay에서는 직접 사용할 수 없으므로,
-      // 비교를 위해 분(minute) 단위로 변환합니다.
-      final scheduleStartMinutes =
-          schedule.startTime.hour * 60 + schedule.startTime.minute;
-      final scheduleEndMinutes =
-          schedule.endTime.hour * 60 + schedule.endTime.minute;
-      final targetStartMinutes = startTime.hour * 60 + startTime.minute;
-      final targetEndMinutes = endTime.hour * 60 + endTime.minute;
-
-      // 중복 조건을 만족하면 true를 반환하여 리스트에 포함시킵니다.
-      return scheduleStartMinutes < targetEndMinutes &&
-          scheduleEndMinutes > targetStartMinutes;
-    }).toList();
-  }
+  //   // 중복 조건을 만족하면 true를 반환하여 리스트에 포함시킵니다.
+  //   return scheduleStartMinutes < targetEndMinutes &&
+  //       scheduleEndMinutes > targetStartMinutes;
+  // }).toList();
 
   /// 특정 날짜(targetDate)를 포함하여 그 이후의 모든 Schedule 객체를 리스트로 반환합니다.
   List<Schedule> findSchedulesAfterDate(DateTime targetDate) {

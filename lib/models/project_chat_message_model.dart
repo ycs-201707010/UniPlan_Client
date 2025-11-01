@@ -56,14 +56,59 @@ class ProjectChatMessage {
         '- 하위 프로젝트 정보\n';
 
     int i = 1;
-    for (final subProject in addProject.subProjects!) {
-      final subProjectInfoText =
-          '${i}번 일정.\n'
-          '목표: ${subProject.subGoal}\n'
-          '목표 수행 횟수: ${subProject.maxDone}\n'
-          '요일: ${weekdayESMap[subProject.weekDay]}요일\n\n';
-      projectInfoText += subProjectInfoText;
-      i++;
+    String beforeSubGoal = "";
+    int beforeMaxDone = -1;
+    String weekday = "";
+
+    // 리스트의 총 길이와 현재 인덱스를 비교하기 위해 .asMap().entries 사용
+    for (final entry in addProject.subProjects!.asMap().entries) {
+      final index = entry.key;
+      final subProject = entry.value;
+
+      // 1. 새 그룹이 시작되었는지 확인 (첫 번째 항목이거나, goal/maxDone이 변경된 경우)
+      if (beforeSubGoal.isEmpty || // 첫 번째 항목
+          beforeSubGoal != subProject.subGoal! || // Goal이 변경
+          beforeMaxDone != subProject.maxDone!) {
+        // MaxDone이 변경
+
+        // 2. (첫 번째 항목이 아닌 경우) 이전 그룹의 정보를 처리(출력)
+        if (beforeSubGoal.isNotEmpty) {
+          // 누적된 요일 문자열의 마지막 쉼표 제거 (예: "월,화," -> "월,화")
+          if (weekday.isNotEmpty) {
+            weekday = weekday.substring(0, weekday.length - 1);
+          }
+
+          final subProjectInfoText =
+              '${i}번 일정.\n'
+              '목표: $beforeSubGoal\n' // 이전 그룹의 Goal 사용
+              '목표 수행 횟수: $beforeMaxDone\n' // 이전 그룹의 MaxDone 사용
+              '요일: [${weekday} 요일]\n\n';
+          projectInfoText += subProjectInfoText;
+          i++; // 그룹이 끝날 때마다 번호 증가
+        }
+
+        // 3. 새 그룹을 위해 변수 초기화
+        beforeSubGoal = subProject.subGoal!;
+        beforeMaxDone = subProject.maxDone!;
+        weekday = weekdayESMap[subProject.weekDay]! + ","; // 새 그룹의 첫 요일 추가
+      } else {
+        // 4. (같은 그룹인 경우) 현재 요일만 누적
+        weekday += weekdayESMap[subProject.weekDay]! + ",";
+      }
+
+      // 5. 루프의 마지막 항목인지 확인
+      if (index == addProject.subProjects!.length - 1) {
+        // 마지막 항목까지 처리한 후, 누적된 마지막 그룹의 정보를 처리(출력)
+        if (weekday.isNotEmpty) {
+          weekday = weekday.substring(0, weekday.length - 1);
+        }
+        final subProjectInfoText =
+            '${i}번 일정.\n'
+            '목표: $beforeSubGoal\n'
+            '목표 수행 횟수: $beforeMaxDone\n'
+            '요일: [${weekday}요일]\n\n';
+        projectInfoText += subProjectInfoText;
+      }
     }
 
     return projectInfoText;

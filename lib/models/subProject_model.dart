@@ -11,6 +11,7 @@ Map<String, String> weekdaySEMap = {
   '금': "fri",
   '토': "sat",
   '일': "sun",
+  '매일': "every",
 };
 
 Map<String, String> weekdayESMap = {
@@ -21,6 +22,7 @@ Map<String, String> weekdayESMap = {
   "fri": '금',
   "sat": '토',
   "sun": '일',
+  "every": '매일',
 };
 
 @immutable
@@ -76,7 +78,7 @@ class SubProject {
       if (subGoal != null) 'subgoal': subGoal,
       if (done != null) 'done': done,
       if (maxDone != null) 'max_done': maxDone,
-      if (weekDay != null) 'week_day': weekDay,
+      if (weekDay != null) 'weekday': weekDay,
       if (multiPerDay != null) 'multi_per_day': multiPerDay,
       if (color != null) 'color': color,
     };

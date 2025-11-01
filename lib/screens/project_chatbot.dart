@@ -366,7 +366,7 @@ class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      automaticallyImplyLeading: false, // 기본 뒤로가기 제거
+      automaticallyImplyLeading: true, // false : 기본 뒤로가기 제거, true : 남기기
       elevation: 0, // 그림자 높이
       scrolledUnderElevation: 0, // 스크롤 해도 색상이 변하지 않게
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

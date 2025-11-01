@@ -41,8 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<Widget> widgetOptions = <Widget>[
       const scheduleSheetsPage(), // 0번 탭: 캘린더 화면 (이제 Scaffold 포함)
       const TimetablePage(),
-      const ProjectPage(), //TimetablePage(), // 1번 탭 : 대학 시간표 화면
-      const ChatbotPage(), //ChatbotPage(), // 임시 위젯 (추후 ChatBotPage()로 변경)
+      const ProjectPage(), // TimetablePage(), // 1번 탭 : 대학 시간표 화면
+      const ChatbotListPage(), // ChatbotPage(),
       const MyPage(), // 임시 위젯 (추후 Scaffold로 변경)
     ];
 

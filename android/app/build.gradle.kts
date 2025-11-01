@@ -1,10 +1,15 @@
-// .env 파일을 읽기 위한 Properties 객체 생성
-Properties properties = new Properties()
-// 프로젝트 루트(최상위)에 있는 .env 파일 경로 설정
-File envFile = new File(project.rootDir.path + '/.env')
-// .env 파일이 존재하면 파일 내용을 읽어들임
+// 1. 파일의 맨 윗부분에 import 구문을 추가합니다.
+import java.util.Properties
+import java.io.FileInputStream
+
+// ... (plugins {...} 블록 등이 이어서 나옵니다) ...
+
+// 2. .env 파일을 읽는 코드를 Groovy가 아닌 Kotlin 문법으로 수정합니다.
+//    (android { ... } 블록이 시작되기 *전*에 넣어주세요.)
+val properties = Properties()
+val envFile = File(project.rootDir.path + "/.env")
 if (envFile.exists()) {
-    properties.load(new FileInputStream(envFile))
+    properties.load(FileInputStream(envFile))
 }
 
 plugins {
@@ -37,6 +42,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = properties.getProperty("GOOGLE_MAPS_API_KEY", "YOUR_DEFAULT_KEY")
     }
 
     buildTypes {

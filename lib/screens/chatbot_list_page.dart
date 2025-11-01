@@ -1,4 +1,5 @@
 import 'package:all_new_uniplan/screens/chatbot.dart';
+import 'package:all_new_uniplan/screens/project_chatbot.dart';
 import 'package:flutter/material.dart';
 
 class ChatbotListPage extends StatefulWidget {
@@ -14,7 +15,24 @@ class _ChatbotListPageState extends State<ChatbotListPage> {
     return Scaffold(
       appBar: chatListTopBar(),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SingleChildScrollView(child: Column()),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SettingPageButton(
+              profilePicUrl: "assets/images/schedule_profile_pic.png",
+              mainText: "스케줄봇",
+              subText: "사용자 일정 관리",
+              target: ChatbotPage(),
+            ),
+            SettingPageButton(
+              profilePicUrl: "assets/images/project_profile_pic.png",
+              mainText: "프로젝트봇",
+              subText: "사용자 프로젝트 & 하위 목표 관리",
+              target: ProjectChatbot(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -85,9 +103,11 @@ class SettingPageButton extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (pageContext) => ChatbotPage()),
+          MaterialPageRoute(builder: (pageContext) => target),
         );
       },
+      onLongPress: () {},
+      splashColor: Theme.of(context).colorScheme.surfaceContainer,
       child: Container(
         width: double.infinity, // 부모 위젯의 너비에 맞춤
         padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -98,29 +118,33 @@ class SettingPageButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             CircleAvatar(
-              radius: 16,
+              radius: 28,
               backgroundImage: AssetImage(
                 profilePicUrl == null
                     ? 'assets/images/bot_profile_pic.png'
                     : profilePicUrl!,
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  mainText,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subText,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+            SizedBox(width: 20),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    mainText,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    subText,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

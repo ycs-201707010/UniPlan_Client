@@ -100,5 +100,6 @@
 "dowThuShort": "목",
 "dowFriShort": "금",
 "dowSatShort": "토",
-"dateHeader": "yyyy년 MM월"
+"dateHeader": "yyyy년 MM월",
+"distance": "이동거리"
 }

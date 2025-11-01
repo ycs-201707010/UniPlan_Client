@@ -1,4 +1,5 @@
 import 'package:all_new_uniplan/screens/place_edit_page.dart';
+import 'package:all_new_uniplan/screens/profile_edit_page.dart';
 import 'package:all_new_uniplan/screens/setting_page.dart';
 import 'package:flutter/material.dart';
 
@@ -35,24 +36,32 @@ class _MyPageState extends State<MyPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Row(
-                        children: [
-                          Text("프로필 변경하기", style: TextStyle(fontSize: 15)),
-                          IconButton(
-                            visualDensity: VisualDensity(
-                              vertical: -4,
-                              horizontal: -4,
-                            ), // IconButton의 기본 padding 제거
-                            onPressed:
-                                () => {
-                                  // TODO : 프로필 변경 창으로 이동
-                                },
-                            icon: Icon(Icons.arrow_forward_ios, size: 15),
-                            splashColor: Colors.transparent, // 클릭 시 음영 제거
-                            highlightColor:
-                                Colors.transparent, // 길게 눌렀을 때 음영 제거
-                          ),
-                        ],
+                      InkWell(
+                        onTap: () {
+                          // TODO : 프로필 변경 창으로 이동
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileEditPage(),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Text("프로필 변경하기", style: TextStyle(fontSize: 15)),
+                            IconButton(
+                              visualDensity: VisualDensity(
+                                vertical: -4,
+                                horizontal: -4,
+                              ), // IconButton의 기본 padding 제거
+                              onPressed: () => {},
+                              icon: Icon(Icons.arrow_forward_ios, size: 15),
+                              splashColor: Colors.transparent, // 클릭 시 음영 제거
+                              highlightColor:
+                                  Colors.transparent, // 길게 눌렀을 때 음영 제거
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

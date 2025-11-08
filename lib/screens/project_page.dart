@@ -5,6 +5,7 @@ import 'package:all_new_uniplan/screens/add_project.dart';
 import 'package:all_new_uniplan/screens/add_schedule.dart';
 import 'package:all_new_uniplan/screens/add_sub_Project.dart';
 import 'package:all_new_uniplan/screens/project_chatbot.dart';
+import 'package:all_new_uniplan/screens/project_stats_page.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 import 'package:flutter/material.dart';
@@ -387,13 +388,13 @@ class _ProjectPageState extends State<ProjectPage> {
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
             children: [
               SpeedDialChild(
-                child: const Icon(Icons.android),
-                label: context.l10n.projectChatbot,
+                child: const Icon(Icons.bar_chart_rounded),
+                label: context.l10n.projectStatView,
                 onTap: () async {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (pageContext) => const ProjectChatbot(),
+                      builder: (pageContext) => const ProjectStatsPage(),
                     ),
                   );
                 },

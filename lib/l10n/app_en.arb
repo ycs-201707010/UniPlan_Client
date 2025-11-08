@@ -70,6 +70,7 @@
 "projectEdit": "Edit Project",
 "projectAddButton": "Add Project",
 "projectEditButton": "Update Project",
+"projectStatView": "View Project stat",
 "projectType": "Project Type",
 "projectTypeExercise": "Exercise",
 "projectTypeStudy": "Study",

@@ -69,6 +69,7 @@
 "projectEdit": "프로젝트 수정",
 "projectAddButton": "프로젝트 추가하기",
 "projectEditButton": "프로젝트 수정하기",
+"projectStatView": "프로젝트 통계",
 "projectType": "프로젝트 종류",
 "projectTypeExercise": "운동",
 "projectTypeStudy": "공부",

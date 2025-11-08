@@ -78,6 +78,15 @@ class ProjectChatMessage {
             weekday = weekday.substring(0, weekday.length - 1);
           }
 
+          String dayString = '요일: ';
+
+          if (weekday == "매일") {
+            dayString += '매일';
+          } else {
+            dayString += ' [${weekday} 요일]';
+          }
+          dayString += '\n\n';
+
           final subProjectInfoText =
               '${i}번 일정.\n'
               '목표: $beforeSubGoal\n' // 이전 그룹의 Goal 사용

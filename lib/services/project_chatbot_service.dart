@@ -143,6 +143,7 @@ class ProjectChatbotService with ChangeNotifier {
                 }
               }
             }
+            _pendingProjectAdd = _pendingProjectAdd!.reversed.toList();
             _currentMessage = ProjectChatMessage(
               message: "총 ${count}개의 장기 프로젝트 추가를 확인해주세요.",
               speaker: ProjectChatMessageType.bot,
@@ -225,7 +226,6 @@ class ProjectChatbotService with ChangeNotifier {
   // 각 임시 변수를 초기화하고 취소 관련 메시지를 생성하여
   // 마지막 채팅과 채팅 내역을 저장하는 필드를 갱신한다.
   void cancelScheduleAddition() {
-    _pendingProjectAdd = null;
     _messages.last.showButtons = false;
 
     _currentMessage = ProjectChatMessage(
@@ -236,8 +236,10 @@ class ProjectChatbotService with ChangeNotifier {
     );
     addMessage(_currentMessage);
 
-    _pendingProjectAdd!.removeLast();
-    getProjectChatFromList();
+    if (_pendingProjectAdd!.length != 0) {
+      _pendingProjectAdd!.removeLast();
+      getProjectChatFromList();
+    }
     notifyListeners();
   }
 

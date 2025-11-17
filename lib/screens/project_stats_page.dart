@@ -1,3 +1,4 @@
+import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +10,9 @@ import 'package:all_new_uniplan/services/auth_service.dart';
 import 'package:all_new_uniplan/services/project_service.dart';
 
 import 'package:percent_indicator/percent_indicator.dart'; // (원형 차트 패키지)
+
+import 'package:all_new_uniplan/l10n/l10n.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // ===============================================
 // 📊 통계 페이지 (ProjectStatsPage)
@@ -174,7 +178,7 @@ class _ProjectStatsPageState extends State<ProjectStatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('프로젝트 통계')),
+      appBar: TopBar(title: context.l10n.projectStat),
       body:
           _isLoading
               ? const Center(
@@ -219,7 +223,7 @@ class _ProjectStatsPageState extends State<ProjectStatsPage> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<Project>(
           isExpanded: true,
-          hint: const Text('프로젝트 선택'),
+          hint: Text(context.l10n.projectSelect),
           value: _selectedProject,
           // ✅ 2. 프로젝트를 클릭(변경)하면 _onProjectSelected 호출
           onChanged: (Project? project) {
@@ -253,24 +257,24 @@ class _ProjectStatsPageState extends State<ProjectStatsPage> {
         alignment: WrapAlignment.center, // 가운데 정렬
         children: [
           FilterButton(
-            text: '전체',
+            text: context.l10n.statAll,
             isSelected: _currentFilter == 'total',
             onPressed: () => _onFilterChanged('total'),
           ),
           FilterButton(
-            text: '이번 주',
+            text: context.l10n.statWeek,
             isSelected: _currentFilter == 'week',
             onPressed: () => _onFilterChanged('week'),
           ),
           FilterButton(
-            text: '이번 달',
+            text: context.l10n.statMonth,
             isSelected: _currentFilter == 'month',
             onPressed: () => _onFilterChanged('month'),
           ),
 
           // ✅ 2. "직접 선택" 버튼 추가
           FilterButton(
-            text: '직접 선택',
+            text: context.l10n.statCustom,
             isSelected: _currentFilter == 'custom',
             onPressed: _showCustomDateRangePicker, // 👈 1번에서 만든 함수 연결
           ),
@@ -292,7 +296,7 @@ class ProjectStatCard extends StatelessWidget {
     final double percent = statData.percent / 100;
     final String percentText = "${statData.percent.toStringAsFixed(0)}%";
     final String countText =
-        "${statData.completeTask} / ${statData.totalTask}개 완료";
+        "${statData.completeTask} / ${statData.totalTask}${context.l10n.statComplete}";
 
     return Center(
       // 카드를 가운데 정렬

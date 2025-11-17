@@ -106,5 +106,15 @@
 "dateHeader": "yyyy-MM",
 "scheduleBotInInterface": "Schedule Bot",
 "scheduleBotInChat": "Unibot (Schedule)",
-"msgInputHint": "Send a Message..."
+"msgInputHint": "Send a Message...",
+"pushThisButton": "Press the button to start recording",
+"reRecordButton": "Record Again",
+"sendButton": "Send!",
+"projectStat": "Project Stat",
+"projectSelect": "Choose a project from the list...",
+"statAll": "All",
+"statWeek": "This Week",
+"statMonth": "This Month",
+"statCustom": "Custom",
+"statComplete": " Complete"
 }

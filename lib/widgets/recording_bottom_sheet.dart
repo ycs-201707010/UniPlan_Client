@@ -1,5 +1,7 @@
 // TODO : 챗봇 화면의 음성녹음 버튼을 클릭했을 시 출력될 BottomSheet
 
+import 'package:all_new_uniplan/l10n/l10n.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:async';
 import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:flutter/material.dart';
@@ -202,7 +204,7 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
             Text(
               _isRecording
                   ? _formatDuration(_recordSeconds)
-                  : '버튼을 눌러 녹음을 시작하세요',
+                  : context.l10n.pushThisButton,
               style: TextStyle(
                 fontSize: _isRecording ? 32 : 20,
                 fontWeight: FontWeight.bold,
@@ -262,7 +264,7 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
                       }),
                     },
                 child: Text(
-                  '다시 녹음하기',
+                  context.l10n.reRecordButton,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -281,7 +283,7 @@ class _RecordingBottomSheetState extends State<RecordingBottomSheet> {
                   Navigator.of(context).pop(recordedText);
                 },
                 child: Text(
-                  '전송하기',
+                  context.l10n.sendButton,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),

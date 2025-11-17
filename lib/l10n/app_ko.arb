@@ -106,5 +106,15 @@
 "dateHeader": "yyyy년 MM월",
 "scheduleBotInInterface": "스케줄봇",
 "scheduleBotInChat": "유니봇 (스케줄)",
-"msgInputHint": "여기에 메시지를 입력..."
+"msgInputHint": "여기에 메시지를 입력...",
+"pushThisButton": "버튼을 눌러 녹음을 시작하세요",
+"reRecordButton": "다시 녹음하기",
+"sendButton": "전송하기",
+"projectStat": "프로젝트 통계",
+"projectSelect": "리스트에서 프로젝트 선택...",
+"statAll": "전체",
+"statWeek": "이번 주",
+"statMonth": "이번 달",
+"statCustom": "직접 선택",
+"statComplete": "개 완료"
 }

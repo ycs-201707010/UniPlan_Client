@@ -1,6 +1,7 @@
 // ** 일정이 보여지는 화면 **
 
 import 'package:all_new_uniplan/l10n/l10n.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:all_new_uniplan/screens/everytime_link_page.dart';
 import 'package:all_new_uniplan/screens/schedule_detail_sheet.dart';
 import 'package:all_new_uniplan/services/everytime_service.dart';
@@ -18,7 +19,6 @@ import 'package:all_new_uniplan/models/schedule_model.dart';
 import 'package:all_new_uniplan/classes/schedule_data_source.dart';
 import 'package:toastification/toastification.dart';
 import 'package:all_new_uniplan/services/place_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class scheduleSheetsPage extends StatefulWidget {
   const scheduleSheetsPage({super.key});

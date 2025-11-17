@@ -1,5 +1,6 @@
 // ** 현재 사용중인 챗봇 페이지 코드 **
 
+import 'package:all_new_uniplan/l10n/l10n.dart';
 import 'package:all_new_uniplan/services/record_service.dart';
 import 'package:all_new_uniplan/widgets/recording_bottom_sheet.dart';
 import 'package:all_new_uniplan/widgets/typing_indicator.dart';
@@ -73,7 +74,7 @@ class _ChatPageState extends State<ChatbotPage> {
                   authService.currentUser!.userId,
                 );
               },
-              child: const Text('예'),
+              child: Text(context.l10n.yes),
             ),
             const SizedBox(width: 16), // 버튼 사이 간격
             // '아니오' 버튼
@@ -85,7 +86,7 @@ class _ChatPageState extends State<ChatbotPage> {
                 // 일정 변경을 취소한다는 메시지를 생성한다.
                 chatbotService.cancelScheduleAddition();
               },
-              child: const Text('아니오'),
+              child: Text(context.l10n.no),
             ),
           ],
         ),
@@ -131,7 +132,7 @@ class _ChatPageState extends State<ChatbotPage> {
 
                 if (chatMessage.speaker == ChatMessageType.bot)
                   Text(
-                    'UniBot',
+                    context.l10n.scheduleBotInChat,
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -251,8 +252,8 @@ class _ChatPageState extends State<ChatbotPage> {
                           child: TextField(
                             controller: _controller,
                             style: TextStyle(color: Color(0xFF0e0f10)),
-                            decoration: const InputDecoration(
-                              hintText: '여기에 메시지를 입력...',
+                            decoration: InputDecoration(
+                              hintText: context.l10n.msgInputHint,
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
                             ),
@@ -369,8 +370,8 @@ class chatTopBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            '스케줄봇 1.0',
+          Text(
+            '${context.l10n.scheduleBotInInterface} 1.0',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           IconButton(

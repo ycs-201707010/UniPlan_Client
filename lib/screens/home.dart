@@ -64,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
             // ✅ 2. 하드코딩된 문자열 대신 AppLocalizations 사용
             label: context.l10n.navCalendar,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.table_chart), label: '시간표'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.table_chart),
+            label: context.l10n.navTimeTable,
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assessment_outlined), // 프로젝트에 어울리는 아이콘으로 변경
             label: context.l10n.navProject,

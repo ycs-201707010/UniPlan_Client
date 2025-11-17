@@ -8,9 +8,11 @@
   "addSchedule": "일정 추가하기",
   "linkEverytime": "에브리타임 연동",
 "navCalendar": "캘린더",
+"navTimeTable": "시간표",
 "navProject": "프로젝트",
 "navChatbot": "챗봇",
 "navMyPage": "마이페이지",
+"distance": "이동거리",
 "detailLocation": "장소",
 "detailStart": "시작",
 "detailEnd": "종료",
@@ -102,5 +104,7 @@
 "dowFriShort": "금",
 "dowSatShort": "토",
 "dateHeader": "yyyy년 MM월",
-"distance": "이동거리"
+"scheduleBotInInterface": "스케줄봇",
+"scheduleBotInChat": "유니봇 (스케줄)",
+"msgInputHint": "여기에 메시지를 입력..."
 }

@@ -616,7 +616,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           // 오른쪽 : 도움말 아이콘
           Row(
             children: [
-              Text("이동거리", style: TextStyle(fontSize: 14)),
+              Text(context.l10n.distance, style: TextStyle(fontSize: 14)),
               SizedBox(width: 8),
               Container(
                 decoration: BoxDecoration(

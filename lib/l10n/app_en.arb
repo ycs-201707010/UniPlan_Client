@@ -8,9 +8,11 @@
   "addSchedule": "Add Schedule",
   "linkEverytime": "Link Everytime",
 "navCalendar": "Calendar",
+"navTimeTable": "Timetable",
 "navProject": "Projects",
 "navChatbot": "Chatbot",
 "navMyPage": "My Page",
+"distance": "distance",
 "detailLocation": "Location",
 "detailStart": "Start",
 "detailEnd": "End",
@@ -65,7 +67,6 @@
 "projectChatbot": "Project Chatbot",
 "planSubGoals": "Plan Sub-Goals",
 "createProject": "Create Project",
-
 "projectAdd": "Add Project",
 "projectEdit": "Edit Project",
 "projectAddButton": "Add Project",
@@ -103,5 +104,7 @@
 "dowFriShort": "Fri",
 "dowSatShort": "Sat",
 "dateHeader": "yyyy-MM",
-"distance": "distance"
+"scheduleBotInInterface": "Schedule Bot",
+"scheduleBotInChat": "Unibot (Schedule)",
+"msgInputHint": "Send a Message..."
 }

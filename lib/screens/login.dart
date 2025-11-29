@@ -1,8 +1,10 @@
 import 'package:all_new_uniplan/screens/home.dart';
+import 'package:all_new_uniplan/widgets/common_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:all_new_uniplan/widgets/top_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:all_new_uniplan/services/auth_service.dart';
+import 'package:all_new_uniplan/l10n/l10n.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,8 +14,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool _isPasswordVisible = false; // 비밀번호를 감추고 드러내는데 사용되는 토글 변수.
-
   final TextEditingController idController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -21,8 +21,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: TopBar(title: '로그인 하기'),
+      appBar: TopBar(title: l10n.login),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(15),
@@ -31,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Container(
                 child: Text(
-                  '회원가입 시 입력하신 아이디로\n로그인해 주세요',
+                  l10n.loginDescription,
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22),
                 ),
               ),
@@ -41,52 +43,64 @@ class _LoginPageState extends State<LoginPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('아이디', style: TextStyle(fontWeight: FontWeight.w500)),
-                  TextField(
+                  // Text('아이디', style: TextStyle(fontWeight: FontWeight.w500)),
+                  // TextField(
+                  //   controller: idController,
+                  //   decoration: InputDecoration(
+                  //     hintText: '여기에 아이디 입력',
+                  //     // focusedBorder: UnderlineInputBorder(
+                  //     //   borderSide: BorderSide(
+                  //     //     color: Theme.of(context).colorScheme.primary,
+                  //     //     width: 2,
+                  //     //   ),
+                  //     // ),
+                  //   ),
+                  // ),
+                  CommonTextField(
                     controller: idController,
-                    decoration: InputDecoration(
-                      hintText: '여기에 아이디 입력',
-                      // focusedBorder: UnderlineInputBorder(
-                      //   borderSide: BorderSide(
-                      //     color: Theme.of(context).colorScheme.primary,
-                      //     width: 2,
-                      //   ),
-                      // ),
-                    ),
+                    label: l10n.idLabel,
+                    hintText: l10n.idHint,
                   ),
 
                   SizedBox(height: 40),
 
-                  Text('비밀번호', style: TextStyle(fontWeight: FontWeight.w500)),
-                  TextField(
-                    // _isPasswordVisible가 false일 때 true가 되어 텍스트가 가려진다.
-                    obscureText: !_isPasswordVisible,
+                  CommonTextField(
                     controller: passwordController,
-                    decoration: InputDecoration(
-                      hintText: '여기에 비밀번호 입력',
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 2,
-                        ),
-                      ),
-
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          // _isPasswordVisible 상태에 따라 아이콘 모양을 변경한다.
-                          _isPasswordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed:
-                            () => {
-                              setState(() {
-                                _isPasswordVisible = !_isPasswordVisible;
-                              }),
-                            },
-                      ),
-                    ),
+                    obscureText: true,
+                    label: l10n.passwordLabel,
+                    hintText: l10n.passwordHint,
                   ),
+
+                  // Text('비밀번호', style: TextStyle(fontWeight: FontWeight.w500)),
+                  // TextField(
+                  //   // _isPasswordVisible가 false일 때 true가 되어 텍스트가 가려진다.
+                  //   obscureText: !_isPasswordVisible,
+                  //   controller: passwordController,
+                  //   decoration: InputDecoration(
+                  //     hintText: '여기에 비밀번호 입력',
+                  //     focusedBorder: UnderlineInputBorder(
+                  //       borderSide: BorderSide(
+                  //         color: Theme.of(context).colorScheme.primary,
+                  //         width: 2,
+                  //       ),
+                  //     ),
+
+                  //     suffixIcon: IconButton(
+                  //       icon: Icon(
+                  //         // _isPasswordVisible 상태에 따라 아이콘 모양을 변경한다.
+                  //         _isPasswordVisible
+                  //             ? Icons.visibility_off
+                  //             : Icons.visibility,
+                  //       ),
+                  //       onPressed:
+                  //           () => {
+                  //             setState(() {
+                  //               _isPasswordVisible = !_isPasswordVisible;
+                  //             }),
+                  //           },
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ],

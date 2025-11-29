@@ -1,6 +1,7 @@
 // 어플리케이션 실행 시 나타날 화면 (비로그인 시)
 
 import 'package:all_new_uniplan/l10n/l10n.dart';
+import 'package:all_new_uniplan/screens/find_account_page.dart';
 import 'package:all_new_uniplan/screens/find_login_id.dart';
 import 'package:all_new_uniplan/screens/login.dart';
 import 'package:all_new_uniplan/screens/signup.dart';
@@ -65,36 +66,53 @@ class welcomePage extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 40),
+            SizedBox(height: 15),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const FindLoginId(),
-                      ),
-                    );
-                  },
-                  child: Text(context.l10n.findId),
-                ),
-                SizedBox(width: 80),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const FindLoginId(),
-                      ),
-                    );
-                  },
-                  child: Text(context.l10n.findPw),
-                ),
-              ],
+            // 계정찾기 버튼
+            FractionallySizedBox(
+              widthFactor: 0.9,
+              child: OutlinedButton(
+                onPressed: () {
+                  // TODO: 계정 찾기 페이지로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FindAccountPage(),
+                    ),
+                  );
+                },
+                child: Text(context.l10n.findAccount),
+              ),
             ),
+
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     TextButton(
+            //       onPressed: () {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder: (context) => const FindLoginId(),
+            //           ),
+            //         );
+            //       },
+            //       child: Text(context.l10n.findId),
+            //     ),
+            //     SizedBox(width: 80),
+            //     TextButton(
+            //       onPressed: () {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder: (context) => const FindLoginId(),
+            //           ),
+            //         );
+            //       },
+            //       child: Text(context.l10n.findPw),
+            //     ),
+            //   ],
+            // ),
           ], // children
         ),
       ),

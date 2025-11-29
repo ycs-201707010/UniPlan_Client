@@ -53,14 +53,15 @@ class _BirthdayPickerState extends State<BirthdayPicker> {
           child: GestureDetector(
             onTap: _showDatePicker,
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 0),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2,
-                  ),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.5),
+                  width: 1,
                 ),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Text(displayText, style: const TextStyle(fontSize: 16)),
             ),

@@ -74,12 +74,20 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_launcher_icons: ^0.13.1
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+
+flutter_launcher_icons:
+  android: "launcher_icon" # 안드로이드 아이콘 이름 설정
+  ios: true # iOS 아이콘 생성 활성화
+  image_path: "assets/images/icon.png" # 1번에서 준비한 이미지 경로
+  min_sdk_android: 21 # (선택) 안드로이드 최소 SDK 버전
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

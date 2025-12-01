@@ -7,9 +7,12 @@ import java.io.FileInputStream
 // 2. .env 파일을 읽는 코드를 Groovy가 아닌 Kotlin 문법으로 수정합니다.
 //    (android { ... } 블록이 시작되기 *전*에 넣어주세요.)
 val properties = Properties()
-val envFile = File(project.rootDir.path + "/.env")
+val envFile = File(project.rootDir.parentFile, ".env")
 if (envFile.exists()) {
     properties.load(FileInputStream(envFile))
+    println("✅ Loaded .env file from: ${envFile.absolutePath}") // 로그 확인용
+} else {
+    println("❌ Could not find .env file at: ${envFile.absolutePath}") // 로그 확인용
 }
 
 plugins {
@@ -42,7 +45,14 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = properties.getProperty("GOOGLE_MAPS_API_KEY", "YOUR_DEFAULT_KEY")
+
+        val apiKey = properties.getProperty("GOOGLE_MAPS_API_KEY")
+        
+        if (apiKey == null) {
+            println("⚠️ GOOGLE_MAPS_API_KEY not found in .env, using default.")
+        }
+
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = apiKey ?: "YOUR_DEFAULT_KEY"
     }
 
     buildTypes {

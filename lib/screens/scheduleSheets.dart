@@ -38,6 +38,11 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
   // 이동시간 표시 여부를 관리할 변수
   bool _showTravelTime = true; // 기본값은 '켜기'
 
+  DateTime _currentVisibleMonth = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+  );
+
   @override
   void initState() {
     // TODO: 위젯이 생성되자마자 일정 데이터를 불러오는 함수를 호출함
@@ -45,12 +50,13 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
 
     // addPostFrameCallBack을 사용해서, 위젯이 빌드된 이후에 로드 작업을 수행하도록 한다.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadSchedules();
+      final now = DateTime.now();
+      _loadSchedules(now.year, now.month);
     });
   }
 
   // 일정을 불러오는 비동기 함수 생성
-  Future<void> _loadSchedules() async {
+  Future<void> _loadSchedules(int year, int month) async {
     // context.read를 사용하여 서비스 인스턴스를 가져옴
     final authService = context.read<AuthService>();
     final scheduleService = context.read<ScheduleService>();
@@ -61,8 +67,8 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
     if (authService.isLoggedIn) {
       try {
         await scheduleService.getScheduleByMonth(
-          2025,
-          11,
+          year,
+          month,
           authService.currentUser!.userId,
         );
       } on Exception catch (e) {
@@ -316,6 +322,32 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                       timeFormat: 'HH:mm',
                     ),
 
+                    // ✅ 뷰가 변경될 때 호출됨 (스크롤 등)
+                    onViewChanged: (ViewChangedDetails details) {
+                      // 현재 화면에 보이는 날짜들 중 가운데 날짜를 기준으로 월을 판단
+                      // (주간 뷰에서는 첫 번째 날짜나 마지막 날짜가 다른 달일 수도 있으므로 중간값이 안전)
+                      final midDate =
+                          details.visibleDates[details.visibleDates.length ~/
+                              2];
+
+                      // 연도나 월이 바뀌었는지 확인
+                      if (midDate.year != _currentVisibleMonth.year ||
+                          midDate.month != _currentVisibleMonth.month) {
+                        // 상태 업데이트 및 데이터 로딩
+                        // (setState는 빌드 중에 호출하면 안 되므로 Future.microtask 사용)
+                        Future.microtask(() {
+                          _currentVisibleMonth = DateTime(
+                            midDate.year,
+                            midDate.month,
+                          );
+                          print(
+                            "📅 월 변경 감지: ${midDate.year}년 ${midDate.month}월 데이터 로딩",
+                          );
+                          _loadSchedules(midDate.year, midDate.month);
+                        });
+                      }
+                    },
+
                     onLongPress: (details) {
                       if (details.appointments != null &&
                           details.appointments!.isNotEmpty) {
@@ -340,7 +372,6 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                           return;
                         }
 
-                        // TODO : 여기에 상세 정보를 출력할 BottomSheet를 출력.
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
@@ -383,7 +414,10 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                                     );
 
                                     // 일정 목록 새로고침
-                                    _loadSchedules();
+                                    _loadSchedules(
+                                      _currentVisibleMonth.year,
+                                      _currentVisibleMonth.month,
+                                    );
                                   }
                                 },
                                 // 삭제 로직
@@ -449,7 +483,10 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                                         title: const Text('일정이 성공적으로 삭제되었습니다.'),
                                       );
 
-                                      _loadSchedules();
+                                      _loadSchedules(
+                                        _currentVisibleMonth.year,
+                                        _currentVisibleMonth.month,
+                                      );
                                     }
                                   }
 
@@ -518,7 +555,10 @@ class _scheduleSheetsPageState extends State<scheduleSheetsPage>
                       title: Text('제하하하하하!! 일정을 등록했다!!'),
                     );
 
-                    _loadSchedules();
+                    _loadSchedules(
+                      _currentVisibleMonth.year,
+                      _currentVisibleMonth.month,
+                    );
                   }
                 },
               ),

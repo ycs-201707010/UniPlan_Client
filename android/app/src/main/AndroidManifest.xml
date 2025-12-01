@@ -2,7 +2,7 @@
     <application
         android:label="all_new_uniplan"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
 
         <!-- ✅ Google Maps API 키 추가 -->
         <meta-data

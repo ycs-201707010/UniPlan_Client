@@ -4,6 +4,10 @@ import 'package:intl/intl.dart';
 // ✅ 1. 국제화 파일 import
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'package:provider/provider.dart';
+import 'package:all_new_uniplan/services/auth_service.dart';
+import 'package:all_new_uniplan/services/project_service.dart';
+
 class AddProject extends StatefulWidget {
   const AddProject({super.key});
 
@@ -69,6 +73,68 @@ class _AddProjectState extends State<AddProject> {
         _endDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
       }
     });
+  }
+
+  // ✅ 프로젝트 저장 로직
+  Future<void> _saveProject() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    // 1. 유효성 검사 (빈 값 체크)
+    if (_titleController.text.trim().isEmpty ||
+        _goalController.text.trim().isEmpty ||
+        _selectedStartDate == null ||
+        _selectedEndDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        // l10n에 'fillRequiredFields'("필수 항목을 모두 입력해주세요") 키가 있다고 가정
+        SnackBar(content: Text(l10n.fillRequiredFields)),
+      );
+      return;
+    }
+
+    // 2. Service 및 User Info 가져오기
+    final authService = context.read<AuthService>();
+    final projectService = context.read<ProjectService>();
+    final userId = authService.currentUser?.userId;
+
+    if (userId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("로그인 정보가 없습니다.")));
+      return;
+    }
+
+    // 3. 선택된 프로젝트 타입 확인 (ToggleButtons)
+    // (참고: 현재 ProjectService.addProject에는 type 인자가 없어서 로직만 짜둡니다)
+    String projectType = '기타';
+    if (isSelected[0])
+      projectType = '운동';
+    else if (isSelected[1])
+      projectType = '공부';
+
+    try {
+      // 4. 서버 통신 요청
+      await projectService.addProject(
+        userId,
+        _titleController.text.trim(),
+        _goalController.text.trim(),
+        _selectedStartDate!,
+        _selectedEndDate!,
+        // ⚠️ 주의: ProjectService의 addProject 메서드를 수정하여
+        // projectType도 함께 저장하도록 업데이트하는 것을 권장합니다.
+      );
+
+      // 5. 성공 시 화면 닫기
+      if (mounted) {
+        Navigator.pop(context, true); // true를 반환하며 닫음 (목록 갱신용)
+      }
+    } catch (e) {
+      // 6. 실패 시 에러 메시지
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("프로젝트 생성 실패: $e")));
+      }
+    }
   }
 
   @override
@@ -169,7 +235,7 @@ class _AddProjectState extends State<AddProject> {
           width: double.infinity,
           height: 55,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: _saveProject,
             child: Text(
               l10n.projectAddButton,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

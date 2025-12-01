@@ -374,6 +374,8 @@ class ProjectService with ChangeNotifier {
     final Map<String, dynamic> body = subProject.toJson();
     body["project_id"] = projectId;
 
+    print("body: $body");
+
     try {
       final response = await _apiClient.post(
         '/project/addSubProject',
@@ -643,8 +645,28 @@ class ProjectService with ChangeNotifier {
 
   // 서브 프로젝트를 해당 장기 프로젝트의 이를 저장하는 List 타입 필드에 추가하는 메서드
   void addSubProjectToList(int projectId, SubProject subProject) {
-    _projects[projectId]!.subProjects!.add(subProject);
-    notifyListeners();
+    // 1. 프로젝트가 맵에 있는지 확인
+    if (_projects.containsKey(projectId)) {
+      var project = _projects[projectId]!;
+
+      // 2. subProjects 리스트가 null이면 빈 리스트로 초기화 (방어 코드)
+      if (project.subProjects == null) {
+        // Project 모델이 불변(immutable)이 아니라면 직접 할당,
+        // 불변이라면 copyWith를 써야 하지만, 여기선 직접 할당 가능하다고 가정합니다.
+        // 만약 직접 할당이 안된다면 모델 구조에 따라 project.subProjects = []; 가 필요합니다.
+        // 님의 Project 모델을 보면 final이 아니라서 할당 가능할 수도 있고,
+        // copyWith를 써야 할 수도 있습니다. 가장 안전한 방법은 아래와 같습니다.
+
+        // 리스트를 초기화하여 다시 맵에 넣음
+        _projects[projectId] = project.copyWith(subProjects: []);
+      }
+
+      // 3. 이제 안전하게 추가
+      _projects[projectId]!.subProjects!.add(subProject);
+      notifyListeners();
+    } else {
+      print("❌ Error: Project ID $projectId not found in local cache.");
+    }
   }
 
   // 변경을 한 장기 프로젝트의 정보를 리스트에서 갱신

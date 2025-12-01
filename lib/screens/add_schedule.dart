@@ -207,52 +207,6 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   /// 메모 작성
   final TextEditingController memoController = TextEditingController();
 
-  void addSchedule() async {
-    final l10n = AppLocalizations.of(context)!;
-    final authService = context.read<AuthService>();
-    final scheduleService = context.read<ScheduleService>();
-
-    final userId = authService.currentUser!.userId;
-    final title = titleController.text.trim();
-    final date = selectedDate;
-    final start = startTime;
-    final end = endTime;
-    String? location;
-    String? memo;
-    String color = colorToHex(_selectedColor);
-
-    if (locationController.text.isNotEmpty) {
-      location = locationController.text;
-    }
-    if (memoController.text.isNotEmpty) {
-      memo = memoController.text.trim();
-    }
-
-    if (title.isEmpty || date == null || start == null || end == null) {
-      showAlert(context, l10n.fillRequiredFields);
-      return;
-    }
-    if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
-      showAlert(context, l10n.startTimeBeforeEndTime);
-      return;
-    }
-
-    final bool isSuccess = await scheduleService.addSchedule(
-      userId,
-      title,
-      date,
-      start,
-      end,
-      location: location,
-      memo: memo,
-      isLongProject: false,
-      color: color,
-    );
-
-    if (!context.mounted) return;
-    Navigator.of(context).pop(isSuccess);
-  }
-
   Color _pickerColor = const Color(0xFF00FFA3);
   Color _selectedColor = const Color(0xFF00FFA3);
 
@@ -305,6 +259,52 @@ class _AddSchedulePageState extends State<AddSchedulePage> {
   String colorToHex(Color color) {
     String argb = color.toARGB32().toRadixString(16).padLeft(8, "0");
     return '#${argb.substring(2, 8)}';
+  }
+
+  void addSchedule() async {
+    final l10n = AppLocalizations.of(context)!;
+    final authService = context.read<AuthService>();
+    final scheduleService = context.read<ScheduleService>();
+
+    final userId = authService.currentUser!.userId;
+    final title = titleController.text.trim();
+    final date = selectedDate;
+    final start = startTime;
+    final end = endTime;
+    String? location;
+    String? memo;
+    String color = colorToHex(_selectedColor);
+
+    if (locationController.text.isNotEmpty) {
+      location = locationController.text;
+    }
+    if (memoController.text.isNotEmpty) {
+      memo = memoController.text.trim();
+    }
+
+    if (title.isEmpty || date == null || start == null || end == null) {
+      showAlert(context, l10n.fillRequiredFields);
+      return;
+    }
+    if (_timeOfDayToMinutes(start) >= _timeOfDayToMinutes(end)) {
+      showAlert(context, l10n.startTimeBeforeEndTime);
+      return;
+    }
+
+    final bool isSuccess = await scheduleService.addSchedule(
+      userId,
+      title,
+      date,
+      start,
+      end,
+      location: location,
+      memo: memo,
+      isLongProject: false,
+      color: color,
+    );
+
+    if (!context.mounted) return;
+    Navigator.of(context).pop(isSuccess);
   }
 
   void modifySchedule() async {

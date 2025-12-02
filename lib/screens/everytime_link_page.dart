@@ -87,28 +87,56 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
     }
 
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day); // 과거 제거용
+
+    // ✅ 수정 1: 과거 날짜 선택 허용 (예: 5년 전부터)
+    final firstDateLimit = DateTime(now.year - 5);
+
+    // ✅ 수정 2: 미래 날짜 범위 확장 (예: 5년 후까지)
+    final lastDateLimit = DateTime(now.year + 5);
+
+    // ✅ 수정 3: 종료일 선택 시, 선택 가능한 최소 날짜를 '시작일'로 설정
+    // 시작일 선택 시에는 제한 없이 과거 날짜도 가능
+    final validFirstDate = isStarted ? firstDateLimit : selectedStartDate!;
+
+    // 초기 포커스 날짜 설정
+    DateTime initialDate;
+    if (isStarted) {
+      initialDate = selectedStartDate ?? now;
+    } else {
+      // 종료일 선택 창을 띄울 때, 이미 선택된 종료일이 있다면 그것을,
+      // 없다면 시작일을 기준으로 띄움 (사용자 편의성)
+      initialDate = selectedEndDate ?? selectedStartDate ?? now;
+    }
 
     final picked = await showDatePicker(
       context: context,
-      initialDate:
-          isStarted ? selectedStartDate ?? now : selectedEndDate ?? now,
-      firstDate: today, // 오늘 이전의 날짜는 선택 불가임.
-      lastDate: DateTime(now.year + 1),
+      initialDate: initialDate,
+      firstDate: validFirstDate, // ✅ 동적으로 설정된 최소 날짜 적용
+      lastDate: lastDateLimit, // ✅ 확장된 최대 날짜 적용
       locale: const Locale('ko'),
     );
+
     if (picked != null) {
-      print('시작 날짜 : $selectedStartDate');
-      print('종료 날짜 : $selectedEndDate');
+      // print('시작 날짜 : $selectedStartDate');
+      // print('종료 날짜 : $selectedEndDate');
       setState(() {
         if (isStarted == true) {
           selectedStartDate = picked;
+
+          // ✅ 수정 4: 시작일을 변경했는데, 기존 종료일이 시작일보다 과거가 되어버리면 종료일 초기화
+          if (selectedEndDate != null && selectedEndDate!.isBefore(picked)) {
+            selectedEndDate = null;
+            endDateController.clear();
+          }
         } else {
           selectedEndDate = picked;
         }
 
-        dateController.text = DateFormat('yyyy-MM-dd (E)', 'en').format(picked);
+        dateController.text = DateFormat('yyyy-MM-dd (E)', 'ko').format(picked);
       });
+
+      // 유효성 검사 트리거 (버튼 활성화 여부 갱신)
+      _validateFields();
     }
   }
 
@@ -386,9 +414,8 @@ class _EverytimeLinkPageState extends State<EverytimeLinkPage> {
                                   everytimeService.conflictingSchedules!.length,
                                 );
                                 if (everytimeService
-                                        .conflictingSchedules!
-                                        .length !=
-                                    0) {
+                                    .conflictingSchedules!
+                                    .isNotEmpty) {
                                   await Navigator.push(
                                     context,
                                     MaterialPageRoute(
